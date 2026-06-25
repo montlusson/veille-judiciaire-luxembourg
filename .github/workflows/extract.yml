@@ -29,22 +29,18 @@ jobs:
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
-        run: |
-          cd veille-judiciaire
-          python extract_decisions.py
+        run: python extract_decisions.py
 
       - name: Scraper les audiences
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
-        run: |
-          cd veille-judiciaire
-          python scrape_audiences.py || true   # ne bloque pas si scraping échoue
+        run: python scrape_audiences.py || true
 
       - name: Committer decisions_meta.json (timestamp)
         run: |
           git config user.name  "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add veille-judiciaire/decisions_meta.json || true
+          git add decisions_meta.json || true
           git diff --cached --quiet || git commit -m "chore: mise à jour index $(date -u +'%Y-%m-%d')"
           git push || true
