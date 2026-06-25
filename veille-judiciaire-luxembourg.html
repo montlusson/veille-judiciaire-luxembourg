@@ -2208,24 +2208,26 @@ function renderDashboard(){
   $('#kpi-entities').textContent = DECISIONS.reduce((n,d) => n + d.entities.societes.length + d.entities.montants.length, 0);
   if($('#kpi-imports')) $('#kpi-imports').textContent = uploadedFiles.length;
 
-  /* Activité récente : fichiers importés par l'utilisateur, ou état vide */
+  /* Activité récente : élément optionnel (peut ne pas exister selon le layout) */
   const recentEl = $('#recent-list');
-  if(uploadedFiles.length === 0 && DECISIONS.length === 0){
-    recentEl.innerHTML = `<div class="empty-state" style="padding:28px 20px;">
-      <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6"/></svg>
-      <p style="margin-top:10px;">${currentLang==='de'
-        ? 'Noch keine Aktivität. Laden Sie ZIP-Archive herunter oder importieren Sie Dateien, um zu beginnen.'
-        : 'Aucune activité. Téléchargez des archives ZIP ou importez des fichiers pour démarrer.'}</p>
-      <button class="btn btn-secondary" style="margin-top:14px;" onclick="showScreen('collecte');switchSubtab('sources')">${
-        currentLang==='de' ? 'Quellen anzeigen' : 'Voir les sources'}</button>
-    </div>`;
-  } else {
-    recentEl.innerHTML = uploadedFiles.slice(0,5).map(f => `
-      <div class="list-row">
-        <div class="list-ic" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6"/></svg></div>
-        <div style="min-width:0;"><div class="meta-title">${f.name}</div><div class="meta-sub">${formatFileSize(f.size)}</div></div>
-        <div class="meta-date">${new Date().toLocaleDateString(currentLang==='de'?'de-DE':'fr-LU')}</div>
-      </div>`).join('');
+  if(recentEl){
+    if(uploadedFiles.length === 0 && DECISIONS.length === 0){
+      recentEl.innerHTML = `<div class="empty-state" style="padding:28px 20px;">
+        <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6"/></svg>
+        <p style="margin-top:10px;">${currentLang==='de'
+          ? 'Noch keine Aktivität. Laden Sie ZIP-Archive herunter oder importieren Sie Dateien, um zu beginnen.'
+          : 'Aucune activité. Téléchargez des archives ZIP ou importez des fichiers pour démarrer.'}</p>
+        <button class="btn btn-secondary" style="margin-top:14px;" onclick="showScreen('collecte');switchSubtab('sources')">${
+          currentLang==='de' ? 'Quellen anzeigen' : 'Voir les sources'}</button>
+      </div>`;
+    } else {
+      recentEl.innerHTML = uploadedFiles.slice(0,5).map(f => `
+        <div class="list-row">
+          <div class="list-ic" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6"/></svg></div>
+          <div style="min-width:0;"><div class="meta-title">${f.name}</div><div class="meta-sub">${formatFileSize(f.size)}</div></div>
+          <div class="meta-date">${new Date().toLocaleDateString(currentLang==='de'?'de-DE':'fr-LU')}</div>
+        </div>`).join('');
+    }
   }
 }
 
