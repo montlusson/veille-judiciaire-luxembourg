@@ -649,6 +649,22 @@ def main() -> None:
         encoding="utf-8"
     )
 
+    # Index statique pour GitHub Pages (sans fulltext, excerpt tronqué à 200 chars)
+    _keep = {'id','ref','date','jur','group','type','source_year'}
+    index_decisions = []
+    for d in all_decisions:
+        row = {k: d.get(k) for k in _keep}
+        row['excerpt'] = (d.get('excerpt') or '')[:200]
+        ent = d.get('entities') or {}
+        row['entities'] = {'societes': ent.get('societes', []), 'montants': ent.get('montants', [])}
+        index_decisions.append(row)
+    index_file = OUTPUT_FILE.parent / "decisions_index.json"
+    index_file.write_text(
+        json.dumps({"generated_at": output["generated_at"], "total": len(index_decisions), "decisions": index_decisions}, ensure_ascii=False),
+        encoding="utf-8"
+    )
+    log(f"  Index   : {index_file} ({index_file.stat().st_size / 1024 / 1024:.1f} MB)")
+
     save_zip_cache(zip_cache)
 
     log(f"\n═══════════════════════════════════════════════════════")
