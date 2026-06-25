@@ -3191,14 +3191,48 @@ async function loadDecisionsFromSupabase(forceRefresh = false){
   }
   function setDisabled(v){ if(refreshBtn) refreshBtn.disabled=v; if(pipeBtn) pipeBtn.disabled=v; }
 
+  /* ── Étape 1 (startup uniquement) : IDB → affichage immédiat ── */
+  if(!forceRefresh){
+    try {
+      const db     = await _vjOpenDB();
+      const cached = await _vjIDBGet(db, 'decisions');
+      if(Array.isArray(cached) && cached.length > 0){
+        DECISIONS = cached;
+        renderAll();
+        maybeShowLegalModal();
+        /* Vérification silencieuse en arrière-plan */
+        _checkSupabaseUpdate();
+        return;
+      }
+    } catch(e){ /* IDB inaccessible — on continue vers Supabase */ }
+  }
+
+  /* ── Étape 2 : chargement complet depuis Supabase ── */
   const prevCount = DECISIONS.filter(d => !d._demo).length;
   setDisabled(true);
   if(dot) dot.className = 'index-update-dot loading';
-  showBanner('↺ Chargement des décisions…', 'var(--accent-blue)', '#fff');
+  if(forceRefresh) showBanner('↺ Chargement des décisions…', 'var(--accent-blue)', '#fff');
 
+  await _fetchAllFromSupabase(forceRefresh, prevCount, showBanner, setDisabled);
+}
+
+async function _checkSupabaseUpdate(){
+  /* Vérifie si Supabase a des données plus récentes que l'IDB — sans bloquer l'UI */
+  try {
+    const stored = localStorage.getItem('vj_last_generated');
+    const { data, error } = await _sb.from('meta').select('value').eq('key','last_generated').single();
+    if(error || !data) return;
+    if(stored && data.value <= stored) return; /* pas de mise à jour */
+    /* Nouvelles données disponibles : fetch silencieux */
+    await _fetchAllFromSupabase(false, 0, ()=>{}, ()=>{});
+    renderAll();
+  } catch(e){ /* silencieux */ }
+}
+
+async function _fetchAllFromSupabase(forceRefresh, prevCount, showBanner, setDisabled){
   const COLS = 'id,ref,date,jur,group,type,excerpt,entities,source_year,archived';
   const PAGE = 1000;
-  let all = [], from = 0, ok = true;
+  let all = [], from = 0;
 
   try {
     while(true){
@@ -3219,20 +3253,22 @@ async function loadDecisionsFromSupabase(forceRefresh = false){
     const delta = forceRefresh ? Math.max(0, newCount - prevCount) : -1;
     if(forceRefresh) localStorage.setItem('vj_delta', delta);
     localStorage.setItem('vj_last_generated', new Date().toISOString());
+
+    /* Persister dans IDB pour les prochains startups */
+    _vjOpenDB().then(db => _vjIDBPut(db, 'decisions', DECISIONS)).catch(()=>{});
+
     const fmt = new Date().toLocaleDateString(currentLang==='de'?'de-DE':'fr-LU',{day:'2-digit',month:'long',year:'numeric'});
     const newMsg = delta > 0 ? ` · +${delta} ${currentLang==='de'?'neu':'nouvelles'}` : '';
     showBanner(`✓ ${newCount.toLocaleString()} ${currentLang==='de'?'Entscheidungen geladen':'décisions chargées'}${newMsg} · ${fmt}`, '#1A7F3C', '#fff');
+    setDisabled(false);
+    renderAll();
+    maybeShowLegalModal();
   } catch(e){
-    ok = false;
     console.warn('[Supabase] Erreur chargement décisions :', e);
+    setDisabled(false);
     /* Fallback vers decisions.json local */
     await loadDecisionsJSON(forceRefresh);
-    return;
   }
-
-  setDisabled(false);
-  renderAll();
-  maybeShowLegalModal();
 }
 
 /* Fonction unifiée appelée par les boutons "Mettre à jour l'index" */

@@ -1,6 +1,6 @@
 # Données volumineuses générées localement — chargées depuis Supabase en prod
 decisions.json
-archives/
+archives/*.pdf
 zip_cache.json
 
 # macOS
