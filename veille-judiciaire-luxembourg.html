@@ -2109,33 +2109,12 @@ let ANNOTATIONS = JSON.parse(localStorage.getItem('vj_annotations') || '{}');
 async function saveAnnotation(id, patch){
   ANNOTATIONS[id] = Object.assign({}, ANNOTATIONS[id]||{parties:[],notes:'',journalist:'',tags:[]}, patch, {updated:new Date().toISOString()});
   localStorage.setItem('vj_annotations', JSON.stringify(ANNOTATIONS));
-  if(_sb){
-    const row = { decision_id: id, content: ANNOTATIONS[id].notes||'', journalist: ANNOTATIONS[id].journalist||'', updated_at: ANNOTATIONS[id].updated };
-    await _sb.from('annotations').upsert(row, { onConflict: 'decision_id' });
-  }
 }
 function getAnnotation(id){ return ANNOTATIONS[id]||null; }
 function hasAnnotation(id){ const a=ANNOTATIONS[id]; return !!(a&&(a.parties.length||a.notes||a.tags.length)); }
 
 /* ── Persistance recherches sauvegardées ── */
 function saveAlerts(){
-  localStorage.setItem('vj_alerts', JSON.stringify(ALERTS));
-  if(_sb) _sb.from('saved_searches').delete().neq('id','00000000-0000-0000-0000-000000000000')
-    .then(()=> _sb.from('saved_searches').insert(ALERTS.map(a=>({ label:a.kw, keywords:a.kw, author:a.author||'', on:a.on, freq:a.freq }))));
-}
-
-/* ── Chargement initial depuis Supabase ── */
-async function loadFromSupabase(){
-  if(!_sb) return;
-  const [{ data: annots }, { data: searches }] = await Promise.all([
-    _sb.from('annotations').select('*'),
-    _sb.from('saved_searches').select('*')
-  ]);
-  if(annots) annots.forEach(r => {
-    ANNOTATIONS[r.decision_id] = Object.assign({}, ANNOTATIONS[r.decision_id]||{parties:[],tags:[]}, { notes: r.content||'', journalist: r.journalist||'', updated: r.updated_at });
-  });
-  if(searches && searches.length) ALERTS = searches.map(r => ({ kw: r.keywords, freq: r.freq||'instant', on: r.on!==false, matches:0 }));
-  localStorage.setItem('vj_annotations', JSON.stringify(ANNOTATIONS));
   localStorage.setItem('vj_alerts', JSON.stringify(ALERTS));
 }
 
@@ -2692,7 +2671,6 @@ function commitAnnotation(id){
 function deleteAnnotation(id){
   delete ANNOTATIONS[id];
   localStorage.setItem('vj_annotations',JSON.stringify(ANNOTATIONS));
-  if(_sb) _sb.from('annotations').delete().eq('decision_id', id);
   openReader(id); renderResults();
 }
 
@@ -2877,7 +2855,7 @@ function renderAll(){
   renderWatchlistPanel();
   renderStats();
   applyI18n();
-  loadFromSupabase().then(()=>{ renderDashboard(); renderAlerts(); renderTimeline(); renderResults(); });
+  renderDashboard(); renderAlerts(); renderTimeline(); renderResults();
 }
 
 
@@ -4006,7 +3984,6 @@ async function authOnSession(session){
 
   hideAuthOverlay();
   applyI18n();
-  await loadFromSupabase();
   renderAll();
   loadDecisionsFromSupabase();
   loadAudiencesJSON();
