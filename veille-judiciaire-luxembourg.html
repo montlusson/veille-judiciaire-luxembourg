@@ -965,10 +965,10 @@ table.analyse-tbl tbody tr:hover{background:var(--row-sep);}
           </div>
         </button>
         <button class="kpi-card kpi-blue" onclick="showScreen('collecte');switchSubtab('sources')" aria-label="Voir la collecte automatique">
-          <div class="kpi-num" id="kpi-new">0</div>
-          <div class="kpi-label" data-i18n="kpi_new">Nouvelles cette semaine</div>
+          <div class="kpi-num" id="kpi-new">—</div>
+          <div class="kpi-label" id="kpi-new-label" data-i18n="kpi_new">Nouvelles décisions</div>
           <div class="kpi-foot">
-            <span data-i18n="kpi_new_foot">Collecte des données</span>
+            <span id="kpi-new-foot" data-i18n="kpi_new_foot">Depuis la dernière mise à jour</span>
             <svg class="kpi-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
           </div>
         </button>
@@ -1048,8 +1048,6 @@ table.analyse-tbl tbody tr:hover{background:var(--row-sep);}
         </div>
       </div>
 
-      <div class="section-h"><h2 data-i18n="recent_activity">Activité récente</h2></div>
-      <div class="list-card" id="recent-list"></div>
     </section>
 
     <!-- COLLECTE -->
@@ -2177,10 +2175,10 @@ function renderDashboard(){
     const lastGen = localStorage.getItem('vj_last_generated');
     if(realCount > 0){
       dot.className = 'index-update-dot ok';
-      label.textContent = `${realCount.toLocaleString(currentLang==='de'?'de-DE':'fr-LU')} ${currentLang==='de'?'Entscheidungen indexiert':'décisions indexées'}`;
-      sub.textContent = lastGen
-        ? `${currentLang==='de'?'Aktualisiert':'Mis à jour'} ${new Date(lastGen).toLocaleDateString(currentLang==='de'?'de-DE':'fr-LU',{day:'2-digit',month:'long',year:'numeric'})}`
-        : (currentLang==='de'?'Aus lokalem Cache geladen':'Chargé depuis le cache local');
+      label.textContent = lastGen
+        ? `${currentLang==='de'?'Aktualisiert am':'Mise à jour le'} ${new Date(lastGen).toLocaleDateString(currentLang==='de'?'de-DE':'fr-LU',{day:'2-digit',month:'long',year:'numeric'})}`
+        : (currentLang==='de'?'Index geladen':'Index chargé');
+      sub.textContent = '';
     } else {
       dot.className = 'index-update-dot error';
       label.textContent = t('index_strip_error');
@@ -2191,7 +2189,21 @@ function renderDashboard(){
   }
 
   $('#kpi-total').textContent   = DECISIONS.length;
-  $('#kpi-new').textContent     = src2026;
+  const delta = parseInt(localStorage.getItem('vj_delta') ?? '-1');
+  const kpiNew     = $('#kpi-new');
+  const kpiNewFoot = $('#kpi-new-foot');
+  if(kpiNew){
+    if(delta < 0){
+      kpiNew.textContent = '—';
+      if(kpiNewFoot) kpiNewFoot.textContent = currentLang==='de'?'Noch kein Vergleich':'Pas encore de comparaison';
+    } else if(delta === 0){
+      kpiNew.textContent = '0';
+      if(kpiNewFoot) kpiNewFoot.textContent = currentLang==='de'?'Bereits aktuell':'Déjà à jour';
+    } else {
+      kpiNew.textContent = '+' + delta.toLocaleString(currentLang==='de'?'de-DE':'fr-LU');
+      if(kpiNewFoot) kpiNewFoot.textContent = currentLang==='de'?'Seit letzter Aktualisierung':'Depuis la dernière mise à jour';
+    }
+  }
   $('#kpi-alerts').textContent  = ALERTS.filter(a => a.on).length;
   $('#kpi-entities').textContent = DECISIONS.reduce((n,d) => n + d.entities.societes.length + d.entities.montants.length, 0);
   if($('#kpi-imports')) $('#kpi-imports').textContent = uploadedFiles.length;
@@ -3179,9 +3191,10 @@ async function loadDecisionsFromSupabase(forceRefresh = false){
   }
   function setDisabled(v){ if(refreshBtn) refreshBtn.disabled=v; if(pipeBtn) pipeBtn.disabled=v; }
 
+  const prevCount = DECISIONS.filter(d => !d._demo).length;
   setDisabled(true);
   if(dot) dot.className = 'index-update-dot loading';
-  showBanner('↺ Connexion à Supabase…', 'var(--accent-blue)', '#fff');
+  showBanner('↺ Chargement des décisions…', 'var(--accent-blue)', '#fff');
 
   const COLS = 'id,ref,date,jur,group,type,excerpt,entities,source_year,archived';
   const PAGE = 1000;
@@ -3202,8 +3215,13 @@ async function loadDecisionsFromSupabase(forceRefresh = false){
     if(all.length === 0) throw new Error('empty');
 
     DECISIONS = all.filter(d => !d.archived);
+    const newCount = DECISIONS.length;
+    const delta = forceRefresh ? Math.max(0, newCount - prevCount) : -1;
+    if(forceRefresh) localStorage.setItem('vj_delta', delta);
+    localStorage.setItem('vj_last_generated', new Date().toISOString());
     const fmt = new Date().toLocaleDateString(currentLang==='de'?'de-DE':'fr-LU',{day:'2-digit',month:'long',year:'numeric'});
-    showBanner(`✓ ${DECISIONS.length.toLocaleString()} ${currentLang==='de'?'Entscheidungen geladen':'décisions chargées'} · Supabase · ${fmt}`, '#1A7F3C', '#fff');
+    const newMsg = delta > 0 ? ` · +${delta} ${currentLang==='de'?'neu':'nouvelles'}` : '';
+    showBanner(`✓ ${newCount.toLocaleString()} ${currentLang==='de'?'Entscheidungen geladen':'décisions chargées'}${newMsg} · ${fmt}`, '#1A7F3C', '#fff');
   } catch(e){
     ok = false;
     console.warn('[Supabase] Erreur chargement décisions :', e);
@@ -3303,6 +3321,7 @@ async function loadDecisionsJSON(forceRefresh = false){
     ];
 
     localStorage.setItem(LAST_KEY, fetchedGenerated);
+    if(forceRefresh) localStorage.setItem('vj_delta', newCount);
 
     /* Persister dans IndexedDB en arrière-plan pour les prochaines ouvertures */
     _vjOpenDB()
