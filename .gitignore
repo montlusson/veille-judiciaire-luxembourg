@@ -1,0 +1,7 @@
+# Données volumineuses générées localement — chargées depuis Supabase en prod
+decisions.json
+archives/
+zip_cache.json
+
+# macOS
+.DS_Store

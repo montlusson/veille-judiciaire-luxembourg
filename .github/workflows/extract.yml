@@ -1,0 +1,50 @@
+name: Extraction hebdomadaire des décisions
+
+on:
+  schedule:
+    # Chaque dimanche à 4h UTC (6h Luxembourg)
+    - cron: '0 4 * * 0'
+  workflow_dispatch:
+    # Permet de déclencher manuellement depuis l'onglet Actions de GitHub
+
+jobs:
+  extract:
+    name: Extraire et pousser vers Supabase
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+
+    steps:
+      - name: Checkout du repo
+        uses: actions/checkout@v4
+
+      - name: Installer Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Installer les dépendances
+        run: pip install pdfplumber requests beautifulsoup4
+
+      - name: Lancer l'extraction
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+        run: |
+          cd veille-judiciaire
+          python extract_decisions.py
+
+      - name: Scraper les audiences
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+        run: |
+          cd veille-judiciaire
+          python scrape_audiences.py || true   # ne bloque pas si scraping échoue
+
+      - name: Committer decisions_meta.json (timestamp)
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add veille-judiciaire/decisions_meta.json || true
+          git diff --cached --quiet || git commit -m "chore: mise à jour index $(date -u +'%Y-%m-%d')"
+          git push || true
