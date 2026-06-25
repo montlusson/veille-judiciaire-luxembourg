@@ -3200,13 +3200,14 @@ async function loadDecisionsFromSupabase(forceRefresh = false){
     if(on && stripSub)   stripSub.textContent   = '';
   }
 
-  /* ── Étape 1 : IDB → affichage immédiat ── */
+  /* ── Étape 1 : IDB → affichage immédiat (si données réelles) ── */
   if(!forceRefresh){
     try {
       const db     = await _vjOpenDB();
       const cached = await _vjIDBGet(db, 'decisions');
-      if(Array.isArray(cached) && cached.length > 0){
-        DECISIONS = cached;
+      const realCached = Array.isArray(cached) ? cached.filter(d => !d._demo) : [];
+      if(realCached.length > 100){
+        DECISIONS = realCached;
         renderAll();
         maybeShowLegalModal();
         _checkSupabaseUpdate(); /* vérification silencieuse en arrière-plan */
