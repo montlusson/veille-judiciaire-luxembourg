@@ -3371,7 +3371,10 @@ async function loadDecisionsJSON(forceRefresh = false){
       showBanner(`✓ Synchronisé ${fmt} · Index identique`, 'var(--card-border)', 'var(--text-faint)');
     }
   } catch(e) {
-    showBanner('⚠ Données d\'exemple — lancez extract_decisions.py pour charger les vraies décisions', 'var(--accent-red)', '#fff');
+    const msg = _sb
+      ? '⚠ Connexion à la base de données impossible — vérifiez la politique de lecture Supabase (RLS)'
+      : '⚠ Données d\'exemple — lancez extract_decisions.py pour charger les décisions';
+    showBanner(msg, 'var(--accent-red)', '#fff');
   }
   setButtonsDisabled(false);
   renderAll();
