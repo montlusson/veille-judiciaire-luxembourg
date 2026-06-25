@@ -3179,19 +3179,28 @@ loadArchives();
 async function loadDecisionsFromSupabase(forceRefresh = false){
   if(!_sb) { await loadDecisionsJSON(forceRefresh); return; }
 
+  const dot        = $('#index-update-dot');
+  const stripLabel = $('#index-update-label');
+  const stripSub   = $('#index-update-sub');
   const banner     = $('#json-banner');
   const refreshBtn = $('#dashboard-refresh-btn');
   const pipeBtn    = $('#run-pipeline-btn');
-  const dot        = $('#index-update-dot');
+
   function showBanner(msg, bg, color){
     if(!banner) return;
     banner.textContent = msg; banner.style.background = bg;
     banner.style.color = color; banner.style.display = 'block';
     if(bg === '#1A7F3C') setTimeout(()=>{ banner.style.background='var(--card-border)'; banner.style.color='var(--text-faint)'; }, 10000);
   }
-  function setDisabled(v){ if(refreshBtn) refreshBtn.disabled=v; if(pipeBtn) pipeBtn.disabled=v; }
+  function setLoading(on){
+    if(dot) dot.className = 'index-update-dot' + (on ? ' loading' : ' ok');
+    if(refreshBtn) refreshBtn.disabled = on;
+    if(pipeBtn)    pipeBtn.disabled    = on;
+    if(on && stripLabel) stripLabel.textContent = currentLang==='de' ? 'Daten werden geladen…' : 'Chargement en cours…';
+    if(on && stripSub)   stripSub.textContent   = '';
+  }
 
-  /* ── Étape 1 (startup uniquement) : IDB → affichage immédiat ── */
+  /* ── Étape 1 : IDB → affichage immédiat ── */
   if(!forceRefresh){
     try {
       const db     = await _vjOpenDB();
@@ -3200,51 +3209,39 @@ async function loadDecisionsFromSupabase(forceRefresh = false){
         DECISIONS = cached;
         renderAll();
         maybeShowLegalModal();
-        /* Vérification silencieuse en arrière-plan */
-        _checkSupabaseUpdate();
+        _checkSupabaseUpdate(); /* vérification silencieuse en arrière-plan */
         return;
       }
-    } catch(e){ /* IDB inaccessible — on continue vers Supabase */ }
+    } catch(e){ /* IDB inaccessible */ }
   }
 
-  /* ── Étape 2 : chargement complet depuis Supabase ── */
+  /* ── Étape 2 : premier chargement (IDB vide) ou refresh forcé ── */
+  setLoading(true);
+  if(forceRefresh)
+    showBanner('↺ ' + (currentLang==='de' ? 'Entscheidungen werden geladen…' : 'Chargement des décisions…'), 'var(--accent-blue)', '#fff');
+
   const prevCount = DECISIONS.filter(d => !d._demo).length;
-  setDisabled(true);
-  if(dot) dot.className = 'index-update-dot loading';
-  if(forceRefresh) showBanner('↺ Chargement des décisions…', 'var(--accent-blue)', '#fff');
-
-  await _fetchAllFromSupabase(forceRefresh, prevCount, showBanner, setDisabled);
-}
-
-async function _checkSupabaseUpdate(){
-  /* Vérifie si Supabase a des données plus récentes que l'IDB — sans bloquer l'UI */
-  try {
-    const stored = localStorage.getItem('vj_last_generated');
-    const { data, error } = await _sb.from('meta').select('value').eq('key','last_generated').single();
-    if(error || !data) return;
-    if(stored && data.value <= stored) return; /* pas de mise à jour */
-    /* Nouvelles données disponibles : fetch silencieux */
-    await _fetchAllFromSupabase(false, 0, ()=>{}, ()=>{});
-    renderAll();
-  } catch(e){ /* silencieux */ }
-}
-
-async function _fetchAllFromSupabase(forceRefresh, prevCount, showBanner, setDisabled){
   const COLS = 'id,ref,date,jur,group,type,excerpt,entities,source_year,archived';
-  const PAGE = 1000;
-  let all = [], from = 0;
+  const PAGE  = 1000;
 
   try {
-    while(true){
-      const { data, error } = await _sb.from('decisions')
-        .select(COLS)
-        .order('date', { ascending: false })
-        .range(from, from + PAGE - 1);
+    /* Compter d'abord pour paralléliser les pages */
+    const { count, error: cErr } = await _sb.from('decisions').select('*', { count:'exact', head:true });
+    if(cErr) throw cErr;
+
+    const pages = Math.ceil((count || 0) / PAGE);
+    if(pages === 0) throw new Error('empty');
+
+    /* Toutes les pages en parallèle */
+    const fetches = Array.from({ length: pages }, (_, i) =>
+      _sb.from('decisions').select(COLS).order('date', { ascending: false }).range(i * PAGE, (i + 1) * PAGE - 1)
+    );
+    const results = await Promise.all(fetches);
+
+    const all = [];
+    for(const { data, error } of results){
       if(error) throw error;
-      if(!data || data.length === 0) break;
-      all.push(...data);
-      if(data.length < PAGE) break;
-      from += PAGE;
+      if(data) all.push(...data);
     }
     if(all.length === 0) throw new Error('empty');
 
@@ -3254,21 +3251,44 @@ async function _fetchAllFromSupabase(forceRefresh, prevCount, showBanner, setDis
     if(forceRefresh) localStorage.setItem('vj_delta', delta);
     localStorage.setItem('vj_last_generated', new Date().toISOString());
 
-    /* Persister dans IDB pour les prochains startups */
     _vjOpenDB().then(db => _vjIDBPut(db, 'decisions', DECISIONS)).catch(()=>{});
 
-    const fmt = new Date().toLocaleDateString(currentLang==='de'?'de-DE':'fr-LU',{day:'2-digit',month:'long',year:'numeric'});
+    const fmt    = new Date().toLocaleDateString(currentLang==='de'?'de-DE':'fr-LU',{day:'2-digit',month:'long',year:'numeric'});
     const newMsg = delta > 0 ? ` · +${delta} ${currentLang==='de'?'neu':'nouvelles'}` : '';
     showBanner(`✓ ${newCount.toLocaleString()} ${currentLang==='de'?'Entscheidungen geladen':'décisions chargées'}${newMsg} · ${fmt}`, '#1A7F3C', '#fff');
-    setDisabled(false);
+    setLoading(false);
     renderAll();
     maybeShowLegalModal();
   } catch(e){
-    console.warn('[Supabase] Erreur chargement décisions :', e);
-    setDisabled(false);
-    /* Fallback vers decisions.json local */
+    console.warn('[Supabase] Erreur :', e);
+    setLoading(false);
     await loadDecisionsJSON(forceRefresh);
   }
+}
+
+async function _checkSupabaseUpdate(){
+  try {
+    const stored = localStorage.getItem('vj_last_generated');
+    const { data, error } = await _sb.from('meta').select('value').eq('key','last_generated').single();
+    if(error || !data) return;
+    if(stored && data.value <= stored) return;
+    /* Nouvelles données : rechargement silencieux */
+    const COLS = 'id,ref,date,jur,group,type,excerpt,entities,source_year,archived';
+    const PAGE  = 1000;
+    const { count } = await _sb.from('decisions').select('*', { count:'exact', head:true });
+    const pages = Math.ceil((count || 0) / PAGE);
+    const results = await Promise.all(
+      Array.from({ length: pages }, (_, i) =>
+        _sb.from('decisions').select(COLS).order('date', { ascending:false }).range(i*PAGE, (i+1)*PAGE-1)
+      )
+    );
+    const all = results.flatMap(r => r.data || []);
+    if(all.length === 0) return;
+    DECISIONS = all.filter(d => !d.archived);
+    localStorage.setItem('vj_last_generated', data.value);
+    _vjOpenDB().then(db => _vjIDBPut(db, 'decisions', DECISIONS)).catch(()=>{});
+    renderAll();
+  } catch(e){ /* silencieux */ }
 }
 
 /* Fonction unifiée appelée par les boutons "Mettre à jour l'index" */
