@@ -22,6 +22,7 @@ import os
 import re
 import sys
 import threading
+import time
 import zipfile
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime
@@ -449,7 +450,6 @@ def push_to_supabase(decisions: list[dict], generated_at: str) -> None:
     decisions = list(seen.values())
 
     # Upsert par lots de 100 (payloads fulltext volumineux → timeout à 200)
-    import time
     batch_size = 100
     errors = 0
     total_batches = (len(decisions) - 1) // batch_size + 1
@@ -686,11 +686,16 @@ def main() -> None:
     log(f"═══════════════════════════════════════════════════════")
 
     # Poussée Supabase uniquement si explicitement demandée (--push-supabase)
-    # Désactivée par défaut dans le workflow GitHub Actions pour éviter le timeout
+    # IMPORTANT : ne lancez cette option que localement avec decisions.json présent.
+    # En CI, decisions.json est absent → load_existing_decisions() lit decisions_index.json
+    # (sans fulltext) → le push écraserait le fulltext Supabase par des chaînes vides.
     if "--push-supabase" in sys.argv:
+        if not OUTPUT_FILE.exists():
+            log("  ✗ --push-supabase requiert decisions.json (fulltext). Lancez d'abord le script sans ce flag.")
+            sys.exit(1)
         push_to_supabase(all_decisions, output["generated_at"])
     else:
-        log("  Supabase push ignoré (lancez avec --push-supabase pour forcer)")
+        log("  Supabase push ignoré (lancez localement avec --push-supabase pour forcer)")
 
 
 if __name__ == "__main__":
