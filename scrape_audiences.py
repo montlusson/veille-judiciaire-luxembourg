@@ -10,10 +10,12 @@ Usage :
 """
 from __future__ import annotations
 
+import hashlib
+import io
 import json
 import re
 import uuid
-from datetime import date, datetime, timedelta
+from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
 
 import requests
@@ -246,6 +248,11 @@ def parse_text_content(soup: BeautifulSoup, juridiction: str) -> list[dict]:
     return entries
 
 
+def _ical_escape(text: str) -> str:
+    """Échappe les caractères spéciaux selon la spec iCal (RFC 5545)."""
+    return text.replace("\\", "\\\\").replace(";", "\\;").replace(",", "\\,").replace("\n", "\\n")
+
+
 def build_ical(events: list[dict]) -> str:
     """Génère un fichier iCal (.ics) depuis la liste d'événements."""
     lines = [
@@ -257,7 +264,7 @@ def build_ical(events: list[dict]) -> str:
         "X-WR-CALNAME:Audiences judiciaires Luxembourg",
         "X-WR-TIMEZONE:Europe/Luxembourg",
     ]
-    now_str = datetime.utcnow().strftime("%Y%m%dT%H%M%SZ")
+    now_str = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
 
     for ev in events:
         d    = date.fromisoformat(ev["date"])
@@ -268,6 +275,7 @@ def build_ical(events: list[dict]) -> str:
         desc  = f"Juridiction : {ev['juridiction']}"
         if ev.get("salle"):
             desc += f"\\nSalle : {ev['salle']}"
+        location = f"{ev.get('salle', '')} — {ev['juridiction']}".strip(" —")
 
         lines += [
             "BEGIN:VEVENT",
@@ -275,9 +283,9 @@ def build_ical(events: list[dict]) -> str:
             f"DTSTAMP:{now_str}",
             f"DTSTART:{start.strftime('%Y%m%dT%H%M%S')}",
             f"DTEND:{end.strftime('%Y%m%dT%H%M%S')}",
-            f"SUMMARY:{title}",
-            f"DESCRIPTION:{desc}",
-            f"LOCATION:{ev.get('salle', '')} — {ev['juridiction']}",
+            f"SUMMARY:{_ical_escape(title)}",
+            f"DESCRIPTION:{_ical_escape(desc)}",
+            f"LOCATION:{_ical_escape(location)}",
             "END:VEVENT",
         ]
 
@@ -335,7 +343,7 @@ def download_pdf_archive(out_dir: Path) -> list[dict]:
     records  = []
 
     try:
-        import pdfplumber
+        import pdfplumber  # noqa: F401 — vérifie la disponibilité
         has_pdfplumber = True
     except ImportError:
         has_pdfplumber = False
@@ -359,7 +367,6 @@ def download_pdf_archive(out_dir: Path) -> list[dict]:
         text = ""
         if has_pdfplumber:
             try:
-                import pdfplumber, io
                 with pdfplumber.open(io.BytesIO(r.content)) as pdf:
                     pages = pdf.pages[:6]
                     text = "\n".join(p.extract_text() or "" for p in pages)
@@ -428,7 +435,7 @@ def main() -> None:
             occurrences = generate_occurrences(entry["jours"], entry["horaire"], today)
             for occ in occurrences:
                 events.append({
-                    "uid":         str(uuid.uuid4()),
+                    "uid":         hashlib.sha1(f"{entry['juridiction']}::{occ.isoformat()}::{entry['chambre']}::{entry['horaire']}".encode()).hexdigest()[:32] + "@vj-lux",
                     "date":        occ.isoformat(),
                     "juridiction": entry["juridiction"],
                     "chambre":     entry["chambre"],

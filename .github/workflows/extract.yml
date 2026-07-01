@@ -5,12 +5,7 @@ on:
     # Chaque dimanche à 4h UTC (6h Luxembourg)
     - cron: '0 4 * * 0'
   workflow_dispatch:
-    inputs:
-      push_supabase:
-        description: 'Pousser vers Supabase (lent, optionnel)'
-        required: false
-        default: 'false'
-        type: boolean
+    # Déclenchement manuel depuis l'onglet Actions de GitHub
 
 jobs:
   extract:
@@ -38,17 +33,10 @@ jobs:
       - name: Scraper les audiences
         run: python scrape_audiences.py || true
 
-      - name: Pousser vers Supabase (optionnel)
-        if: ${{ github.event.inputs.push_supabase == 'true' }}
-        env:
-          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
-          SUPABASE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
-        run: python extract_decisions.py --push-supabase
-
       - name: Committer les fichiers générés
         run: |
           git config user.name  "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add decisions_index.json decisions_meta.json zip_cache.json || true
+          git add decisions_index.json decisions_meta.json zip_cache.json audiences.json archives/index.json || true
           git diff --cached --quiet || git commit -m "chore: mise à jour index $(date -u +'%Y-%m-%d')"
           git push || true
