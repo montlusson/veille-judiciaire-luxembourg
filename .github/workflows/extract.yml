@@ -5,13 +5,18 @@ on:
     # Chaque dimanche à 4h UTC (6h Luxembourg)
     - cron: '0 4 * * 0'
   workflow_dispatch:
-    # Permet de déclencher manuellement depuis l'onglet Actions de GitHub
+    inputs:
+      push_supabase:
+        description: 'Pousser vers Supabase (lent, optionnel)'
+        required: false
+        default: 'false'
+        type: boolean
 
 jobs:
   extract:
-    name: Extraire et pousser vers Supabase
+    name: Extraire et mettre à jour l'index statique
     runs-on: ubuntu-latest
-    timeout-minutes: 60
+    timeout-minutes: 30
 
     steps:
       - name: Checkout du repo
@@ -26,16 +31,17 @@ jobs:
         run: pip install pdfplumber requests beautifulsoup4
 
       - name: Lancer l'extraction
-        env:
-          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
-          SUPABASE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
         run: python extract_decisions.py
 
       - name: Scraper les audiences
+        run: python scrape_audiences.py || true
+
+      - name: Pousser vers Supabase (optionnel)
+        if: ${{ github.event.inputs.push_supabase == 'true' }}
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
-        run: python scrape_audiences.py || true
+        run: python extract_decisions.py --push-supabase
 
       - name: Committer decisions_index.json et decisions_meta.json
         run: |

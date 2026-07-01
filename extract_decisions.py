@@ -676,7 +676,12 @@ def main() -> None:
     log(f"  Fichier : {OUTPUT_FILE}")
     log(f"═══════════════════════════════════════════════════════")
 
-    push_to_supabase(all_decisions, output["generated_at"])
+    # Poussée Supabase uniquement si explicitement demandée (--push-supabase)
+    # Désactivée par défaut dans le workflow GitHub Actions pour éviter le timeout
+    if "--push-supabase" in sys.argv:
+        push_to_supabase(all_decisions, output["generated_at"])
+    else:
+        log("  Supabase push ignoré (lancez avec --push-supabase pour forcer)")
 
 
 if __name__ == "__main__":
