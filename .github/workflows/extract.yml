@@ -17,6 +17,8 @@ jobs:
     name: Extraire et mettre à jour l'index statique
     runs-on: ubuntu-latest
     timeout-minutes: 30
+    permissions:
+      contents: write
 
     steps:
       - name: Checkout du repo
