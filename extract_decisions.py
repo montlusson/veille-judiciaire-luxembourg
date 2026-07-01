@@ -545,10 +545,19 @@ def save_zip_cache(cache: dict) -> None:
 
 
 def load_existing_decisions() -> list[dict]:
-    """Charge les décisions existantes depuis decisions.json."""
+    """Charge les décisions existantes depuis decisions.json, ou decisions_index.json en fallback."""
     if OUTPUT_FILE.exists():
         try:
             data = json.loads(OUTPUT_FILE.read_text(encoding="utf-8"))
+            return data.get("decisions", [])
+        except Exception:
+            pass
+    # Fallback : decisions_index.json (sans fulltext) — utilisé en CI/CD
+    index_file = OUTPUT_FILE.parent / "decisions_index.json"
+    if index_file.exists():
+        try:
+            data = json.loads(index_file.read_text(encoding="utf-8"))
+            log("  ℹ decisions.json absent — chargement depuis decisions_index.json (sans fulltext)")
             return data.get("decisions", [])
         except Exception:
             pass
