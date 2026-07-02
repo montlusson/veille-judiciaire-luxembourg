@@ -966,7 +966,7 @@ table.analyse-tbl tbody tr:hover{background:var(--row-sep);}
         </button>
         <button class="kpi-card kpi-blue" onclick="showScreen('collecte');switchSubtab('sources')" aria-label="Voir la collecte automatique">
           <div class="kpi-num" id="kpi-new">—</div>
-          <div class="kpi-label" id="kpi-new-label" data-i18n="kpi_new">Nouvelles décisions</div>
+          <div class="kpi-label" id="kpi-new-label">Nouvelles décisions</div>
           <div class="kpi-foot">
             <span id="kpi-new-foot" data-i18n="kpi_new_foot">Depuis la dernière mise à jour</span>
             <svg class="kpi-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
@@ -977,14 +977,6 @@ table.analyse-tbl tbody tr:hover{background:var(--row-sep);}
           <div class="kpi-label" data-i18n="kpi_alerts">Alertes actives</div>
           <div class="kpi-foot">
             <span data-i18n="kpi_alerts_foot">Veille en cours</span>
-            <svg class="kpi-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
-          </div>
-        </button>
-        <button class="kpi-card kpi-gold" onclick="showScreen('recherche')" aria-label="Voir les entités extraites">
-          <div class="kpi-num" id="kpi-entities">0</div>
-          <div class="kpi-label" data-i18n="kpi_entities">Entités extraites</div>
-          <div class="kpi-foot">
-            <span data-i18n="kpi_entities_foot">Sociétés &amp; montants</span>
             <svg class="kpi-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
           </div>
         </button>
@@ -2168,23 +2160,30 @@ function renderDashboard(){
   }
 
   $('#kpi-total').textContent   = DECISIONS.length;
-  const delta = parseInt(localStorage.getItem('vj_delta') ?? '-1');
-  const kpiNew     = $('#kpi-new');
-  const kpiNewFoot = $('#kpi-new-foot');
+  const delta      = parseInt(localStorage.getItem('vj_delta') ?? '-1');
+  const kpiNew      = $('#kpi-new');
+  const kpiNewLabel = $('#kpi-new-label');
+  const kpiNewFoot  = $('#kpi-new-foot');
   if(kpiNew){
     if(delta < 0){
       kpiNew.textContent = '—';
-      if(kpiNewFoot) kpiNewFoot.textContent = currentLang==='de'?'Noch kein Vergleich':'Pas encore de comparaison';
+      if(kpiNewLabel) kpiNewLabel.textContent = currentLang==='de' ? 'Neue Entscheidungen' : 'Nouvelles décisions';
+      if(kpiNewFoot)  kpiNewFoot.textContent  = currentLang==='de' ? 'Noch kein Vergleich' : 'Pas encore de comparaison';
     } else if(delta === 0){
       kpiNew.textContent = '0';
-      if(kpiNewFoot) kpiNewFoot.textContent = currentLang==='de'?'Bereits aktuell':'Déjà à jour';
+      if(kpiNewLabel) kpiNewLabel.textContent = currentLang==='de' ? 'Neue Entscheidung' : 'Nouvelle décision';
+      if(kpiNewFoot)  kpiNewFoot.textContent  = currentLang==='de' ? 'Bereits aktuell' : 'Déjà à jour';
+    } else if(delta === 1){
+      kpiNew.textContent = '+1';
+      if(kpiNewLabel) kpiNewLabel.textContent = currentLang==='de' ? 'Neue Entscheidung' : 'Nouvelle décision';
+      if(kpiNewFoot)  kpiNewFoot.textContent  = currentLang==='de' ? 'Seit letzter Aktualisierung' : 'Depuis la dernière mise à jour';
     } else {
-      kpiNew.textContent = '+' + delta.toLocaleString(currentLang==='de'?'de-DE':'fr-LU');
-      if(kpiNewFoot) kpiNewFoot.textContent = currentLang==='de'?'Seit letzter Aktualisierung':'Depuis la dernière mise à jour';
+      kpiNew.textContent = '+' + delta.toLocaleString(currentLang==='de' ? 'de-DE' : 'fr-LU');
+      if(kpiNewLabel) kpiNewLabel.textContent = currentLang==='de' ? 'Neue Entscheidungen' : 'Nouvelles décisions';
+      if(kpiNewFoot)  kpiNewFoot.textContent  = currentLang==='de' ? 'Seit letzter Aktualisierung' : 'Depuis la dernière mise à jour';
     }
   }
-  $('#kpi-alerts').textContent  = ALERTS.filter(a => a.on).length;
-  $('#kpi-entities').textContent = DECISIONS.reduce((n,d) => n + d.entities.societes.length + d.entities.montants.length, 0);
+  $('#kpi-alerts').textContent = ALERTS.filter(a => a.on).length;
   if($('#kpi-imports')) $('#kpi-imports').textContent = uploadedFiles.length;
 
   /* Activité récente : élément optionnel (peut ne pas exister selon le layout) */
@@ -3191,7 +3190,10 @@ async function _checkStaticUpdate(){
     if(!r.ok) return;
     const data = await r.json();
     if(!Array.isArray(data.decisions) || data.decisions.length === 0) return;
+    const prevCount = DECISIONS.filter(d => !d._demo).length;
     DECISIONS = data.decisions.filter(d => !d.archived);
+    const newDelta = Math.max(0, DECISIONS.length - prevCount);
+    localStorage.setItem('vj_delta', newDelta);
     localStorage.setItem('vj_last_generated', meta.generated_at);
     _vjOpenDB().then(db => _vjIDBPut(db, 'decisions', DECISIONS)).catch(()=>{});
     renderAll();
