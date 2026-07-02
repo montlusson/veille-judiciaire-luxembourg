@@ -6,7 +6,7 @@
 <title>Veille judiciaire — Outil de collecte, recherche et radar décisions</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=PT+Serif:ital,wght@0,400;0,700;1,400&family=PT+Sans:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=PT+Serif:ital,wght@0,400;0,700;1,400&family=Outfit:wght@400;500;600;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
 <style>
 :root{
   --bg:#F7F4EC;
@@ -31,7 +31,7 @@ html,body{margin:0;padding:0;}
 body{
   background:var(--bg);
   color:var(--text);
-  font-family:'PT Sans',Arial,sans-serif;
+  font-family:'Outfit',Arial,sans-serif;
   font-size:15px;
   line-height:1.55;
   min-height:100dvh;
@@ -63,8 +63,9 @@ nav.navlist{display:flex;flex-direction:column;gap:2px;margin-top:6px;}
   display:flex;align-items:center;gap:11px;width:100%;text-align:left;background:transparent;border:none;
   color:var(--sidebar-text-muted);padding:11px 12px;border-radius:var(--radius-sm);cursor:pointer;
   border-left:3px solid transparent;min-height:44px;font-size:14px;
+  transition:background .18s cubic-bezier(0.16,1,0.3,1),color .18s cubic-bezier(0.16,1,0.3,1);
 }
-.navbtn:hover{background:var(--sidebar-hover-bg);}
+.navbtn:hover{background:var(--sidebar-hover-bg);color:var(--sidebar-text);}
 .navbtn[aria-current="page"]{background:var(--sidebar-active-bg);color:var(--sidebar-text);border-left-color:var(--accent-red);font-weight:700;}
 .navbtn .ic{flex:0 0 18px;width:18px;height:18px;}
 
@@ -87,24 +88,41 @@ main{flex:1;min-width:0;padding:36px 40px 56px;max-width:1180px;}
 .intro{color:var(--text-muted);max-width:680px;margin-top:10px;margin-bottom:24px;}
 h1.title{font-size:28px;}
 
-.kpi-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px;margin-top:26px;}
-.kpi-card{background:var(--card-bg);border:1px solid var(--card-border);border-radius:var(--radius-lg);padding:14px 16px;cursor:pointer;transition:border-color .2s ease,transform .15s ease,box-shadow .15s ease;text-align:left;width:100%;}
-.kpi-card:hover{transform:translateY(-2px);box-shadow:0 4px 16px rgba(0,0,0,.09);}
+.kpi-grid{display:grid;grid-template-columns:1.65fr 1fr 1fr 1fr;gap:12px;margin-top:26px;}
+@media(max-width:900px){.kpi-grid{grid-template-columns:1fr 1fr;}}
+@media(max-width:560px){.kpi-grid{grid-template-columns:1fr;}}
+.kpi-card{
+  background:var(--card-bg);border:1px solid var(--card-border);border-radius:var(--radius-lg);
+  padding:16px 18px;cursor:pointer;text-align:left;width:100%;
+  transition:border-color .25s cubic-bezier(0.16,1,0.3,1),transform .25s cubic-bezier(0.16,1,0.3,1),box-shadow .25s cubic-bezier(0.16,1,0.3,1);
+  position:relative;overflow:hidden;
+}
+.kpi-card::before{
+  content:"";position:absolute;inset:0;border-radius:var(--radius-lg);
+  opacity:0;transition:opacity .25s cubic-bezier(0.16,1,0.3,1);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.6);
+}
+.kpi-card:hover{transform:translateY(-3px);box-shadow:0 8px 28px rgba(0,0,0,.08),0 2px 6px rgba(0,0,0,.04);}
+.kpi-card:hover::before{opacity:1;}
+.kpi-card:active{transform:scale(0.98) translateY(0);box-shadow:0 2px 8px rgba(0,0,0,.06);}
 .kpi-card:focus-visible{outline:3px solid var(--accent-blue);outline-offset:2px;border-radius:var(--radius-lg);}
 .kpi-card.kpi-red:hover{border-color:var(--accent-red);}
 .kpi-card.kpi-blue:hover{border-color:var(--accent-blue);}
 .kpi-card.kpi-gold:hover{border-color:var(--accent-gold);}
 .kpi-card.kpi-dark:hover{border-color:var(--sidebar-bg);}
 .kpi-card.kpi-green:hover{border-color:var(--success-icon-bg);}
-.kpi-num{font-family:'PT Serif',serif;font-size:26px;font-weight:700;}
-.kpi-label{color:var(--text-muted);font-size:12px;margin-top:4px;}
-.kpi-foot{display:flex;align-items:center;justify-content:space-between;margin-top:10px;color:var(--text-faint);font-size:11.5px;}
-.kpi-arrow{opacity:0;transition:opacity .15s,transform .15s;transform:translateX(-3px);}
+.kpi-num{font-family:'JetBrains Mono',monospace;font-size:28px;font-weight:700;letter-spacing:-0.02em;font-variant-numeric:tabular-nums;}
+.kpi-label{color:var(--text-muted);font-size:12px;margin-top:5px;font-weight:500;letter-spacing:.01em;}
+.kpi-foot{display:flex;align-items:center;justify-content:space-between;margin-top:12px;color:var(--text-faint);font-size:11.5px;}
+.kpi-arrow{opacity:0;transition:opacity .2s,transform .25s cubic-bezier(0.16,1,0.3,1);transform:translateX(-4px);}
 .kpi-card:hover .kpi-arrow,.kpi-card:focus-visible .kpi-arrow{opacity:1;transform:translateX(0);}
 
-.action-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:18px;}
-@media(min-width:900px){.action-grid{grid-template-columns:1fr 1fr 1fr 1fr;}}
-.action-card{border-radius:var(--radius-lg);padding:20px;display:flex;flex-direction:column;gap:10px;min-height:130px;}
+.action-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:22px;}
+.action-card{
+  border-radius:var(--radius-lg);padding:22px;display:flex;flex-direction:column;gap:10px;min-height:140px;
+  transition:transform .25s cubic-bezier(0.16,1,0.3,1),box-shadow .25s cubic-bezier(0.16,1,0.3,1);
+}
+.action-card:hover{transform:translateY(-2px);}
 .action-card.light{background:var(--card-bg);border:1px solid var(--card-border);}
 .action-card.dark{background:var(--sidebar-bg);color:var(--sidebar-text);}
 .action-card.green{background:var(--success-bg);border:1px solid var(--success-border);}
@@ -974,7 +992,7 @@ table.analyse-tbl tbody tr:hover{background:var(--row-sep);}
         </button>
         <button class="kpi-card kpi-red" onclick="showScreen('veille')" aria-label="Voir les recherches sauvegardées">
           <div class="kpi-num" id="kpi-alerts">0</div>
-          <div class="kpi-label" data-i18n="kpi_alerts">Alertes actives</div>
+          <div class="kpi-label" id="kpi-alerts-label">Recherche active</div>
           <div class="kpi-foot">
             <span data-i18n="kpi_alerts_foot">Veille en cours</span>
             <svg class="kpi-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
@@ -2183,7 +2201,16 @@ function renderDashboard(){
       if(kpiNewFoot)  kpiNewFoot.textContent  = currentLang==='de' ? 'Seit letzter Aktualisierung' : 'Depuis la dernière mise à jour';
     }
   }
-  $('#kpi-alerts').textContent = ALERTS.filter(a => a.on).length;
+  const alertCount = ALERTS.filter(a => a.on).length;
+  $('#kpi-alerts').textContent = alertCount;
+  const kpiAlertsLabel = $('#kpi-alerts-label');
+  if(kpiAlertsLabel){
+    if(alertCount <= 1){
+      kpiAlertsLabel.textContent = currentLang==='de' ? 'Aktive Suche' : 'Recherche active';
+    } else {
+      kpiAlertsLabel.textContent = currentLang==='de' ? 'Aktive Suchen' : 'Recherches actives';
+    }
+  }
   if($('#kpi-imports')) $('#kpi-imports').textContent = uploadedFiles.length;
 
   /* Activité récente : élément optionnel (peut ne pas exister selon le layout) */
