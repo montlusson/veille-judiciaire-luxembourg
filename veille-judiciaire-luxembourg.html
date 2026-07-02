@@ -1295,6 +1295,21 @@ table.analyse-tbl tbody tr:hover{background:var(--row-sep);}
             Lancez <strong>scrape_audiences.py</strong> pour télécharger les PDF du greffe.</p>
           </div>
         </div>
+
+        <h2 style="font-size:15px;margin:32px 0 4px;" data-i18n="audiences_archive_title">Audiences passées</h2>
+        <p class="intro" style="font-size:12.5px;margin-bottom:14px;" data-i18n="audiences_archive_intro">Audiences déjà tenues, retirées automatiquement du calendrier et conservées ici par scrape_audiences.py.</p>
+        <div class="archive-search-bar">
+          <div class="searchbar" style="flex:1;">
+            <span class="ic"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg></span>
+            <input class="input" id="audiences-archive-search" type="search" data-i18n-placeholder="audiences_archive_search_ph" placeholder="Juridiction, chambre, salle…" oninput="renderAudiencesArchive()">
+          </div>
+        </div>
+        <div id="audiences-archive-list">
+          <div class="empty-state" style="padding:48px 24px;background:var(--card-bg);border:1px solid var(--card-border);border-radius:var(--radius-lg);">
+            <p data-i18n="audiences_archive_empty_html">Les audiences passées apparaîtront ici, classées par semaine.<br>
+            Lancez <strong>scrape_audiences.py</strong> pour archiver le calendrier.</p>
+          </div>
+        </div>
       </div>
     </section>
 
@@ -1641,6 +1656,11 @@ const TRANSLATIONS = {
     archive_empty_html: "Les convocations téléchargées apparaîtront ici, classées par semaine.<br>Lancez <strong>scrape_audiences.py</strong> pour télécharger les PDF du greffe.",
     archive_no_results: "Aucun résultat pour cette recherche.",
     archive_none: "Aucune archive. Lancez <strong>scrape_audiences.py</strong> pour télécharger les PDF.",
+    audiences_archive_title: "Audiences passées",
+    audiences_archive_intro: "Audiences déjà tenues, retirées automatiquement du calendrier et conservées ici par scrape_audiences.py.",
+    audiences_archive_search_ph: "Juridiction, chambre, salle…",
+    audiences_archive_empty_html: "Les audiences passées apparaîtront ici, classées par semaine.<br>Lancez <strong>scrape_audiences.py</strong> pour archiver le calendrier.",
+    audiences_archive_none: "Aucune audience archivée pour l'instant.",
     archive_week_label: "Semaine",
     archive_downloaded: "Semaine {w} · Téléchargé le {d}",
     archive_open: "Ouvrir",
@@ -1848,6 +1868,11 @@ const TRANSLATIONS = {
     archive_empty_html: "Heruntergeladene Ladungen erscheinen hier, geordnet nach Woche.<br>Starten Sie <strong>scrape_audiences.py</strong>, um die PDF der Kanzlei herunterzuladen.",
     archive_no_results: "Kein Ergebnis für diese Suche.",
     archive_none: "Kein Archiv. Starten Sie <strong>scrape_audiences.py</strong>, um die PDF herunterzuladen.",
+    audiences_archive_title: "Vergangene Sitzungen",
+    audiences_archive_intro: "Bereits stattgefundene Sitzungen, automatisch aus dem Kalender entfernt und hier von scrape_audiences.py aufbewahrt.",
+    audiences_archive_search_ph: "Gericht, Kammer, Saal…",
+    audiences_archive_empty_html: "Vergangene Sitzungen erscheinen hier, geordnet nach Woche.<br>Starten Sie <strong>scrape_audiences.py</strong>, um den Kalender zu archivieren.",
+    audiences_archive_none: "Noch keine archivierten Sitzungen.",
     archive_week_label: "Woche",
     archive_downloaded: "Woche {w} · Heruntergeladen am {d}",
     archive_open: "Öffnen",
@@ -3165,6 +3190,84 @@ function switchAgendaTab(tab){
   });
 }
 
+/* ── Audiences passées (déplacées automatiquement par scrape_audiences.py) ── */
+let AUDIENCES_ARCHIVE = [];
+
+async function loadAudiencesArchiveJSON(){
+  try {
+    const r = await fetch('audiences_archive.json', { cache: 'no-cache' });
+    if(!r.ok) throw new Error('not found');
+    const data = await r.json();
+    AUDIENCES_ARCHIVE = data.events || [];
+    renderAudiencesArchive();
+  } catch {
+    /* Pas encore d'archive — message déjà en place dans le HTML */
+  }
+}
+
+function isoWeekLabel(dateStr){
+  const d = new Date(dateStr + 'T00:00:00');
+  const target = new Date(d.valueOf());
+  const dayNr = (d.getDay() + 6) % 7;
+  target.setDate(target.getDate() - dayNr + 3);
+  const firstThursday = new Date(target.getFullYear(), 0, 4);
+  const diff = target - firstThursday;
+  const week = 1 + Math.round(diff / (7 * 86400000));
+  return `${target.getFullYear()}-W${String(week).padStart(2,'0')}`;
+}
+
+function renderAudiencesArchive(){
+  const el = document.getElementById('audiences-archive-list');
+  if(!el) return;
+  const q = (document.getElementById('audiences-archive-search')?.value || '').toLowerCase().trim();
+
+  const filtered = q
+    ? AUDIENCES_ARCHIVE.filter(e =>
+        (e.juridiction || '').toLowerCase().includes(q)
+        || (e.chambre || '').toLowerCase().includes(q)
+        || (e.salle || '').toLowerCase().includes(q))
+    : AUDIENCES_ARCHIVE;
+
+  if(!filtered.length){
+    el.innerHTML = '<div class="empty-state" style="padding:40px;background:var(--card-bg);border:1px solid var(--card-border);border-radius:var(--radius-lg);">'
+      + (AUDIENCES_ARCHIVE.length ? '<p>' + t('archive_no_results') + '</p>'
+        : '<p>' + t('audiences_archive_none') + '</p>')
+      + '</div>';
+    return;
+  }
+
+  const byWeek = {};
+  filtered.forEach(e => {
+    const w = isoWeekLabel(e.date);
+    (byWeek[w] = byWeek[w] || []).push(e);
+  });
+
+  const locale = currentLang === 'de' ? 'de-LU' : 'fr-LU';
+
+  el.innerHTML = Object.entries(byWeek).sort((a,b) => b[0].localeCompare(a[0])).map(([week, evts]) => {
+    const byDate = {};
+    evts.forEach(e => { (byDate[e.date] = byDate[e.date] || []).push(e); });
+    const days = Object.entries(byDate).sort((a,b) => b[0].localeCompare(a[0])).map(([dateStr, dayEvts]) => {
+      const d     = new Date(dateStr + 'T00:00:00');
+      const label = d.toLocaleDateString(locale, {weekday:'long', day:'numeric', month:'long', year:'numeric'});
+      const rows  = dayEvts.sort((a,b) => a.horaire.localeCompare(b.horaire)).map(e => {
+        const sep = `<span class="agenda-sep">·</span>`;
+        const chambreHtml = e.chambre ? `${sep}<span class="agenda-chambre-inline">${e.chambre}</span>` : '';
+        const salleHtml   = e.salle   ? `${sep}<span class="agenda-salle-inline">${e.salle}</span>`   : '';
+        return `<div class="agenda-row">
+          <span class="agenda-time">${e.horaire}</span>
+          <span class="agenda-inline">
+            <span class="agenda-jur-inline">${e.juridiction}</span>
+            ${chambreHtml}${salleHtml}
+          </span>
+        </div>`;
+      }).join('');
+      return `<div class="agenda-day"><div class="agenda-day-header"><span>${label}</span></div>${rows}</div>`;
+    }).join('');
+    return '<div class="archive-week"><div class="archive-week-header">' + t('archive_week_label') + ' ' + week + '</div>' + days + '</div>';
+  }).join('');
+}
+
 /* ── Archives locales (PDF téléchargés par scrape_audiences.py) ── */
 let ARCHIVES_DATA = [];
 
@@ -4082,6 +4185,7 @@ async function authOnSession(session){
   renderAll();
   loadDecisionsFromSupabase();
   loadAudiencesJSON();
+  loadAudiencesArchiveJSON();
   loadArchivesJSON();
 }
 
@@ -4111,6 +4215,7 @@ async function initAuth(){
     renderAll();
     loadDecisionsFromSupabase();
     loadAudiencesJSON();
+    loadAudiencesArchiveJSON();
     loadArchivesJSON();
     return;
   }

@@ -53,6 +53,7 @@ ORDINALS_FR = {
 }
 
 WEEKS_AHEAD = 10  # générer les occurrences pour les 10 prochaines semaines
+ARCHIVE_WEEKS_KEPT = 12  # conserver les audiences passées 12 semaines dans l'archive
 
 
 def log(msg: str) -> None:
@@ -407,6 +408,40 @@ def download_pdf_archive(out_dir: Path) -> list[dict]:
     return all_records
 
 
+def update_audiences_archive(out_dir: Path, old_events: list[dict], today: date) -> int:
+    """
+    Déplace vers audiences_archive.json les audiences de l'ancien audiences.json
+    dont la date est désormais passée (elles sortiraient sinon silencieusement
+    de la fenêtre glissante de WEEKS_AHEAD semaines générée à chaque exécution).
+    Conserve un historique glissant de ARCHIVE_WEEKS_KEPT semaines.
+    """
+    archive_path = out_dir / "audiences_archive.json"
+    existing: list[dict] = []
+    if archive_path.exists():
+        try:
+            existing = json.loads(archive_path.read_text(encoding="utf-8")).get("events", [])
+        except Exception:
+            existing = []
+
+    existing_uids = {e["uid"] for e in existing}
+    today_str = today.isoformat()
+    newly_past = [e for e in old_events if e["date"] < today_str and e["uid"] not in existing_uids]
+
+    merged = existing + newly_past
+    cutoff = (today - timedelta(weeks=ARCHIVE_WEEKS_KEPT)).isoformat()
+    merged = [e for e in merged if e["date"] >= cutoff]
+    merged.sort(key=lambda e: (e["date"], e["horaire"]), reverse=True)
+
+    archive_path.write_text(json.dumps({
+        "updated_at":   datetime.now().isoformat(),
+        "total_events": len(merged),
+        "events":       merged,
+    }, ensure_ascii=False, indent=2), encoding="utf-8")
+
+    log(f"✓ audiences_archive.json → {len(merged)} audiences passées ({len(newly_past)} nouvellement archivées)")
+    return len(newly_past)
+
+
 def main() -> None:
     log("═══════════════════════════════════════════════════════")
     log("  Scraper audiences judiciaires — justice.public.lu")
@@ -415,6 +450,18 @@ def main() -> None:
     today   = date.today()
     raw     = []   # séances récurrentes brutes
     events  = []   # occurrences calculées avec dates réelles
+
+    out_dir = Path(__file__).parent
+
+    # Charge l'ancien audiences.json AVANT de l'écraser : sert à détecter les
+    # nouvelles entrées et à archiver celles devenues passées.
+    old_audiences_path = out_dir / "audiences.json"
+    old_events: list[dict] = []
+    if old_audiences_path.exists():
+        try:
+            old_events = json.loads(old_audiences_path.read_text(encoding="utf-8")).get("events", [])
+        except Exception:
+            old_events = []
 
     for jur in JURIDICTIONS:
         log(f"── {jur['nom']} ──")
@@ -446,7 +493,14 @@ def main() -> None:
 
     events.sort(key=lambda e: (e["date"], e["horaire"]))
 
-    out_dir = Path(__file__).parent
+    # ── Détection de nouvelles entrées ──────────────────────
+    old_uids = {e["uid"] for e in old_events}
+    new_uids = {e["uid"] for e in events}
+    brand_new = new_uids - old_uids
+    if old_events:
+        log(f"\n→ {len(brand_new)} nouvelle(s) audience(s) détectée(s) depuis la dernière extraction")
+    else:
+        log("\n→ première extraction, pas de comparaison possible")
 
     # ── audiences.json ─────────────────────────────────────
     output = {
@@ -465,6 +519,10 @@ def main() -> None:
     ics_path = out_dir / "audiences.ics"
     ics_path.write_text(ical, encoding="utf-8")
     log(f"✓ audiences.ics  → importable dans Apple Agenda, Google Calendar, Outlook")
+
+    # ── Archives des audiences passées ──────────────────────
+    log("\n── Archivage des audiences passées ──")
+    update_audiences_archive(out_dir, old_events, today)
 
     # ── Archives PDF convocations ──────────────────────────────
     log("\n── Téléchargement des convocations PDF ──")

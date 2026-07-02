@@ -1,0 +1,2319 @@
+{
+  "updated_at": "2026-07-02T14:59:25.133007",
+  "total_events": 257,
+  "events": [
+    {
+      "uid": "447bc101-dacf-4928-b643-3f24fc29d670",
+      "date": "2026-07-01",
+      "juridiction": "Cour d'appel",
+      "chambre": "2e chambre (affaires civiles/référé-divorce/affaires familiales )",
+      "horaire": "15:00",
+      "salle": "CR 2.29",
+      "jours_txt": "lundi, mercredi, 15h00"
+    },
+    {
+      "uid": "98c266f4-a8b4-4bff-8b1b-645bc11d03e0",
+      "date": "2026-07-01",
+      "juridiction": "Cour d'appel",
+      "chambre": "7e Chambre (référés ordinaires travail/affaires civiles)",
+      "horaire": "15:00",
+      "salle": "CR 2.28",
+      "jours_txt": "mardi, mercredi, 15h00"
+    },
+    {
+      "uid": "b669df77-c0e6-4500-8ad7-1697fb8d48b0",
+      "date": "2026-07-01",
+      "juridiction": "Cour d'appel",
+      "chambre": "10e chambre (affaires correctionnelles)",
+      "horaire": "15:00",
+      "salle": "CR 0.19",
+      "jours_txt": "lundi, mercredi, 15h00"
+    },
+    {
+      "uid": "1e1ad09c-efaa-47fb-a1fb-7d536e2b9fdd",
+      "date": "2026-07-01",
+      "juridiction": "Tribunal d'arrondissement de Luxembourg",
+      "chambre": "7e chambre (affaires correctionnelles)",
+      "horaire": "15:00",
+      "salle": "TL 1.07 TL 1.04 TL 1.07",
+      "jours_txt": "lundi, mardi, 15h00 mercredi, jeudi, 9h00 vendredi (1er, 3e), 9h00"
+    },
+    {
+      "uid": "308b511c-1c8b-45b0-a0ba-5e1787365a91",
+      "date": "2026-07-01",
+      "juridiction": "Tribunal d'arrondissement de Luxembourg",
+      "chambre": "9e chambre (affaires correctionnelles)",
+      "horaire": "15:00",
+      "salle": "TL 1.10 TL 1.07 TL 1.04 TL 1.07 TL 1.07",
+      "jours_txt": "lundi, 15h00 mardi, 9h00 mercredi, 15h00 jeudi, 15h00 vendredi (2e, 4e), 9h00"
+    },
+    {
+      "uid": "dba10543-75f7-43bf-80c8-3d38eab5bed3",
+      "date": "2026-07-01",
+      "juridiction": "Tribunal d'arrondissement de Luxembourg",
+      "chambre": "15e chambre (commerce/faillites)",
+      "horaire": "15:00",
+      "salle": "CO 1.01 CO 1.01 CO 1.01 CO 1.07 CO 1.02",
+      "jours_txt": "lundi, 15h00 mardi, 9h00 mercredi, 15h00 vérification des créances, jeudi, 9h00 vendredi, 14h30"
+    },
+    {
+      "uid": "830b822c-95db-4f3d-bfbe-9b36208b7b9f",
+      "date": "2026-07-01",
+      "juridiction": "Tribunal d'arrondissement de Luxembourg",
+      "chambre": "19e chambre (affaires correctionnelles)",
+      "horaire": "15:00",
+      "salle": "TL 0.11 TL 1.10 JT 1.02 TL 3.09 TL 0.11 JT 1.02 TL 1.10",
+      "jours_txt": "mercredi, 15h00 vendredi, 15h00 à partir du 16 janvier 2026: lundi, 15h00 mardi, 15h00 mercredi, 15h00 jeudi, 9h00 vendredi (1er, 3e), 15h00"
+    },
+    {
+      "uid": "31b1fe82-144e-4340-9474-52a9b2bdf789",
+      "date": "2026-07-01",
+      "juridiction": "Tribunal d'arrondissement de Luxembourg",
+      "chambre": "23e chambre (affaires correctionnelles)",
+      "horaire": "15:00",
+      "salle": "TL 0.11 TL 1.04 TL 0.11 TL 0.11 TL 1.07",
+      "jours_txt": "lundi, 15h00 mardi, 15h00 mercredi, 9h00 jeudi (1er, 3e), 15h00 vendredi, 15h00"
+    },
+    {
+      "uid": "b6a1affc-8021-406e-93a8-b7c2c679390f",
+      "date": "2026-07-01",
+      "juridiction": "Tribunal d'arrondissement de Luxembourg",
+      "chambre": "Tribunal de la jeunesse et des tutelles",
+      "horaire": "15:00",
+      "salle": "JT 0.02 JT 1.02 JT 1.02 JT 1.02 JT 1.02",
+      "jours_txt": "tutelles, lundi, 15h00 mercredi, 15h00 jeunesse, mardi, 14h30 mercredi, 9h00 vendredi, 9h00"
+    },
+    {
+      "uid": "2b4ad576-212c-432b-b2c0-0ba8821e8133",
+      "date": "2026-07-01",
+      "juridiction": "Justice de Paix de Luxembourg",
+      "chambre": "",
+      "horaire": "15:00",
+      "salle": "JP 1.19",
+      "jours_txt": "mercredi (2e, 3e, 4e et 5e), 15h00"
+    },
+    {
+      "uid": "7cd941e3-82f1-4778-a4ac-b9d77a11dba8",
+      "date": "2026-07-01",
+      "juridiction": "Justice de Paix de Luxembourg",
+      "chambre": "",
+      "horaire": "15:00",
+      "salle": "JP 0.02",
+      "jours_txt": "mercredi (1er et 3e), 15h00"
+    },
+    {
+      "uid": "bfb91ec3-d236-49cd-a5ff-ea3cdcca7f68",
+      "date": "2026-07-01",
+      "juridiction": "Justice de Paix de Luxembourg",
+      "chambre": "",
+      "horaire": "15:00",
+      "salle": "JP 1.19",
+      "jours_txt": "mercredi (1er), 15h00"
+    },
+    {
+      "uid": "48150e85-0aae-4b00-b206-27e38c9813e2",
+      "date": "2026-07-01",
+      "juridiction": "Justice de Paix de Luxembourg",
+      "chambre": "",
+      "horaire": "15:00",
+      "salle": "JP 0.02",
+      "jours_txt": "mercredi (2e), 15h00"
+    },
+    {
+      "uid": "26a76b40-0e58-4c07-9f49-395c3640ff5c",
+      "date": "2026-07-01",
+      "juridiction": "Justice de Paix de Luxembourg",
+      "chambre": "",
+      "horaire": "15:00",
+      "salle": "JP 0.15",
+      "jours_txt": "mercredi (4e), 15h00"
+    },
+    {
+      "uid": "e70342fc-235f-4bbe-9a09-7eb5322e558d",
+      "date": "2026-07-01",
+      "juridiction": "Justice de Paix de Luxembourg",
+      "chambre": "Affaires référé-travail",
+      "horaire": "15:00",
+      "salle": "JP 0.15",
+      "jours_txt": "mercredi (1er,3e,5e), 15h00"
+    },
+    {
+      "uid": "389e070e-6e46-4e53-9042-b340e9f0ab6d",
+      "date": "2026-07-01",
+      "juridiction": "Tribunal administratif",
+      "chambre": "Quatrième chambre",
+      "horaire": "15:00",
+      "salle": "",
+      "jours_txt": "mardi à 15h00 (salle d'aud.du trib.ad.) mercredi à 15h00 (salle d'aud.du trib.ad.)"
+    },
+    {
+      "uid": "52df7831-3e4b-4a63-a798-f4866287bf9b",
+      "date": "2026-07-01",
+      "juridiction": "Conseil arbitral de la sécurité sociale",
+      "chambre": "",
+      "horaire": "15:00",
+      "salle": "Salle 2 – B0.120",
+      "jours_txt": "Mercredi après-midi à 15 :00 heures Salle 2 – B0.120"
+    },
+    {
+      "uid": "1bf9574a-db66-4ef7-8eb4-eb037b3f45de",
+      "date": "2026-07-01",
+      "juridiction": "Tribunal d'arrondissement de Luxembourg",
+      "chambre": "5e chambre (chambre du conseil)",
+      "horaire": "14:30",
+      "salle": "TL 3.05 TL 3.05",
+      "jours_txt": "lundi, 14h30 mercredi, vendredi, 8h30"
+    },
+    {
+      "uid": "ff0b2b33-02ae-46d6-a439-331e1534b8ee",
+      "date": "2026-07-01",
+      "juridiction": "Tribunal d'arrondissement de Luxembourg",
+      "chambre": "21e chambre (chambre du conseil)",
+      "horaire": "14:30",
+      "salle": "TL 3.05",
+      "jours_txt": "lundi, 14h30 mercredi, 8h30 vendredi, 8h30 (et selon les besoins du service)"
+    },
+    {
+      "uid": "652c4e8f-2e6e-45ab-ad6a-03f586ca7bda",
+      "date": "2026-07-01",
+      "juridiction": "Tribunal d'arrondissement de Luxembourg",
+      "chambre": "22e chambre (chambre du conseil)",
+      "horaire": "14:30",
+      "salle": "TL 3.05",
+      "jours_txt": "lundi, 14h30 mercredi, 8h30 vendredi, 8h30"
+    },
+    {
+      "uid": "97680c6e-1ef9-4c80-9c37-a8dedd255163",
+      "date": "2026-07-01",
+      "juridiction": "Justice de Paix de Diekirch",
+      "chambre": "affaires civiles et commerciales, contredits à ordonnances de paiement, les affaires de règlement des petits litiges et les injonctions de payer européennes",
+      "horaire": "14:30",
+      "salle": "1 2",
+      "jours_txt": "lundi, mercredi, jeudi, 14h30 vendredi, 9h30"
+    },
+    {
+      "uid": "8d4486fc-7e6d-4279-92dd-426eb4ae7a41",
+      "date": "2026-07-01",
+      "juridiction": "Justice de Paix de Diekirch",
+      "chambre": "affaires de bail à loyer",
+      "horaire": "14:30",
+      "salle": "1 2",
+      "jours_txt": "lundi, mercredi, jeudi, 14h30 vendredi, 9h30"
+    },
+    {
+      "uid": "d2ab81ed-ed48-4e65-a655-49dd07a44ee6",
+      "date": "2026-07-01",
+      "juridiction": "Justice de Paix de Diekirch",
+      "chambre": "affaires de saisie-arrêt et de cession sur salaire",
+      "horaire": "14:30",
+      "salle": "1",
+      "jours_txt": "lundi, mercredi, jeudi, 14h30"
+    },
+    {
+      "uid": "e806cdef-8428-498e-9262-5019c17867d8",
+      "date": "2026-07-01",
+      "juridiction": "Justice de Paix de Diekirch",
+      "chambre": "affaires de surendettement",
+      "horaire": "14:30",
+      "salle": "2 2",
+      "jours_txt": "lundi, 14h30 (selon les besoins du service) mercredi, 10h00 (selon les besoins du service)"
+    },
+    {
+      "uid": "7c705b76-8468-4198-8efa-b8966e4544f0",
+      "date": "2026-07-01",
+      "juridiction": "Justice de Paix de Diekirch",
+      "chambre": "affaires de recours en matière d'assistance judiciaire",
+      "horaire": "14:30",
+      "salle": "1",
+      "jours_txt": "lundi, mercredi. jeudi, 14h30"
+    },
+    {
+      "uid": "c42f9376-659f-4425-92a5-176d8091eedd",
+      "date": "2026-07-01",
+      "juridiction": "Tribunal d'arrondissement de Diekirch",
+      "chambre": "Affaires commerciales Salle d'audience I",
+      "horaire": "10:00",
+      "salle": "",
+      "jours_txt": "mercredi, 10h00"
+    },
+    {
+      "uid": "35d8ab03-9db6-4db9-9396-e2198b96cf28",
+      "date": "2026-07-01",
+      "juridiction": "Tribunal d'arrondissement de Diekirch",
+      "chambre": "Appel bail à loyer Salle d'audience I",
+      "horaire": "10:00",
+      "salle": "",
+      "jours_txt": "mercredi, 10h00"
+    },
+    {
+      "uid": "07211675-b343-4da4-8b9d-7276f62f210b",
+      "date": "2026-07-01",
+      "juridiction": "Cour d'appel",
+      "chambre": "1ère chambre (affaires civiles et familiales)",
+      "horaire": "09:00",
+      "salle": "CR 2.28",
+      "jours_txt": "mercredi, vendredi, 9h00"
+    },
+    {
+      "uid": "44ab616b-8bd0-49c9-bf6b-220ed5969bfb",
+      "date": "2026-07-01",
+      "juridiction": "Cour d'appel",
+      "chambre": "4e chambre (affaires commerciales)",
+      "horaire": "09:00",
+      "salle": "CR 0.19",
+      "jours_txt": "mardi, mercredi, 9h00"
+    },
+    {
+      "uid": "fef0dfe4-fae5-4f37-b1b6-5abfd7902d43",
+      "date": "2026-07-01",
+      "juridiction": "Cour d'appel",
+      "chambre": "9e chambre (affaires civiles/commerciales)",
+      "horaire": "09:00",
+      "salle": "CR 2.29 CR 2.29",
+      "jours_txt": "mercredi, 9h00 jeudi, 15h00"
+    },
+    {
+      "uid": "ea340ac0-9e46-46a5-967b-f848c55576c4",
+      "date": "2026-07-01",
+      "juridiction": "Tribunal d'arrondissement de Luxembourg",
+      "chambre": "2e chambre (affaires commerciales)",
+      "horaire": "09:00",
+      "salle": "CO 1.01 CO 1.26 CO 1.01",
+      "jours_txt": "mercredi, jeudi, vendredi, 9h00 vérification des créances, mardi, 9h00 vendredi, 14h30"
+    },
+    {
+      "uid": "39726296-82c2-430f-8c83-ac9495b01169",
+      "date": "2026-07-01",
+      "juridiction": "Tribunal d'arrondissement de Luxembourg",
+      "chambre": "6e chambre (affaires commerciales)",
+      "horaire": "09:00",
+      "salle": "CO 1.02 CO 1.02",
+      "jours_txt": "mardi, mercredi, jeudi, 9h00 vérification des créances, vendredi, 9h30"
+    },
+    {
+      "uid": "87863381-c575-4eae-9728-56d806242537",
+      "date": "2026-07-01",
+      "juridiction": "Tribunal d'arrondissement de Luxembourg",
+      "chambre": "8e chambre (affaires civiles)",
+      "horaire": "09:00",
+      "salle": "TL 3.09",
+      "jours_txt": "mercredi, 9h00"
+    },
+    {
+      "uid": "1f677132-6cea-430a-98b0-93c014daf4fa",
+      "date": "2026-07-01",
+      "juridiction": "Tribunal d'arrondissement de Luxembourg",
+      "chambre": "12e chambre (affaires correctionnelles/criminelles)",
+      "horaire": "09:00",
+      "salle": "TL 1.10 TL 1.10 TL 1.10 TL 1.10 TL 1.10",
+      "jours_txt": "lundi (2e, 4e), 9h00 mardi, 15h00 mercredi, 15h00 jeudi, 9h00 vendredi, 9h00"
+    },
+    {
+      "uid": "ad457f3b-8f6f-4dde-aa09-19daa62da1ce",
+      "date": "2026-07-01",
+      "juridiction": "Tribunal d'arrondissement de Luxembourg",
+      "chambre": "13e chambre (affaires correctionnelles/criminelles)",
+      "horaire": "09:00",
+      "salle": "TL 3.09 TL 1.10 TL 1.07 TL 1.10 TL 1.04",
+      "jours_txt": "lundi (1er, 3e), 9h00 mardi, 9h00 mercredi, 15h00 jeudi, 15h00 vendredi, 9h00"
+    },
+    {
+      "uid": "67531b26-a388-4b48-972e-9181c9f3bdc1",
+      "date": "2026-07-01",
+      "juridiction": "Tribunal d'arrondissement de Luxembourg",
+      "chambre": "14e chambre (appels justices de paix en matière civile, commerciale, de bail à loyer et de police)",
+      "horaire": "09:00",
+      "salle": "TL 1.04 TL 3.09",
+      "jours_txt": "lundi, 9h00 mercredi, 15h00"
+    },
+    {
+      "uid": "bcdc3dbf-bc68-4d1a-b2e2-15389375f918",
+      "date": "2026-07-01",
+      "juridiction": "Tribunal d'arrondissement de Luxembourg",
+      "chambre": "16e chambre (correctionnelles/notamment affaires écon. et financières)",
+      "horaire": "09:00",
+      "salle": "TL 1.07 TL1.10 TL 3.09 TL 1.07 TL 1.04 TL 1.04",
+      "jours_txt": "lundi(2e, 4e), 9h00 lundi (1er, 3e), 9h00 mardi, 9h00 mercredi, 9h00 jeudi, 15h00 vendredi (2e, 4e), 15h00"
+    },
+    {
+      "uid": "6b9fd73f-e3bc-49d3-9e75-f6b81a679781",
+      "date": "2026-07-01",
+      "juridiction": "Tribunal d'arrondissement de Luxembourg",
+      "chambre": "17e chambre (affaires civiles)",
+      "horaire": "09:00",
+      "salle": "TL 3.06",
+      "jours_txt": "mercredi, 9h00"
+    },
+    {
+      "uid": "25f03a77-5030-47c8-8b9c-5b48a3d8d18e",
+      "date": "2026-07-01",
+      "juridiction": "Tribunal d'arrondissement de Luxembourg",
+      "chambre": "18e chambre (affaires correctionnelles)",
+      "horaire": "09:00",
+      "salle": "TL 1.07 TL 3.09 TL 1.04 TL 1.10 TL 1.07 TL 1.04",
+      "jours_txt": "lundi (1er, 3e), 9h00 lundi (2e, 4e), 9h00 mardi, 9h00 mercredi, 9h00 jeudi, 9h00 vendredi (1er, 3e), 15h00"
+    },
+    {
+      "uid": "965b92de-42bc-443f-ba8d-61af731b9e6d",
+      "date": "2026-07-01",
+      "juridiction": "Justice de Paix de Luxembourg",
+      "chambre": "Affaires de police",
+      "horaire": "09:00",
+      "salle": "JP 1.19 JP 1.19 JP 1.19",
+      "jours_txt": "chaque lundi et mardi, 9h00 mercredi (2e et 4e), 9h00 jeudi (1er), 9h00"
+    },
+    {
+      "uid": "3122eb28-279f-459e-a95a-131021501b88",
+      "date": "2026-07-01",
+      "juridiction": "Justice de Paix de Luxembourg",
+      "chambre": "",
+      "horaire": "09:00",
+      "salle": "JP 1.19",
+      "jours_txt": "mercredi (1er, 3e et 5e), 9h00"
+    },
+    {
+      "uid": "58e9b0c8-ea51-4ecf-b823-44085c85743b",
+      "date": "2026-07-01",
+      "juridiction": "Justice de Paix de Luxembourg",
+      "chambre": "",
+      "horaire": "09:00",
+      "salle": "JP 0.02",
+      "jours_txt": "mercredi (1er et 3e), 9h00"
+    },
+    {
+      "uid": "3ed326ed-8def-4316-97f2-210c6f0cc06e",
+      "date": "2026-07-01",
+      "juridiction": "Justice de Paix de Luxembourg",
+      "chambre": "",
+      "horaire": "09:00",
+      "salle": "JP 0.15",
+      "jours_txt": "mercredi (1er, 2e, 3e, 5e), 9h00"
+    },
+    {
+      "uid": "bc6cfee2-8420-4646-a56c-134d37f4c621",
+      "date": "2026-07-01",
+      "juridiction": "Justice de Paix de Luxembourg",
+      "chambre": "",
+      "horaire": "09:00",
+      "salle": "JP 0.15",
+      "jours_txt": "mercredi (4e), 9h00"
+    },
+    {
+      "uid": "8c8a4347-ef0a-4401-87f5-71287577576d",
+      "date": "2026-07-01",
+      "juridiction": "Justice de Paix de Luxembourg",
+      "chambre": "",
+      "horaire": "09:00",
+      "salle": "JP 0.02",
+      "jours_txt": "mercredi (2e, 4e), 9h00"
+    },
+    {
+      "uid": "4b173b1b-ccfb-4371-ba5f-794081049996",
+      "date": "2026-07-01",
+      "juridiction": "Justice de Paix de Luxembourg",
+      "chambre": "Affaires de surendettement",
+      "horaire": "09:00",
+      "salle": "JP 0.02 JP 0.02 JP 1.19 JP 1.19 JP 0.02",
+      "jours_txt": "mardi (4e), 9h00 mercredi (1er, 3e), 15h00 mercredi (1er), 15h00 jeudi (2e, 3e, 4e, 5e), 9h00 vendredi (1er, 3e, 4e, 5e), 9h00"
+    },
+    {
+      "uid": "73645289-5cf2-4bea-9296-628dce9d7b26",
+      "date": "2026-07-01",
+      "juridiction": "Justice de Paix d'Esch-sur-Alzette",
+      "chambre": "affaires civiles et commerciales/ contredits à ordonnances de paiement, affaires de règlements des petits litiges et les injonctions de payer européennes",
+      "horaire": "09:00",
+      "salle": "1 1 2 3 2",
+      "jours_txt": "lundi (1er, 2e, 3e, 4e), 9h00 mardi (1er, 2e, 3e, 4e), 09h00 mercredi (1er, 2e, 3e, 4e), 9h00 jeudi (2e), 9h00 jeudi (4e), 9h00"
+    },
+    {
+      "uid": "b9ae6470-4a8f-47e5-8da2-aab5bed62b51",
+      "date": "2026-07-01",
+      "juridiction": "Justice de Paix d'Esch-sur-Alzette",
+      "chambre": "affaires bail à loyer",
+      "horaire": "09:00",
+      "salle": "1 1 1 3",
+      "jours_txt": "mercredi (2e, 4e), 9h00 mercredi (3e et 4e), 15h00 jeudi (1er, 2e, 3e, 4e), 15h00 vendredi, (1er, 2e, 3e, 4e), 9h00"
+    },
+    {
+      "uid": "7ccec9e9-c5d2-40bf-84d2-ee81dc8e048d",
+      "date": "2026-07-01",
+      "juridiction": "Justice de Paix d'Esch-sur-Alzette",
+      "chambre": "affaires saisie-arrêt/ cession sur les revenus protégés/ surendettement",
+      "horaire": "09:00",
+      "salle": "2 1 2 3",
+      "jours_txt": "mardi (1er, 3e), 9h00 mercredi, (1er, 2e), 15h00 vendredi (1er, 3e), 9h00 vendredi (1er, 2e), 15h00"
+    },
+    {
+      "uid": "b0c9a71d-c817-4c49-a342-646bfdf4a451",
+      "date": "2026-07-01",
+      "juridiction": "Justice de Paix d'Esch-sur-Alzette",
+      "chambre": "affaires de droit du travail-référé",
+      "horaire": "09:00",
+      "salle": "3 1 3",
+      "jours_txt": "mercredi (2e), 9h00 jeudi (3e), 9h00 vendredi (4e), 15h00"
+    },
+    {
+      "uid": "18a52239-5bae-4eff-885d-e37a75d1268e",
+      "date": "2026-07-01",
+      "juridiction": "Tribunal administratif",
+      "chambre": "Première chambre",
+      "horaire": "09:00",
+      "salle": "",
+      "jours_txt": "lundi à 9h00 (salle d'aud.du trib.ad.) mercredi à 15h00 (salle d'aud.du trib.ad.)"
+    },
+    {
+      "uid": "dffb10db-73be-450f-9c0b-180680093e56",
+      "date": "2026-07-01",
+      "juridiction": "Tribunal administratif",
+      "chambre": "Troisième chambre",
+      "horaire": "09:00",
+      "salle": "",
+      "jours_txt": "mardi à 9h00 (salle d'aud.du trib.ad.) mercredi à 9h00 (salle d'aud. de la Cour ad.)"
+    },
+    {
+      "uid": "9e0d790c-8228-47b0-b03a-2cb16f1ac611",
+      "date": "2026-07-01",
+      "juridiction": "Tribunal administratif",
+      "chambre": "Cinquième chambre",
+      "horaire": "09:00",
+      "salle": "",
+      "jours_txt": "mercredi à 9h00 (salle d'aud.du trib.ad.) vendredi à 15h00 (salle d'aud.du trib.ad.)"
+    },
+    {
+      "uid": "b22f29ae-6355-4c06-b89d-83ee21b96b55",
+      "date": "2026-07-01",
+      "juridiction": "Conseil arbitral de la sécurité sociale",
+      "chambre": "",
+      "horaire": "09:00",
+      "salle": "Salle 1 – B0.140",
+      "jours_txt": "Mercredi matin à 09 :00 heures Salle 1 – B0.140"
+    },
+    {
+      "uid": "a0b213de-15a0-445c-98f6-bd2cc486acf7",
+      "date": "2026-07-01",
+      "juridiction": "Conseil arbitral de la sécurité sociale",
+      "chambre": "",
+      "horaire": "09:00",
+      "salle": "Salle 2 – B0.120",
+      "jours_txt": "Mercredi matin à 09 :00 heures Salle 2 – B0.120"
+    },
+    {
+      "uid": "8626adf6-d055-4c67-8dcc-a093e8a21f64",
+      "date": "2026-07-01",
+      "juridiction": "Conseil arbitral de la sécurité sociale",
+      "chambre": "",
+      "horaire": "09:00",
+      "salle": "Salle 3 – B0.110",
+      "jours_txt": "Mercredi matin à 09 :00 heures Salle 3 – B0.110"
+    },
+    {
+      "uid": "44e5aa5e-f78c-4605-af32-0f6ed7152b68",
+      "date": "2026-07-01",
+      "juridiction": "Tribunal d'arrondissement de Diekirch",
+      "chambre": "Affaires de divorce (ancien régime) Salle d'audience I",
+      "horaire": "08:30",
+      "salle": "",
+      "jours_txt": "mercredi, 8h30"
+    },
+    {
+      "uid": "186f82a9-400d-40b6-9100-fa2112918fc9",
+      "date": "2026-07-01",
+      "juridiction": "Tribunal d'arrondissement de Diekirch",
+      "chambre": "JAF (juge aux affaires familiales) Salle d'audience II Jeunesse Salle II Tutelles Salle d'audience II Salle d'audience III",
+      "horaire": "08:30",
+      "salle": "",
+      "jours_txt": "lundi, 8h30 mercredi, 9h30 mercredi (4e), 14h15 vendredi, 8h30 mercredi (1er, 3e), 14h15 mercredi (2e, 4e), 14h15 jeudi, 9h00 vendredi, 9h00"
+    },
+    {
+      "uid": "b571da1d-fa70-4a18-aa10-35d7c7ce8e79",
+      "date": "2026-06-30",
+      "juridiction": "Cour d'appel",
+      "chambre": "5e chambre (affaires correctionnelles)",
+      "horaire": "15:00",
+      "salle": "CR 0.19 CR 0.19",
+      "jours_txt": "mardi, 15h00 vendredi, 9h00"
+    },
+    {
+      "uid": "95be9af1-87dc-4b25-80c2-91a1fef79afb",
+      "date": "2026-06-30",
+      "juridiction": "Cour d'appel",
+      "chambre": "7e Chambre (référés ordinaires travail/affaires civiles)",
+      "horaire": "15:00",
+      "salle": "CR 2.28",
+      "jours_txt": "mardi, mercredi, 15h00"
+    },
+    {
+      "uid": "425ef288-37fa-42be-8a45-b52297f4de27",
+      "date": "2026-06-30",
+      "juridiction": "Cour d'appel",
+      "chambre": "chambres criminelles (selon besoin)",
+      "horaire": "15:00",
+      "salle": "CR 0.19 CR 0.19",
+      "jours_txt": "lundi (3e, 4e), 15h00 mardi (1er, 2e), 15h00"
+    },
+    {
+      "uid": "f7772df3-4a0d-4ddd-a4d1-09cc2ff68859",
+      "date": "2026-06-30",
+      "juridiction": "Tribunal d'arrondissement de Luxembourg",
+      "chambre": "7e chambre (affaires correctionnelles)",
+      "horaire": "15:00",
+      "salle": "TL 1.07 TL 1.04 TL 1.07",
+      "jours_txt": "lundi, mardi, 15h00 mercredi, jeudi, 9h00 vendredi (1er, 3e), 9h00"
+    },
+    {
+      "uid": "84b1eaf3-a818-443e-aa8d-348a64d90f7d",
+      "date": "2026-06-30",
+      "juridiction": "Tribunal d'arrondissement de Luxembourg",
+      "chambre": "9e chambre (affaires correctionnelles)",
+      "horaire": "15:00",
+      "salle": "TL 1.10 TL 1.07 TL 1.04 TL 1.07 TL 1.07",
+      "jours_txt": "lundi, 15h00 mardi, 9h00 mercredi, 15h00 jeudi, 15h00 vendredi (2e, 4e), 9h00"
+    },
+    {
+      "uid": "9978ead2-0027-423c-9b8d-d9e9114da64f",
+      "date": "2026-06-30",
+      "juridiction": "Tribunal d'arrondissement de Luxembourg",
+      "chambre": "15e chambre (commerce/faillites)",
+      "horaire": "15:00",
+      "salle": "CO 1.01 CO 1.01 CO 1.01 CO 1.07 CO 1.02",
+      "jours_txt": "lundi, 15h00 mardi, 9h00 mercredi, 15h00 vérification des créances, jeudi, 9h00 vendredi, 14h30"
+    },
+    {
+      "uid": "cdc8f693-8abf-424c-8ce5-ca8dd5a4cf7b",
+      "date": "2026-06-30",
+      "juridiction": "Tribunal d'arrondissement de Luxembourg",
+      "chambre": "19e chambre (affaires correctionnelles)",
+      "horaire": "15:00",
+      "salle": "TL 0.11 TL 1.10 JT 1.02 TL 3.09 TL 0.11 JT 1.02 TL 1.10",
+      "jours_txt": "mercredi, 15h00 vendredi, 15h00 à partir du 16 janvier 2026: lundi, 15h00 mardi, 15h00 mercredi, 15h00 jeudi, 9h00 vendredi (1er, 3e), 15h00"
+    },
+    {
+      "uid": "886eb18e-17d1-45d1-b900-bf47df670e07",
+      "date": "2026-06-30",
+      "juridiction": "Tribunal d'arrondissement de Luxembourg",
+      "chambre": "23e chambre (affaires correctionnelles)",
+      "horaire": "15:00",
+      "salle": "TL 0.11 TL 1.04 TL 0.11 TL 0.11 TL 1.07",
+      "jours_txt": "lundi, 15h00 mardi, 15h00 mercredi, 9h00 jeudi (1er, 3e), 15h00 vendredi, 15h00"
+    },
+    {
+      "uid": "279c8ac3-71eb-46b4-b7a5-b07759d88248",
+      "date": "2026-06-30",
+      "juridiction": "Tribunal d'arrondissement de Luxembourg",
+      "chambre": "25e chambre (affaire commerciales)",
+      "horaire": "15:00",
+      "salle": "CO 1.02",
+      "jours_txt": "lundi, mardi, jeudi, 15h00"
+    },
+    {
+      "uid": "3d19b874-b7e2-4164-a34c-972277209f0f",
+      "date": "2026-06-30",
+      "juridiction": "Tribunal d'arrondissement de Luxembourg",
+      "chambre": "Tribunal de la jeunesse et des tutelles",
+      "horaire": "15:00",
+      "salle": "JT 0.02 JT 1.02 JT 1.02 JT 1.02 JT 1.02",
+      "jours_txt": "tutelles, lundi, 15h00 mercredi, 15h00 jeunesse, mardi, 14h30 mercredi, 9h00 vendredi, 9h00"
+    },
+    {
+      "uid": "5af7735b-bb95-4512-a0c3-a2aadd14ed33",
+      "date": "2026-06-30",
+      "juridiction": "Justice de Paix de Luxembourg",
+      "chambre": "",
+      "horaire": "15:00",
+      "salle": "JP 0.15",
+      "jours_txt": "mardi (2e, 4e), 15h00"
+    },
+    {
+      "uid": "d816d02c-24c2-4dda-a49e-68f9417a6201",
+      "date": "2026-06-30",
+      "juridiction": "Justice de Paix de Luxembourg",
+      "chambre": "",
+      "horaire": "15:00",
+      "salle": "JP 1.19",
+      "jours_txt": "mardi, 15h00"
+    },
+    {
+      "uid": "f1c36c38-b6ef-4ed8-b701-b36e7deeb765",
+      "date": "2026-06-30",
+      "juridiction": "Justice de Paix de Luxembourg",
+      "chambre": "",
+      "horaire": "15:00",
+      "salle": "JP 0.15",
+      "jours_txt": "mardi (1er, 3e, 5e), 15h00"
+    },
+    {
+      "uid": "60273e69-42bf-4dd1-9fc4-c28551ad0743",
+      "date": "2026-06-30",
+      "juridiction": "Justice de Paix de Luxembourg",
+      "chambre": "",
+      "horaire": "15:00",
+      "salle": "JP 0.02",
+      "jours_txt": "mardi (2e, 4e), 15h00"
+    },
+    {
+      "uid": "ac1cf1db-5748-41e4-8ae4-043d8df39aea",
+      "date": "2026-06-30",
+      "juridiction": "Justice de Paix d'Esch-sur-Alzette",
+      "chambre": "affaires droit du travail",
+      "horaire": "15:00",
+      "salle": "2 2 3 2 1",
+      "jours_txt": "lundi (1er, 2e, 3e et 4e), 15h00 mardi (1er), 15h00 mardi (1er, 2e, 3e), 9h00 jeudi, (1er et 2e), 9h00 jeudi (4e), 9h00"
+    },
+    {
+      "uid": "51d2d229-7e21-4945-a732-659248dab3c8",
+      "date": "2026-06-30",
+      "juridiction": "Justice de Paix de Diekirch",
+      "chambre": "affaires de police",
+      "horaire": "15:00",
+      "salle": "1",
+      "jours_txt": "mardi, 15h00"
+    },
+    {
+      "uid": "dfd12a58-158f-48c9-8ffe-cb6c193ac637",
+      "date": "2026-06-30",
+      "juridiction": "Tribunal administratif",
+      "chambre": "Quatrième chambre",
+      "horaire": "15:00",
+      "salle": "",
+      "jours_txt": "mardi à 15h00 (salle d'aud.du trib.ad.) mercredi à 15h00 (salle d'aud.du trib.ad.)"
+    },
+    {
+      "uid": "eb35bb5f-93c1-4177-9326-a085f1a8d98d",
+      "date": "2026-06-30",
+      "juridiction": "Tribunal administratif",
+      "chambre": "Sixième chambre",
+      "horaire": "15:00",
+      "salle": "",
+      "jours_txt": "mardi à 15h00 (salle d'aud. de la Cour ad.) vendredi à 9h00 (salle d'aud.du trib.ad.)"
+    },
+    {
+      "uid": "2b263f5c-3eec-4758-980d-702b8f1174ce",
+      "date": "2026-06-30",
+      "juridiction": "Tribunal d'arrondissement de Luxembourg",
+      "chambre": "Audiences présidentielles: A) dans les matières hors référé relevant de la compétence du Président du Tribunal d’arrondissement de Luxembourg et pour lesquelles le législateur a uniquement prévu la forme des référés avec assignation à comparaître; B) dans les matières hors référé relevant de la compétence du magistrat présidant la chambre du Tribunal d’arrondissement de Luxembourg siégeant en matière civile; C) dans les matières hors référé relevant de la compétence du magistrat présidant la chambre du Tribunal d’arrondissement de Luxembourg siégeant en matière commerciale et pour lesquelles le législateur a prévu la forme des référés avec assignation à comparaître; Pour plus de détails, voir Legilux B3270",
+      "horaire": "14:15",
+      "salle": "TL 1.04 TL 3.09 CO 1.01",
+      "jours_txt": "lundi, 14h15 (et selon les besoins du service) jeudi, 9h00 mardi (2e,4e), 15h00"
+    },
+    {
+      "uid": "e7bd3763-7cc7-4e99-81eb-c9efa1268536",
+      "date": "2026-06-30",
+      "juridiction": "Tribunal d'arrondissement de Diekirch",
+      "chambre": "Affaires de référés ordinaires et de divorce (ancien régime) Salle d'audience I",
+      "horaire": "14:15",
+      "salle": "",
+      "jours_txt": "mardi, 14h15"
+    },
+    {
+      "uid": "b060d66b-5062-418f-b18a-fb2a2a31f45b",
+      "date": "2026-06-30",
+      "juridiction": "Tribunal d'arrondissement de Diekirch",
+      "chambre": "Chambre du conseil Salle d'audience II",
+      "horaire": "11:00",
+      "salle": "",
+      "jours_txt": "mardi, 11h00 jeudi, 10h00"
+    },
+    {
+      "uid": "5e434758-e0d0-47db-99fc-d3601a40968b",
+      "date": "2026-06-30",
+      "juridiction": "Cour d'appel",
+      "chambre": "3e chambre (affaires de droit du travail)",
+      "horaire": "09:00",
+      "salle": "CR 2.28 CR 2.28",
+      "jours_txt": "mardi, 9h00 jeudi, 15h00"
+    },
+    {
+      "uid": "ed207d0d-5947-4cc2-a6bf-7b7f5dbc57ff",
+      "date": "2026-06-30",
+      "juridiction": "Cour d'appel",
+      "chambre": "4e chambre (affaires commerciales)",
+      "horaire": "09:00",
+      "salle": "CR 0.19",
+      "jours_txt": "mardi, mercredi, 9h00"
+    },
+    {
+      "uid": "716cb382-eecb-4605-a8e3-848c04cc9cc0",
+      "date": "2026-06-30",
+      "juridiction": "Cour d'appel",
+      "chambre": "1re chambre du conseil Cour appel (assumée par la 6e chambre)",
+      "horaire": "09:00",
+      "salle": "CR 0.19 CR 1.25",
+      "jours_txt": "lundi, 9h00 mardi, jeudi, 9h00"
+    },
+    {
+      "uid": "217ddb44-478a-46d5-9590-23462a1fe6e7",
+      "date": "2026-06-30",
+      "juridiction": "Cour d'appel",
+      "chambre": "2e chambre du conseil Cour d'appel (assumée par la 11e chambre)",
+      "horaire": "09:00",
+      "salle": "CR 1.25 CR 2.29",
+      "jours_txt": "lundi, vendredi, 9h00 mardi, 9h00"
+    },
+    {
+      "uid": "e18b1f40-ec62-4a83-a892-491412d12601",
+      "date": "2026-06-30",
+      "juridiction": "Tribunal d'arrondissement de Luxembourg",
+      "chambre": "2e chambre (affaires commerciales)",
+      "horaire": "09:00",
+      "salle": "CO 1.01 CO 1.26 CO 1.01",
+      "jours_txt": "mercredi, jeudi, vendredi, 9h00 vérification des créances, mardi, 9h00 vendredi, 14h30"
+    },
+    {
+      "uid": "a9941363-f2fa-45cc-be2c-b410236db168",
+      "date": "2026-06-30",
+      "juridiction": "Tribunal d'arrondissement de Luxembourg",
+      "chambre": "3e chambre (appels justices de paix en matière civile, commerciale et de bail à loyer)",
+      "horaire": "09:00",
+      "salle": "TL 0.11 TL 3.06",
+      "jours_txt": "mardi, 9h00 vendredi, 9h00"
+    },
+    {
+      "uid": "e35e5d88-326e-40d4-ba3c-0f85063e308a",
+      "date": "2026-06-30",
+      "juridiction": "Tribunal d'arrondissement de Luxembourg",
+      "chambre": "6e chambre (affaires commerciales)",
+      "horaire": "09:00",
+      "salle": "CO 1.02 CO 1.02",
+      "jours_txt": "mardi, mercredi, jeudi, 9h00 vérification des créances, vendredi, 9h30"
+    },
+    {
+      "uid": "ec1ec044-5a4d-4ec8-aacb-17c11297440c",
+      "date": "2026-06-30",
+      "juridiction": "Tribunal d'arrondissement de Luxembourg",
+      "chambre": "12e chambre (affaires correctionnelles/criminelles)",
+      "horaire": "09:00",
+      "salle": "TL 1.10 TL 1.10 TL 1.10 TL 1.10 TL 1.10",
+      "jours_txt": "lundi (2e, 4e), 9h00 mardi, 15h00 mercredi, 15h00 jeudi, 9h00 vendredi, 9h00"
+    },
+    {
+      "uid": "c227d690-b2ea-40dd-90c1-0a22d3e8b595",
+      "date": "2026-06-30",
+      "juridiction": "Tribunal d'arrondissement de Luxembourg",
+      "chambre": "13e chambre (affaires correctionnelles/criminelles)",
+      "horaire": "09:00",
+      "salle": "TL 3.09 TL 1.10 TL 1.07 TL 1.10 TL 1.04",
+      "jours_txt": "lundi (1er, 3e), 9h00 mardi, 9h00 mercredi, 15h00 jeudi, 15h00 vendredi, 9h00"
+    },
+    {
+      "uid": "91626143-e2bc-402e-9d01-8cac3faa6e65",
+      "date": "2026-06-30",
+      "juridiction": "Tribunal d'arrondissement de Luxembourg",
+      "chambre": "16e chambre (correctionnelles/notamment affaires écon. et financières)",
+      "horaire": "09:00",
+      "salle": "TL 1.07 TL1.10 TL 3.09 TL 1.07 TL 1.04 TL 1.04",
+      "jours_txt": "lundi(2e, 4e), 9h00 lundi (1er, 3e), 9h00 mardi, 9h00 mercredi, 9h00 jeudi, 15h00 vendredi (2e, 4e), 15h00"
+    },
+    {
+      "uid": "4aa4caf3-7961-472c-8309-3f9f55084285",
+      "date": "2026-06-30",
+      "juridiction": "Tribunal d'arrondissement de Luxembourg",
+      "chambre": "18e chambre (affaires correctionnelles)",
+      "horaire": "09:00",
+      "salle": "TL 1.07 TL 3.09 TL 1.04 TL 1.10 TL 1.07 TL 1.04",
+      "jours_txt": "lundi (1er, 3e), 9h00 lundi (2e, 4e), 9h00 mardi, 9h00 mercredi, 9h00 jeudi, 9h00 vendredi (1er, 3e), 15h00"
+    },
+    {
+      "uid": "8f52fbe3-d38a-47c6-91a7-6c795326573f",
+      "date": "2026-06-30",
+      "juridiction": "Tribunal d'arrondissement de Luxembourg",
+      "chambre": "Référés ordinaires Référés en matière de divorce",
+      "horaire": "09:00",
+      "salle": "TL 0.11 TL 1.04 TL 3.06 TL0.11 JT 0.02",
+      "jours_txt": "lundi, 9h00 lundi, 14h30 mardi, 9h00 jeudi, 9h00 lundi, 11h00"
+    },
+    {
+      "uid": "fa6ae45f-ac52-4704-a95b-ed5c61a5deea",
+      "date": "2026-06-30",
+      "juridiction": "Tribunal d'arrondissement de Luxembourg",
+      "chambre": "Citations directes en matière correctionnelle (enrôlement des affaires nouvelles)",
+      "horaire": "09:00",
+      "salle": "TL 3.09",
+      "jours_txt": "auprès de la 16e chambre, mardi (2e, 4e), 9h00"
+    },
+    {
+      "uid": "7c8b78bf-3059-4c6f-b7db-65064badd76d",
+      "date": "2026-06-30",
+      "juridiction": "Justice de Paix de Luxembourg",
+      "chambre": "Affaires de police",
+      "horaire": "09:00",
+      "salle": "JP 1.19 JP 1.19 JP 1.19",
+      "jours_txt": "chaque lundi et mardi, 9h00 mercredi (2e et 4e), 9h00 jeudi (1er), 9h00"
+    },
+    {
+      "uid": "1cb25087-af7e-4e51-83be-f432fc05be37",
+      "date": "2026-06-30",
+      "juridiction": "Justice de Paix de Luxembourg",
+      "chambre": "",
+      "horaire": "09:00",
+      "salle": "JP 0.15",
+      "jours_txt": "mardi (1er, 3e), 9h00"
+    },
+    {
+      "uid": "d2c2bcb2-ea4e-4377-acde-e228e646653b",
+      "date": "2026-06-30",
+      "juridiction": "Justice de Paix de Luxembourg",
+      "chambre": "Affaires de saisie-arrêt",
+      "horaire": "09:00",
+      "salle": "JP 0.02",
+      "jours_txt": "mardi (4e), 9h00"
+    },
+    {
+      "uid": "3fe4801c-cae2-4a7a-9ca3-4c2be791e67e",
+      "date": "2026-06-30",
+      "juridiction": "Justice de Paix de Luxembourg",
+      "chambre": "",
+      "horaire": "09:00",
+      "salle": "JP 0.15",
+      "jours_txt": "mardi (2e, 4e), 9h00"
+    },
+    {
+      "uid": "0ea317e9-d778-4fda-9cbb-beeaa53c724f",
+      "date": "2026-06-30",
+      "juridiction": "Justice de Paix de Luxembourg",
+      "chambre": "Affaires de procédure européenne de règlement des petits litiges, injonction de payer européenne",
+      "horaire": "09:00",
+      "salle": "JP 0.02",
+      "jours_txt": "mardi (1er, 2e, 3e, 5e), 9h00"
+    },
+    {
+      "uid": "79328052-7019-441c-8700-6df2bce7ea5c",
+      "date": "2026-06-30",
+      "juridiction": "Justice de Paix de Luxembourg",
+      "chambre": "Affaires de surendettement",
+      "horaire": "09:00",
+      "salle": "JP 0.02 JP 0.02 JP 1.19 JP 1.19 JP 0.02",
+      "jours_txt": "mardi (4e), 9h00 mercredi (1er, 3e), 15h00 mercredi (1er), 15h00 jeudi (2e, 3e, 4e, 5e), 9h00 vendredi (1er, 3e, 4e, 5e), 9h00"
+    },
+    {
+      "uid": "dd071f08-9f92-42e7-b53e-d3a27df0041b",
+      "date": "2026-06-30",
+      "juridiction": "Justice de Paix d'Esch-sur-Alzette",
+      "chambre": "affaires civiles et commerciales/ contredits à ordonnances de paiement, affaires de règlements des petits litiges et les injonctions de payer européennes",
+      "horaire": "09:00",
+      "salle": "1 1 2 3 2",
+      "jours_txt": "lundi (1er, 2e, 3e, 4e), 9h00 mardi (1er, 2e, 3e, 4e), 09h00 mercredi (1er, 2e, 3e, 4e), 9h00 jeudi (2e), 9h00 jeudi (4e), 9h00"
+    },
+    {
+      "uid": "05ba7db6-78dd-49ed-809f-becc95e8fd06",
+      "date": "2026-06-30",
+      "juridiction": "Justice de Paix d'Esch-sur-Alzette",
+      "chambre": "affaires civiles et commerciales référé",
+      "horaire": "09:00",
+      "salle": "1",
+      "jours_txt": "mardi (1er, 2e, 3e, 4e), 9h00"
+    },
+    {
+      "uid": "ddf14874-f9da-45dc-b005-dba16e03b698",
+      "date": "2026-06-30",
+      "juridiction": "Justice de Paix d'Esch-sur-Alzette",
+      "chambre": "affaires saisie-arrêt/ cession sur les revenus protégés/ surendettement",
+      "horaire": "09:00",
+      "salle": "2 1 2 3",
+      "jours_txt": "mardi (1er, 3e), 9h00 mercredi, (1er, 2e), 15h00 vendredi (1er, 3e), 9h00 vendredi (1er, 2e), 15h00"
+    },
+    {
+      "uid": "f85555fe-8995-4331-a952-9be73a391f0a",
+      "date": "2026-06-30",
+      "juridiction": "Cour administrative",
+      "chambre": "",
+      "horaire": "09:00",
+      "salle": "",
+      "jours_txt": "mardi"
+    },
+    {
+      "uid": "0693aeee-e5b1-4cd6-9154-96917bf8cef2",
+      "date": "2026-06-30",
+      "juridiction": "Tribunal administratif",
+      "chambre": "Troisième chambre",
+      "horaire": "09:00",
+      "salle": "",
+      "jours_txt": "mardi à 9h00 (salle d'aud.du trib.ad.) mercredi à 9h00 (salle d'aud. de la Cour ad.)"
+    },
+    {
+      "uid": "11ee15e2-5623-4242-9333-4f53345856f8",
+      "date": "2026-06-30",
+      "juridiction": "Conseil arbitral de la sécurité sociale",
+      "chambre": "",
+      "horaire": "09:00",
+      "salle": "Salle 1 – B0.140",
+      "jours_txt": "Mardi matin à 09 :00 heures Salle 1 – B0.140"
+    },
+    {
+      "uid": "7f4bf462-8b49-4f99-82e2-a0d891b6754b",
+      "date": "2026-06-30",
+      "juridiction": "Conseil arbitral de la sécurité sociale",
+      "chambre": "",
+      "horaire": "09:00",
+      "salle": "Salle 3 – B0.110",
+      "jours_txt": "Mardi matin à 09 :00 heures Salle 3 – B0.110"
+    },
+    {
+      "uid": "dec78153-d341-4e92-9696-2fa2ca510b6c",
+      "date": "2026-06-29",
+      "juridiction": "Cour d'appel",
+      "chambre": "2e chambre (affaires civiles/référé-divorce/affaires familiales )",
+      "horaire": "15:00",
+      "salle": "CR 2.29",
+      "jours_txt": "lundi, mercredi, 15h00"
+    },
+    {
+      "uid": "673ca8c6-28d6-4fa9-b3ca-617b5e654585",
+      "date": "2026-06-29",
+      "juridiction": "Cour d'appel",
+      "chambre": "10e chambre (affaires correctionnelles)",
+      "horaire": "15:00",
+      "salle": "CR 0.19",
+      "jours_txt": "lundi, mercredi, 15h00"
+    },
+    {
+      "uid": "192a5a38-9160-4fed-8b5c-995bbdf61969",
+      "date": "2026-06-29",
+      "juridiction": "Cour d'appel",
+      "chambre": "chambres criminelles (selon besoin)",
+      "horaire": "15:00",
+      "salle": "CR 0.19 CR 0.19",
+      "jours_txt": "lundi (3e, 4e), 15h00 mardi (1er, 2e), 15h00"
+    },
+    {
+      "uid": "9e947b92-5c8c-4076-80fd-52bcb703557e",
+      "date": "2026-06-29",
+      "juridiction": "Cour d'appel",
+      "chambre": "Conseil supérieur de la sécurité sociale",
+      "horaire": "15:00",
+      "salle": "CR 2.28 CR 2.29",
+      "jours_txt": "lundi, 15h00 jeudi, 9h00"
+    },
+    {
+      "uid": "ea2fd5f7-1325-484d-804e-259c9cb13026",
+      "date": "2026-06-29",
+      "juridiction": "Tribunal d'arrondissement de Luxembourg",
+      "chambre": "7e chambre (affaires correctionnelles)",
+      "horaire": "15:00",
+      "salle": "TL 1.07 TL 1.04 TL 1.07",
+      "jours_txt": "lundi, mardi, 15h00 mercredi, jeudi, 9h00 vendredi (1er, 3e), 9h00"
+    },
+    {
+      "uid": "f0aae05b-6a80-4311-8da5-e6edc754850a",
+      "date": "2026-06-29",
+      "juridiction": "Tribunal d'arrondissement de Luxembourg",
+      "chambre": "9e chambre (affaires correctionnelles)",
+      "horaire": "15:00",
+      "salle": "TL 1.10 TL 1.07 TL 1.04 TL 1.07 TL 1.07",
+      "jours_txt": "lundi, 15h00 mardi, 9h00 mercredi, 15h00 jeudi, 15h00 vendredi (2e, 4e), 9h00"
+    },
+    {
+      "uid": "93d147d7-a5f7-4c27-90e2-1d3421cf6730",
+      "date": "2026-06-29",
+      "juridiction": "Tribunal d'arrondissement de Luxembourg",
+      "chambre": "15e chambre (commerce/faillites)",
+      "horaire": "15:00",
+      "salle": "CO 1.01 CO 1.01 CO 1.01 CO 1.07 CO 1.02",
+      "jours_txt": "lundi, 15h00 mardi, 9h00 mercredi, 15h00 vérification des créances, jeudi, 9h00 vendredi, 14h30"
+    },
+    {
+      "uid": "180988c9-175e-4f9a-b58c-cbd4e2517687",
+      "date": "2026-06-29",
+      "juridiction": "Tribunal d'arrondissement de Luxembourg",
+      "chambre": "19e chambre (affaires correctionnelles)",
+      "horaire": "15:00",
+      "salle": "TL 0.11 TL 1.10 JT 1.02 TL 3.09 TL 0.11 JT 1.02 TL 1.10",
+      "jours_txt": "mercredi, 15h00 vendredi, 15h00 à partir du 16 janvier 2026: lundi, 15h00 mardi, 15h00 mercredi, 15h00 jeudi, 9h00 vendredi (1er, 3e), 15h00"
+    },
+    {
+      "uid": "37b80a71-fd9e-43ff-89a9-cf6a49e1145a",
+      "date": "2026-06-29",
+      "juridiction": "Tribunal d'arrondissement de Luxembourg",
+      "chambre": "23e chambre (affaires correctionnelles)",
+      "horaire": "15:00",
+      "salle": "TL 0.11 TL 1.04 TL 0.11 TL 0.11 TL 1.07",
+      "jours_txt": "lundi, 15h00 mardi, 15h00 mercredi, 9h00 jeudi (1er, 3e), 15h00 vendredi, 15h00"
+    },
+    {
+      "uid": "aea0bafa-e642-4b85-be27-4af5e0a9c4b4",
+      "date": "2026-06-29",
+      "juridiction": "Tribunal d'arrondissement de Luxembourg",
+      "chambre": "25e chambre (affaire commerciales)",
+      "horaire": "15:00",
+      "salle": "CO 1.02",
+      "jours_txt": "lundi, mardi, jeudi, 15h00"
+    },
+    {
+      "uid": "f240b97e-7218-4eb7-81e6-c02789b31e40",
+      "date": "2026-06-29",
+      "juridiction": "Tribunal d'arrondissement de Luxembourg",
+      "chambre": "Tribunal de la jeunesse et des tutelles",
+      "horaire": "15:00",
+      "salle": "JT 0.02 JT 1.02 JT 1.02 JT 1.02 JT 1.02",
+      "jours_txt": "tutelles, lundi, 15h00 mercredi, 15h00 jeunesse, mardi, 14h30 mercredi, 9h00 vendredi, 9h00"
+    },
+    {
+      "uid": "36efcd34-d6be-4a65-a046-4bd8e77d9c28",
+      "date": "2026-06-29",
+      "juridiction": "Tribunal d'arrondissement de Diekirch",
+      "chambre": "Affaires correctionnelles Salle d'audience I",
+      "horaire": "15:00",
+      "salle": "",
+      "jours_txt": "lundi, 15h00 jeudi, 9h00 vendredi, 9h00"
+    },
+    {
+      "uid": "95fadbb6-eaf8-41fc-b236-e36bba8b825d",
+      "date": "2026-06-29",
+      "juridiction": "Tribunal d'arrondissement de Diekirch",
+      "chambre": "Affaires criminelles (selon les besoins du service) Salle d'audience I",
+      "horaire": "15:00",
+      "salle": "",
+      "jours_txt": "lundi, 15h00 jeudi, 9h00 vendredi, 9h00"
+    },
+    {
+      "uid": "d7890c78-7062-49ed-af8a-c99a34a6a3a3",
+      "date": "2026-06-29",
+      "juridiction": "Justice de Paix de Luxembourg",
+      "chambre": "",
+      "horaire": "15:00",
+      "salle": "JP 0.15",
+      "jours_txt": "lundi (4e ), 15h00"
+    },
+    {
+      "uid": "5c4b00bf-4f04-40d3-b3b6-16918972c2a4",
+      "date": "2026-06-29",
+      "juridiction": "Justice de Paix de Luxembourg",
+      "chambre": "",
+      "horaire": "15:00",
+      "salle": "JP 0.15",
+      "jours_txt": "lundi (1er, 2e, 3e, 5e), 15h00"
+    },
+    {
+      "uid": "7528cec7-94c8-4029-b0a1-eea08f70b0a9",
+      "date": "2026-06-29",
+      "juridiction": "Justice de Paix de Luxembourg",
+      "chambre": "Affaires droit du travail",
+      "horaire": "15:00",
+      "salle": "JP 0.02",
+      "jours_txt": "lundi, 15h00"
+    },
+    {
+      "uid": "606a0ce2-e5b4-4d9c-8518-151f708fc237",
+      "date": "2026-06-29",
+      "juridiction": "Justice de Paix de Luxembourg",
+      "chambre": "",
+      "horaire": "15:00",
+      "salle": "JP 1.19",
+      "jours_txt": "lundi (1er, 2e, 4e, 5e), 15h00"
+    },
+    {
+      "uid": "bde0e53c-3042-45db-b81f-30ca190e678c",
+      "date": "2026-06-29",
+      "juridiction": "Justice de Paix d'Esch-sur-Alzette",
+      "chambre": "affaires droit du travail",
+      "horaire": "15:00",
+      "salle": "2 2 3 2 1",
+      "jours_txt": "lundi (1er, 2e, 3e et 4e), 15h00 mardi (1er), 15h00 mardi (1er, 2e, 3e), 9h00 jeudi, (1er et 2e), 9h00 jeudi (4e), 9h00"
+    },
+    {
+      "uid": "4e1fe4b8-a2a5-4200-891a-c4ad00469af6",
+      "date": "2026-06-29",
+      "juridiction": "Tribunal administratif",
+      "chambre": "Deuxième chambre",
+      "horaire": "15:00",
+      "salle": "",
+      "jours_txt": "lundi à 15h00 (salle d'aud.du trib.ad.) jeudi à 15h00 (salle d'aud. de la Cour ad.)"
+    },
+    {
+      "uid": "22ec64a3-32ce-439d-bdf0-84ba5059feba",
+      "date": "2026-06-29",
+      "juridiction": "Conseil supérieur de la sécurité sociale",
+      "chambre": "",
+      "horaire": "15:00",
+      "salle": "CR 2.28 jeudi à 9h00",
+      "jours_txt": "lundi"
+    },
+    {
+      "uid": "b466a34c-e9ae-467e-969e-54637db13480",
+      "date": "2026-06-29",
+      "juridiction": "Conseil arbitral de la sécurité sociale",
+      "chambre": "",
+      "horaire": "15:00",
+      "salle": "Salle 3 – B0.110",
+      "jours_txt": "Lundi après-midi à 15 :00 heures Salle 3 – B0.110"
+    },
+    {
+      "uid": "7811d5cf-8c41-4811-a934-8ca76e1c32b6",
+      "date": "2026-06-29",
+      "juridiction": "Tribunal d'arrondissement de Luxembourg",
+      "chambre": "5e chambre (chambre du conseil)",
+      "horaire": "14:30",
+      "salle": "TL 3.05 TL 3.05",
+      "jours_txt": "lundi, 14h30 mercredi, vendredi, 8h30"
+    },
+    {
+      "uid": "5fb2da83-2a59-46ce-86f1-db5670669eb4",
+      "date": "2026-06-29",
+      "juridiction": "Tribunal d'arrondissement de Luxembourg",
+      "chambre": "21e chambre (chambre du conseil)",
+      "horaire": "14:30",
+      "salle": "TL 3.05",
+      "jours_txt": "lundi, 14h30 mercredi, 8h30 vendredi, 8h30 (et selon les besoins du service)"
+    },
+    {
+      "uid": "4351953d-d386-4555-8b3f-a70d98c50243",
+      "date": "2026-06-29",
+      "juridiction": "Tribunal d'arrondissement de Luxembourg",
+      "chambre": "22e chambre (chambre du conseil)",
+      "horaire": "14:30",
+      "salle": "TL 3.05",
+      "jours_txt": "lundi, 14h30 mercredi, 8h30 vendredi, 8h30"
+    },
+    {
+      "uid": "e02ea23e-93b1-449f-85b4-b7d2786c39e1",
+      "date": "2026-06-29",
+      "juridiction": "Justice de Paix de Diekirch",
+      "chambre": "affaires civiles et commerciales, contredits à ordonnances de paiement, les affaires de règlement des petits litiges et les injonctions de payer européennes",
+      "horaire": "14:30",
+      "salle": "1 2",
+      "jours_txt": "lundi, mercredi, jeudi, 14h30 vendredi, 9h30"
+    },
+    {
+      "uid": "e82be178-bfcc-4a6b-ba30-e48f831f6a13",
+      "date": "2026-06-29",
+      "juridiction": "Justice de Paix de Diekirch",
+      "chambre": "affaires de bail à loyer",
+      "horaire": "14:30",
+      "salle": "1 2",
+      "jours_txt": "lundi, mercredi, jeudi, 14h30 vendredi, 9h30"
+    },
+    {
+      "uid": "f6181e74-ae08-4dc9-ada8-5805dedd1863",
+      "date": "2026-06-29",
+      "juridiction": "Justice de Paix de Diekirch",
+      "chambre": "affaires de saisie-arrêt et de cession sur salaire",
+      "horaire": "14:30",
+      "salle": "1",
+      "jours_txt": "lundi, mercredi, jeudi, 14h30"
+    },
+    {
+      "uid": "0502644f-671d-4d43-8c6c-044c429adfc5",
+      "date": "2026-06-29",
+      "juridiction": "Justice de Paix de Diekirch",
+      "chambre": "affaires de surendettement",
+      "horaire": "14:30",
+      "salle": "2 2",
+      "jours_txt": "lundi, 14h30 (selon les besoins du service) mercredi, 10h00 (selon les besoins du service)"
+    },
+    {
+      "uid": "c9df8a7a-ed94-4efb-9c97-597feb0efe1c",
+      "date": "2026-06-29",
+      "juridiction": "Justice de Paix de Diekirch",
+      "chambre": "affaires de recours en matière d'assistance judiciaire",
+      "horaire": "14:30",
+      "salle": "1",
+      "jours_txt": "lundi, mercredi. jeudi, 14h30"
+    },
+    {
+      "uid": "fdd4b647-ae1a-4631-9887-c626a2f2fc65",
+      "date": "2026-06-29",
+      "juridiction": "Tribunal d'arrondissement de Luxembourg",
+      "chambre": "Audiences présidentielles: A) dans les matières hors référé relevant de la compétence du Président du Tribunal d’arrondissement de Luxembourg et pour lesquelles le législateur a uniquement prévu la forme des référés avec assignation à comparaître; B) dans les matières hors référé relevant de la compétence du magistrat présidant la chambre du Tribunal d’arrondissement de Luxembourg siégeant en matière civile; C) dans les matières hors référé relevant de la compétence du magistrat présidant la chambre du Tribunal d’arrondissement de Luxembourg siégeant en matière commerciale et pour lesquelles le législateur a prévu la forme des référés avec assignation à comparaître; Pour plus de détails, voir Legilux B3270",
+      "horaire": "14:15",
+      "salle": "TL 1.04 TL 3.09 CO 1.01",
+      "jours_txt": "lundi, 14h15 (et selon les besoins du service) jeudi, 9h00 mardi (2e,4e), 15h00"
+    },
+    {
+      "uid": "34657639-2efb-42ed-a9f9-5ad872f7b5d6",
+      "date": "2026-06-29",
+      "juridiction": "Cour d'appel",
+      "chambre": "6e chambre (affaires correctionnelles)",
+      "horaire": "09:00",
+      "salle": "CR 0.19",
+      "jours_txt": "lundi, 9h00"
+    },
+    {
+      "uid": "81cadb80-e338-4491-9232-f3aed437e270",
+      "date": "2026-06-29",
+      "juridiction": "Cour d'appel",
+      "chambre": "8e chambre (affaires de droit du travail)",
+      "horaire": "09:00",
+      "salle": "CR 2.28 CR 0.19",
+      "jours_txt": "lundi, 9h00 jeudi, 15h00"
+    },
+    {
+      "uid": "90e820dc-0511-404b-9727-10270a4f15c9",
+      "date": "2026-06-29",
+      "juridiction": "Cour d'appel",
+      "chambre": "12e chambre (affaires commerciales)",
+      "horaire": "09:00",
+      "salle": "CR 2.29",
+      "jours_txt": "lundi, vendredi, 9h00"
+    },
+    {
+      "uid": "3b2559e3-860c-4786-8002-8e948dff06c7",
+      "date": "2026-06-29",
+      "juridiction": "Cour d'appel",
+      "chambre": "1re chambre du conseil Cour appel (assumée par la 6e chambre)",
+      "horaire": "09:00",
+      "salle": "CR 0.19 CR 1.25",
+      "jours_txt": "lundi, 9h00 mardi, jeudi, 9h00"
+    },
+    {
+      "uid": "e9220d1c-3d57-4ee7-9dd0-100f70f0620e",
+      "date": "2026-06-29",
+      "juridiction": "Cour d'appel",
+      "chambre": "2e chambre du conseil Cour d'appel (assumée par la 11e chambre)",
+      "horaire": "09:00",
+      "salle": "CR 1.25 CR 2.29",
+      "jours_txt": "lundi, vendredi, 9h00 mardi, 9h00"
+    },
+    {
+      "uid": "2e07cdf1-2b3b-4bd9-a6d7-09ee2cacae4d",
+      "date": "2026-06-29",
+      "juridiction": "Tribunal d'arrondissement de Luxembourg",
+      "chambre": "12e chambre (affaires correctionnelles/criminelles)",
+      "horaire": "09:00",
+      "salle": "TL 1.10 TL 1.10 TL 1.10 TL 1.10 TL 1.10",
+      "jours_txt": "lundi (2e, 4e), 9h00 mardi, 15h00 mercredi, 15h00 jeudi, 9h00 vendredi, 9h00"
+    },
+    {
+      "uid": "d67bee83-5b5a-4ea9-98b6-3fbdafebf40f",
+      "date": "2026-06-29",
+      "juridiction": "Tribunal d'arrondissement de Luxembourg",
+      "chambre": "13e chambre (affaires correctionnelles/criminelles)",
+      "horaire": "09:00",
+      "salle": "TL 3.09 TL 1.10 TL 1.07 TL 1.10 TL 1.04",
+      "jours_txt": "lundi (1er, 3e), 9h00 mardi, 9h00 mercredi, 15h00 jeudi, 15h00 vendredi, 9h00"
+    },
+    {
+      "uid": "b28fc503-9895-4b61-b167-25334596d4b6",
+      "date": "2026-06-29",
+      "juridiction": "Tribunal d'arrondissement de Luxembourg",
+      "chambre": "14e chambre (appels justices de paix en matière civile, commerciale, de bail à loyer et de police)",
+      "horaire": "09:00",
+      "salle": "TL 1.04 TL 3.09",
+      "jours_txt": "lundi, 9h00 mercredi, 15h00"
+    },
+    {
+      "uid": "b6dc5356-d9f4-4d08-ab15-f11cf6e918fb",
+      "date": "2026-06-29",
+      "juridiction": "Tribunal d'arrondissement de Luxembourg",
+      "chambre": "16e chambre (correctionnelles/notamment affaires écon. et financières)",
+      "horaire": "09:00",
+      "salle": "TL 1.07 TL1.10 TL 3.09 TL 1.07 TL 1.04 TL 1.04",
+      "jours_txt": "lundi(2e, 4e), 9h00 lundi (1er, 3e), 9h00 mardi, 9h00 mercredi, 9h00 jeudi, 15h00 vendredi (2e, 4e), 15h00"
+    },
+    {
+      "uid": "3fdf35f6-6972-47f4-94df-c3b1da87cb0a",
+      "date": "2026-06-29",
+      "juridiction": "Tribunal d'arrondissement de Luxembourg",
+      "chambre": "18e chambre (affaires correctionnelles)",
+      "horaire": "09:00",
+      "salle": "TL 1.07 TL 3.09 TL 1.04 TL 1.10 TL 1.07 TL 1.04",
+      "jours_txt": "lundi (1er, 3e), 9h00 lundi (2e, 4e), 9h00 mardi, 9h00 mercredi, 9h00 jeudi, 9h00 vendredi (1er, 3e), 15h00"
+    },
+    {
+      "uid": "bfd88f12-6d78-42b6-95f0-c3030997302c",
+      "date": "2026-06-29",
+      "juridiction": "Tribunal d'arrondissement de Luxembourg",
+      "chambre": "Référés ordinaires Référés en matière de divorce",
+      "horaire": "09:00",
+      "salle": "TL 0.11 TL 1.04 TL 3.06 TL0.11 JT 0.02",
+      "jours_txt": "lundi, 9h00 lundi, 14h30 mardi, 9h00 jeudi, 9h00 lundi, 11h00"
+    },
+    {
+      "uid": "73850061-9473-490d-b02f-b2743b049583",
+      "date": "2026-06-29",
+      "juridiction": "Justice de Paix de Luxembourg",
+      "chambre": "Affaires de police",
+      "horaire": "09:00",
+      "salle": "JP 1.19 JP 1.19 JP 1.19",
+      "jours_txt": "chaque lundi et mardi, 9h00 mercredi (2e et 4e), 9h00 jeudi (1er), 9h00"
+    },
+    {
+      "uid": "36e5457c-ff20-4955-8c09-b2fc678a6c98",
+      "date": "2026-06-29",
+      "juridiction": "Justice de Paix de Luxembourg",
+      "chambre": "Affaires civiles et commerciales/ contredits à ordonnances de paiement",
+      "horaire": "09:00",
+      "salle": "JP 0.02",
+      "jours_txt": "lundi, 9h00"
+    },
+    {
+      "uid": "64dfda32-b47d-4b8f-89f2-e27ba023b853",
+      "date": "2026-06-29",
+      "juridiction": "Justice de Paix de Luxembourg",
+      "chambre": "Affaires de bail à loyer",
+      "horaire": "09:00",
+      "salle": "JP 0.15",
+      "jours_txt": "lundi (1er, 2e, 3e, 4e), 9h00"
+    },
+    {
+      "uid": "4a27bf55-1f93-4075-b565-64c9d24f1b08",
+      "date": "2026-06-29",
+      "juridiction": "Justice de Paix d'Esch-sur-Alzette",
+      "chambre": "affaires civiles et commerciales/ contredits à ordonnances de paiement, affaires de règlements des petits litiges et les injonctions de payer européennes",
+      "horaire": "09:00",
+      "salle": "1 1 2 3 2",
+      "jours_txt": "lundi (1er, 2e, 3e, 4e), 9h00 mardi (1er, 2e, 3e, 4e), 09h00 mercredi (1er, 2e, 3e, 4e), 9h00 jeudi (2e), 9h00 jeudi (4e), 9h00"
+    },
+    {
+      "uid": "08da876f-0ea2-479d-891d-8ead7118d5ac",
+      "date": "2026-06-29",
+      "juridiction": "Justice de Paix d'Esch-sur-Alzette",
+      "chambre": "affaires de recours en matière d'assistance judiciaire",
+      "horaire": "09:00",
+      "salle": "1",
+      "jours_txt": "lundi (1er, 2e, 3e, 4e), 9h00"
+    },
+    {
+      "uid": "d257517c-c52b-4fc1-83ca-768c079013ac",
+      "date": "2026-06-29",
+      "juridiction": "Justice de Paix de Diekirch",
+      "chambre": "affaires de droit du travail, y comprises les affaires de référé",
+      "horaire": "09:00",
+      "salle": "1 1",
+      "jours_txt": "lundi, 9h00 vendredi, 9h45"
+    },
+    {
+      "uid": "9b22dd70-6783-4a87-97e4-0be471272868",
+      "date": "2026-06-29",
+      "juridiction": "Tribunal administratif",
+      "chambre": "Première chambre",
+      "horaire": "09:00",
+      "salle": "",
+      "jours_txt": "lundi à 9h00 (salle d'aud.du trib.ad.) mercredi à 15h00 (salle d'aud.du trib.ad.)"
+    },
+    {
+      "uid": "6196fb67-5da9-48c3-bcf1-5b83127bb38a",
+      "date": "2026-06-29",
+      "juridiction": "Conseil arbitral de la sécurité sociale",
+      "chambre": "",
+      "horaire": "09:00",
+      "salle": "Salle 2 – B0.120",
+      "jours_txt": "Lundi matin à 09 :00 heures Salle 2 – B0.120"
+    },
+    {
+      "uid": "8e5f7c98-9f9b-44a6-8492-e46428c68d49",
+      "date": "2026-06-29",
+      "juridiction": "Tribunal d'arrondissement de Diekirch",
+      "chambre": "JAF (juge aux affaires familiales) Salle d'audience II Jeunesse Salle II Tutelles Salle d'audience II Salle d'audience III",
+      "horaire": "08:30",
+      "salle": "",
+      "jours_txt": "lundi, 8h30 mercredi, 9h30 mercredi (4e), 14h15 vendredi, 8h30 mercredi (1er, 3e), 14h15 mercredi (2e, 4e), 14h15 jeudi, 9h00 vendredi, 9h00"
+    },
+    {
+      "uid": "b22a39c0-19b7-4319-8193-16166ef722cc",
+      "date": "2026-06-26",
+      "juridiction": "Cour constitutionnelle",
+      "chambre": "",
+      "horaire": "15:00",
+      "salle": "CR 0.19. Elle peut fixer des audiences extraordinaires. Dernière mise à jour 27",
+      "jours_txt": "vendredis à"
+    },
+    {
+      "uid": "c6050e98-5199-4bd7-9b4f-2d905d102cd1",
+      "date": "2026-06-26",
+      "juridiction": "Cour d'appel",
+      "chambre": "5e chambre (affaires correctionnelles)",
+      "horaire": "15:00",
+      "salle": "CR 0.19 CR 0.19",
+      "jours_txt": "mardi, 15h00 vendredi, 9h00"
+    },
+    {
+      "uid": "a427e00e-9caa-44d6-8abb-d149d99a23ce",
+      "date": "2026-06-26",
+      "juridiction": "Tribunal d'arrondissement de Luxembourg",
+      "chambre": "7e chambre (affaires correctionnelles)",
+      "horaire": "15:00",
+      "salle": "TL 1.07 TL 1.04 TL 1.07",
+      "jours_txt": "lundi, mardi, 15h00 mercredi, jeudi, 9h00 vendredi (1er, 3e), 9h00"
+    },
+    {
+      "uid": "10f55818-b675-40b1-98cd-56a25adcd3dd",
+      "date": "2026-06-26",
+      "juridiction": "Tribunal d'arrondissement de Luxembourg",
+      "chambre": "9e chambre (affaires correctionnelles)",
+      "horaire": "15:00",
+      "salle": "TL 1.10 TL 1.07 TL 1.04 TL 1.07 TL 1.07",
+      "jours_txt": "lundi, 15h00 mardi, 9h00 mercredi, 15h00 jeudi, 15h00 vendredi (2e, 4e), 9h00"
+    },
+    {
+      "uid": "468cfff8-051b-4af7-92f3-3e8d9af66790",
+      "date": "2026-06-26",
+      "juridiction": "Tribunal d'arrondissement de Luxembourg",
+      "chambre": "11e chambre (affaires civiles)",
+      "horaire": "15:00",
+      "salle": "TL 3.09",
+      "jours_txt": "vendredi, 15h00"
+    },
+    {
+      "uid": "688707d5-7ee2-4a32-8fb0-8c30585d02c5",
+      "date": "2026-06-26",
+      "juridiction": "Tribunal d'arrondissement de Luxembourg",
+      "chambre": "15e chambre (commerce/faillites)",
+      "horaire": "15:00",
+      "salle": "CO 1.01 CO 1.01 CO 1.01 CO 1.07 CO 1.02",
+      "jours_txt": "lundi, 15h00 mardi, 9h00 mercredi, 15h00 vérification des créances, jeudi, 9h00 vendredi, 14h30"
+    },
+    {
+      "uid": "e57f4361-74bb-4c51-890a-28729202009e",
+      "date": "2026-06-26",
+      "juridiction": "Tribunal d'arrondissement de Luxembourg",
+      "chambre": "19e chambre (affaires correctionnelles)",
+      "horaire": "15:00",
+      "salle": "TL 0.11 TL 1.10 JT 1.02 TL 3.09 TL 0.11 JT 1.02 TL 1.10",
+      "jours_txt": "mercredi, 15h00 vendredi, 15h00 à partir du 16 janvier 2026: lundi, 15h00 mardi, 15h00 mercredi, 15h00 jeudi, 9h00 vendredi (1er, 3e), 15h00"
+    },
+    {
+      "uid": "fa5eb45b-8e1d-4bff-8e90-a6904f963dd0",
+      "date": "2026-06-26",
+      "juridiction": "Tribunal d'arrondissement de Luxembourg",
+      "chambre": "20e chambre (affaires civiles)",
+      "horaire": "15:00",
+      "salle": "TL 3.09 TL 3.09",
+      "jours_txt": "jeudi, 15h00 vendredi, 9h00 (comparution personnelle des parties)"
+    },
+    {
+      "uid": "5719b138-b830-4f92-a845-47ba6e20619f",
+      "date": "2026-06-26",
+      "juridiction": "Tribunal d'arrondissement de Luxembourg",
+      "chambre": "23e chambre (affaires correctionnelles)",
+      "horaire": "15:00",
+      "salle": "TL 0.11 TL 1.04 TL 0.11 TL 0.11 TL 1.07",
+      "jours_txt": "lundi, 15h00 mardi, 15h00 mercredi, 9h00 jeudi (1er, 3e), 15h00 vendredi, 15h00"
+    },
+    {
+      "uid": "6cb101c1-198e-4a3a-86e2-c3e8279982da",
+      "date": "2026-06-26",
+      "juridiction": "Tribunal d'arrondissement de Luxembourg",
+      "chambre": "Tribunal de la jeunesse et des tutelles",
+      "horaire": "15:00",
+      "salle": "JT 0.02 JT 1.02 JT 1.02 JT 1.02 JT 1.02",
+      "jours_txt": "tutelles, lundi, 15h00 mercredi, 15h00 jeunesse, mardi, 14h30 mercredi, 9h00 vendredi, 9h00"
+    },
+    {
+      "uid": "3c07cdf7-1f00-42fa-ae95-6fcdc0f31229",
+      "date": "2026-06-26",
+      "juridiction": "Tribunal d'arrondissement de Diekirch",
+      "chambre": "Affaires correctionnelles Salle d'audience I",
+      "horaire": "15:00",
+      "salle": "",
+      "jours_txt": "lundi, 15h00 jeudi, 9h00 vendredi, 9h00"
+    },
+    {
+      "uid": "a0aa948b-8ac7-4531-8d42-bd22e3ae623d",
+      "date": "2026-06-26",
+      "juridiction": "Tribunal d'arrondissement de Diekirch",
+      "chambre": "Affaires criminelles (selon les besoins du service) Salle d'audience I",
+      "horaire": "15:00",
+      "salle": "",
+      "jours_txt": "lundi, 15h00 jeudi, 9h00 vendredi, 9h00"
+    },
+    {
+      "uid": "16456cfe-977f-482c-bc83-778570c32528",
+      "date": "2026-06-26",
+      "juridiction": "Tribunal administratif",
+      "chambre": "Sixième chambre",
+      "horaire": "15:00",
+      "salle": "",
+      "jours_txt": "mardi à 15h00 (salle d'aud. de la Cour ad.) vendredi à 9h00 (salle d'aud.du trib.ad.)"
+    },
+    {
+      "uid": "d2fd2105-7dc3-439c-8723-b557e494b005",
+      "date": "2026-06-26",
+      "juridiction": "Tribunal d'arrondissement de Luxembourg",
+      "chambre": "5e chambre (chambre du conseil)",
+      "horaire": "14:30",
+      "salle": "TL 3.05 TL 3.05",
+      "jours_txt": "lundi, 14h30 mercredi, vendredi, 8h30"
+    },
+    {
+      "uid": "b68af2e4-9994-4a11-a763-c7ffd658c30d",
+      "date": "2026-06-26",
+      "juridiction": "Tribunal d'arrondissement de Luxembourg",
+      "chambre": "21e chambre (chambre du conseil)",
+      "horaire": "14:30",
+      "salle": "TL 3.05",
+      "jours_txt": "lundi, 14h30 mercredi, 8h30 vendredi, 8h30 (et selon les besoins du service)"
+    },
+    {
+      "uid": "a99c93a5-2a49-443c-8c2a-5872e48c475b",
+      "date": "2026-06-26",
+      "juridiction": "Tribunal d'arrondissement de Luxembourg",
+      "chambre": "22e chambre (chambre du conseil)",
+      "horaire": "14:30",
+      "salle": "TL 3.05",
+      "jours_txt": "lundi, 14h30 mercredi, 8h30 vendredi, 8h30"
+    },
+    {
+      "uid": "ab5894bd-f63a-415a-ad14-d3829301f03b",
+      "date": "2026-06-26",
+      "juridiction": "Justice de Paix de Diekirch",
+      "chambre": "affaires civiles et commerciales, contredits à ordonnances de paiement, les affaires de règlement des petits litiges et les injonctions de payer européennes",
+      "horaire": "14:30",
+      "salle": "1 2",
+      "jours_txt": "lundi, mercredi, jeudi, 14h30 vendredi, 9h30"
+    },
+    {
+      "uid": "e47e5da4-f879-4e60-a492-41a7c86aed2e",
+      "date": "2026-06-26",
+      "juridiction": "Justice de Paix de Diekirch",
+      "chambre": "affaires de bail à loyer",
+      "horaire": "14:30",
+      "salle": "1 2",
+      "jours_txt": "lundi, mercredi, jeudi, 14h30 vendredi, 9h30"
+    },
+    {
+      "uid": "df49d55f-0e19-4610-baef-c2950b348db0",
+      "date": "2026-06-26",
+      "juridiction": "Tribunal d'arrondissement de Diekirch",
+      "chambre": "Affaires civiles, commerciales et de bail à loyer urgentes (selon les besoins du service) Salle d'audience I",
+      "horaire": "14:15",
+      "salle": "",
+      "jours_txt": "vendredi, 14h15"
+    },
+    {
+      "uid": "336ac964-0c23-4430-9d47-2c0157689868",
+      "date": "2026-06-26",
+      "juridiction": "Cour d'appel",
+      "chambre": "1ère chambre (affaires civiles et familiales)",
+      "horaire": "09:00",
+      "salle": "CR 2.28",
+      "jours_txt": "mercredi, vendredi, 9h00"
+    },
+    {
+      "uid": "f241170a-6fbd-452a-bc7c-7e4501ef72c7",
+      "date": "2026-06-26",
+      "juridiction": "Cour d'appel",
+      "chambre": "12e chambre (affaires commerciales)",
+      "horaire": "09:00",
+      "salle": "CR 2.29",
+      "jours_txt": "lundi, vendredi, 9h00"
+    },
+    {
+      "uid": "1f9d92b0-2066-4f6e-9b9f-d30244c975a1",
+      "date": "2026-06-26",
+      "juridiction": "Cour d'appel",
+      "chambre": "2e chambre du conseil Cour d'appel (assumée par la 11e chambre)",
+      "horaire": "09:00",
+      "salle": "CR 1.25 CR 2.29",
+      "jours_txt": "lundi, vendredi, 9h00 mardi, 9h00"
+    },
+    {
+      "uid": "0f1bb9ba-cb4e-4d32-ad0e-39acf85ba3f9",
+      "date": "2026-06-26",
+      "juridiction": "Tribunal d'arrondissement de Luxembourg",
+      "chambre": "1re chambre (affaires civiles)",
+      "horaire": "09:00",
+      "salle": "TL 3.09 TL 3.09",
+      "jours_txt": "jeudi, 9h00 vendredi, 9h00"
+    },
+    {
+      "uid": "fe9560a9-a1be-46ce-a014-92f1c6a1fddd",
+      "date": "2026-06-26",
+      "juridiction": "Tribunal d'arrondissement de Luxembourg",
+      "chambre": "2e chambre (affaires commerciales)",
+      "horaire": "09:00",
+      "salle": "CO 1.01 CO 1.26 CO 1.01",
+      "jours_txt": "mercredi, jeudi, vendredi, 9h00 vérification des créances, mardi, 9h00 vendredi, 14h30"
+    },
+    {
+      "uid": "854b8603-a418-4473-ae62-23180c3856ce",
+      "date": "2026-06-26",
+      "juridiction": "Tribunal d'arrondissement de Luxembourg",
+      "chambre": "3e chambre (appels justices de paix en matière civile, commerciale et de bail à loyer)",
+      "horaire": "09:00",
+      "salle": "TL 0.11 TL 3.06",
+      "jours_txt": "mardi, 9h00 vendredi, 9h00"
+    },
+    {
+      "uid": "185f8d03-bf19-40bd-a5b3-6360b11407ed",
+      "date": "2026-06-26",
+      "juridiction": "Tribunal d'arrondissement de Luxembourg",
+      "chambre": "4e chambre (affaires de divorce)",
+      "horaire": "09:00",
+      "salle": "TL 3.09",
+      "jours_txt": "jeudi, vendredi, 9h00"
+    },
+    {
+      "uid": "f5e735a1-50d1-4286-90c7-b8c70e599b5a",
+      "date": "2026-06-26",
+      "juridiction": "Tribunal d'arrondissement de Luxembourg",
+      "chambre": "6e chambre (affaires commerciales)",
+      "horaire": "09:00",
+      "salle": "CO 1.02 CO 1.02",
+      "jours_txt": "mardi, mercredi, jeudi, 9h00 vérification des créances, vendredi, 9h30"
+    },
+    {
+      "uid": "a5ebcf19-665f-43ce-b146-8a9f8d2da262",
+      "date": "2026-06-26",
+      "juridiction": "Tribunal d'arrondissement de Luxembourg",
+      "chambre": "10e chambre (affaires civiles)",
+      "horaire": "09:00",
+      "salle": "TL 0.11",
+      "jours_txt": "vendredi, 9h00"
+    },
+    {
+      "uid": "953c9b03-89bc-4061-b05d-fbc6649ac2ca",
+      "date": "2026-06-26",
+      "juridiction": "Tribunal d'arrondissement de Luxembourg",
+      "chambre": "12e chambre (affaires correctionnelles/criminelles)",
+      "horaire": "09:00",
+      "salle": "TL 1.10 TL 1.10 TL 1.10 TL 1.10 TL 1.10",
+      "jours_txt": "lundi (2e, 4e), 9h00 mardi, 15h00 mercredi, 15h00 jeudi, 9h00 vendredi, 9h00"
+    },
+    {
+      "uid": "d446fc3a-d176-439b-bbd2-23b8ee45e583",
+      "date": "2026-06-26",
+      "juridiction": "Tribunal d'arrondissement de Luxembourg",
+      "chambre": "13e chambre (affaires correctionnelles/criminelles)",
+      "horaire": "09:00",
+      "salle": "TL 3.09 TL 1.10 TL 1.07 TL 1.10 TL 1.04",
+      "jours_txt": "lundi (1er, 3e), 9h00 mardi, 9h00 mercredi, 15h00 jeudi, 15h00 vendredi, 9h00"
+    },
+    {
+      "uid": "8711050c-b494-4821-a331-b792c4066148",
+      "date": "2026-06-26",
+      "juridiction": "Tribunal d'arrondissement de Luxembourg",
+      "chambre": "16e chambre (correctionnelles/notamment affaires écon. et financières)",
+      "horaire": "09:00",
+      "salle": "TL 1.07 TL1.10 TL 3.09 TL 1.07 TL 1.04 TL 1.04",
+      "jours_txt": "lundi(2e, 4e), 9h00 lundi (1er, 3e), 9h00 mardi, 9h00 mercredi, 9h00 jeudi, 15h00 vendredi (2e, 4e), 15h00"
+    },
+    {
+      "uid": "8451952c-214b-41f9-9a67-35a036393010",
+      "date": "2026-06-26",
+      "juridiction": "Tribunal d'arrondissement de Luxembourg",
+      "chambre": "18e chambre (affaires correctionnelles)",
+      "horaire": "09:00",
+      "salle": "TL 1.07 TL 3.09 TL 1.04 TL 1.10 TL 1.07 TL 1.04",
+      "jours_txt": "lundi (1er, 3e), 9h00 lundi (2e, 4e), 9h00 mardi, 9h00 mercredi, 9h00 jeudi, 9h00 vendredi (1er, 3e), 15h00"
+    },
+    {
+      "uid": "a4eaf895-28b3-4519-9291-3b1c2ae2d614",
+      "date": "2026-06-26",
+      "juridiction": "Justice de Paix de Luxembourg",
+      "chambre": "",
+      "horaire": "09:00",
+      "salle": "JP 1.19",
+      "jours_txt": "vendredi (1er, 3e, 4e, 5e), 9h00"
+    },
+    {
+      "uid": "e9c443b6-3ff1-45b6-aceb-cb9f94df1505",
+      "date": "2026-06-26",
+      "juridiction": "Justice de Paix de Luxembourg",
+      "chambre": "",
+      "horaire": "09:00",
+      "salle": "JP 0.02 et JP 1.19",
+      "jours_txt": "vendredi (2e), 9h00"
+    },
+    {
+      "uid": "e155ff3d-d510-43a9-844a-0d32fb598198",
+      "date": "2026-06-26",
+      "juridiction": "Justice de Paix de Luxembourg",
+      "chambre": "",
+      "horaire": "09:00",
+      "salle": "JP 0.02",
+      "jours_txt": "vendredi (1er, 3e, 4e et 5e), 9h00"
+    },
+    {
+      "uid": "4e1617db-fe25-4163-8e8b-4452f3f1cc38",
+      "date": "2026-06-26",
+      "juridiction": "Justice de Paix de Luxembourg",
+      "chambre": "",
+      "horaire": "09:00",
+      "salle": "JP 0.15",
+      "jours_txt": "vendredi, 9h00"
+    },
+    {
+      "uid": "08d3d525-73ea-4e50-884b-b68a79f49fce",
+      "date": "2026-06-26",
+      "juridiction": "Justice de Paix de Luxembourg",
+      "chambre": "Affaires de surendettement",
+      "horaire": "09:00",
+      "salle": "JP 0.02 JP 0.02 JP 1.19 JP 1.19 JP 0.02",
+      "jours_txt": "mardi (4e), 9h00 mercredi (1er, 3e), 15h00 mercredi (1er), 15h00 jeudi (2e, 3e, 4e, 5e), 9h00 vendredi (1er, 3e, 4e, 5e), 9h00"
+    },
+    {
+      "uid": "8fd0f187-5b01-4351-9195-12cb0141473b",
+      "date": "2026-06-26",
+      "juridiction": "Justice de Paix d'Esch-sur-Alzette",
+      "chambre": "affaires bail à loyer",
+      "horaire": "09:00",
+      "salle": "1 1 1 3",
+      "jours_txt": "mercredi (2e, 4e), 9h00 mercredi (3e et 4e), 15h00 jeudi (1er, 2e, 3e, 4e), 15h00 vendredi, (1er, 2e, 3e, 4e), 9h00"
+    },
+    {
+      "uid": "7acc4ab6-03ce-4e4a-bd41-32928cdfd676",
+      "date": "2026-06-26",
+      "juridiction": "Justice de Paix d'Esch-sur-Alzette",
+      "chambre": "affaires saisie-arrêt/ cession sur les revenus protégés/ surendettement",
+      "horaire": "09:00",
+      "salle": "2 1 2 3",
+      "jours_txt": "mardi (1er, 3e), 9h00 mercredi, (1er, 2e), 15h00 vendredi (1er, 3e), 9h00 vendredi (1er, 2e), 15h00"
+    },
+    {
+      "uid": "86844351-8277-404d-b2d2-3cd61510320f",
+      "date": "2026-06-26",
+      "juridiction": "Justice de Paix d'Esch-sur-Alzette",
+      "chambre": "affaires de droit du travail-référé",
+      "horaire": "09:00",
+      "salle": "3 1 3",
+      "jours_txt": "mercredi (2e), 9h00 jeudi (3e), 9h00 vendredi (4e), 15h00"
+    },
+    {
+      "uid": "2da86349-0e0b-4ca9-a5a6-6b201f227801",
+      "date": "2026-06-26",
+      "juridiction": "Justice de Paix d'Esch-sur-Alzette",
+      "chambre": "affaires de police",
+      "horaire": "09:00",
+      "salle": "1",
+      "jours_txt": "vendredi (1er, 2e, 3e, 4e), 9h00"
+    },
+    {
+      "uid": "41f3f033-d3df-4b31-a880-69748fae6326",
+      "date": "2026-06-26",
+      "juridiction": "Justice de Paix de Diekirch",
+      "chambre": "affaires de droit du travail, y comprises les affaires de référé",
+      "horaire": "09:00",
+      "salle": "1 1",
+      "jours_txt": "lundi, 9h00 vendredi, 9h45"
+    },
+    {
+      "uid": "30144c08-ce71-437b-aa82-be3023c304ac",
+      "date": "2026-06-26",
+      "juridiction": "Tribunal administratif",
+      "chambre": "Cinquième chambre",
+      "horaire": "09:00",
+      "salle": "",
+      "jours_txt": "mercredi à 9h00 (salle d'aud.du trib.ad.) vendredi à 15h00 (salle d'aud.du trib.ad.)"
+    },
+    {
+      "uid": "345b6c7c-4052-4404-8ce6-358880b980a2",
+      "date": "2026-06-26",
+      "juridiction": "Conseil arbitral de la sécurité sociale",
+      "chambre": "",
+      "horaire": "09:00",
+      "salle": "Salle 1 – B0.140",
+      "jours_txt": "Vendredi matin à 09 :00 heures Salle 1 – B0.140"
+    },
+    {
+      "uid": "ffe7fba6-76a4-470c-abb4-5a4e106aa0c4",
+      "date": "2026-06-26",
+      "juridiction": "Conseil arbitral de la sécurité sociale",
+      "chambre": "",
+      "horaire": "09:00",
+      "salle": "Salle 2 – B0.120",
+      "jours_txt": "Vendredi matin à 09 :00 heures Salle 2 – B0.120"
+    },
+    {
+      "uid": "72216825-ec1c-4e9a-bbe4-cbf3d1959056",
+      "date": "2026-06-26",
+      "juridiction": "Conseil arbitral de la sécurité sociale",
+      "chambre": "",
+      "horaire": "09:00",
+      "salle": "Salle 3 – B",
+      "jours_txt": "Vendredi matin à 09 :00 heures Salle 3 – B 0.110"
+    },
+    {
+      "uid": "9dcaeabe-c47e-4554-bf1b-ffac166647cb",
+      "date": "2026-06-26",
+      "juridiction": "Tribunal d'arrondissement de Diekirch",
+      "chambre": "JAF (juge aux affaires familiales) Salle d'audience II Jeunesse Salle II Tutelles Salle d'audience II Salle d'audience III",
+      "horaire": "08:30",
+      "salle": "",
+      "jours_txt": "lundi, 8h30 mercredi, 9h30 mercredi (4e), 14h15 vendredi, 8h30 mercredi (1er, 3e), 14h15 mercredi (2e, 4e), 14h15 jeudi, 9h00 vendredi, 9h00"
+    },
+    {
+      "uid": "4f61aef4-f4e4-4b56-9c1d-293a46b8eef6",
+      "date": "2026-06-25",
+      "juridiction": "Cour d'appel",
+      "chambre": "Conseil supérieur de la sécurité sociale",
+      "horaire": "15:00",
+      "salle": "CR 2.28 CR 2.29",
+      "jours_txt": "lundi, 15h00 jeudi, 9h00"
+    },
+    {
+      "uid": "26a0512d-6f1f-4c5c-a536-aaeb4a615702",
+      "date": "2026-06-25",
+      "juridiction": "Tribunal d'arrondissement de Luxembourg",
+      "chambre": "7e chambre (affaires correctionnelles)",
+      "horaire": "15:00",
+      "salle": "TL 1.07 TL 1.04 TL 1.07",
+      "jours_txt": "lundi, mardi, 15h00 mercredi, jeudi, 9h00 vendredi (1er, 3e), 9h00"
+    },
+    {
+      "uid": "f5c3bcd3-3a4c-4ed3-bab6-9fbab8703a32",
+      "date": "2026-06-25",
+      "juridiction": "Tribunal d'arrondissement de Luxembourg",
+      "chambre": "9e chambre (affaires correctionnelles)",
+      "horaire": "15:00",
+      "salle": "TL 1.10 TL 1.07 TL 1.04 TL 1.07 TL 1.07",
+      "jours_txt": "lundi, 15h00 mardi, 9h00 mercredi, 15h00 jeudi, 15h00 vendredi (2e, 4e), 9h00"
+    },
+    {
+      "uid": "e808f3e1-7c0e-4290-b731-d4f085aba4af",
+      "date": "2026-06-25",
+      "juridiction": "Tribunal d'arrondissement de Luxembourg",
+      "chambre": "15e chambre (commerce/faillites)",
+      "horaire": "15:00",
+      "salle": "CO 1.01 CO 1.01 CO 1.01 CO 1.07 CO 1.02",
+      "jours_txt": "lundi, 15h00 mardi, 9h00 mercredi, 15h00 vérification des créances, jeudi, 9h00 vendredi, 14h30"
+    },
+    {
+      "uid": "becf3dba-a175-4e67-9144-3cbf205587fa",
+      "date": "2026-06-25",
+      "juridiction": "Tribunal d'arrondissement de Luxembourg",
+      "chambre": "19e chambre (affaires correctionnelles)",
+      "horaire": "15:00",
+      "salle": "TL 0.11 TL 1.10 JT 1.02 TL 3.09 TL 0.11 JT 1.02 TL 1.10",
+      "jours_txt": "mercredi, 15h00 vendredi, 15h00 à partir du 16 janvier 2026: lundi, 15h00 mardi, 15h00 mercredi, 15h00 jeudi, 9h00 vendredi (1er, 3e), 15h00"
+    },
+    {
+      "uid": "401b6ceb-6d7e-4729-8c6d-bc5e30cc9fbf",
+      "date": "2026-06-25",
+      "juridiction": "Tribunal d'arrondissement de Luxembourg",
+      "chambre": "20e chambre (affaires civiles)",
+      "horaire": "15:00",
+      "salle": "TL 3.09 TL 3.09",
+      "jours_txt": "jeudi, 15h00 vendredi, 9h00 (comparution personnelle des parties)"
+    },
+    {
+      "uid": "07400acb-e2f6-46ad-afe3-6bd459a9145e",
+      "date": "2026-06-25",
+      "juridiction": "Tribunal d'arrondissement de Luxembourg",
+      "chambre": "23e chambre (affaires correctionnelles)",
+      "horaire": "15:00",
+      "salle": "TL 0.11 TL 1.04 TL 0.11 TL 0.11 TL 1.07",
+      "jours_txt": "lundi, 15h00 mardi, 15h00 mercredi, 9h00 jeudi (1er, 3e), 15h00 vendredi, 15h00"
+    },
+    {
+      "uid": "8b6b21f0-32c4-403a-a45e-52cec4e473e4",
+      "date": "2026-06-25",
+      "juridiction": "Tribunal d'arrondissement de Luxembourg",
+      "chambre": "25e chambre (affaire commerciales)",
+      "horaire": "15:00",
+      "salle": "CO 1.02",
+      "jours_txt": "lundi, mardi, jeudi, 15h00"
+    },
+    {
+      "uid": "12282071-1122-4762-8af2-de065d2c1e3a",
+      "date": "2026-06-25",
+      "juridiction": "Tribunal d'arrondissement de Diekirch",
+      "chambre": "Affaires correctionnelles Salle d'audience I",
+      "horaire": "15:00",
+      "salle": "",
+      "jours_txt": "lundi, 15h00 jeudi, 9h00 vendredi, 9h00"
+    },
+    {
+      "uid": "b456bc51-0e3d-4f53-a40f-efa37e390b68",
+      "date": "2026-06-25",
+      "juridiction": "Tribunal d'arrondissement de Diekirch",
+      "chambre": "Affaires criminelles (selon les besoins du service) Salle d'audience I",
+      "horaire": "15:00",
+      "salle": "",
+      "jours_txt": "lundi, 15h00 jeudi, 9h00 vendredi, 9h00"
+    },
+    {
+      "uid": "3be64727-2ff3-4ce2-8f7a-a6c9748bb8b0",
+      "date": "2026-06-25",
+      "juridiction": "Justice de Paix de Luxembourg",
+      "chambre": "",
+      "horaire": "15:00",
+      "salle": "JP 1.19",
+      "jours_txt": "jeudi, 15h00 (fixations)"
+    },
+    {
+      "uid": "b43b34c0-8eb9-4556-938b-eeee243715ee",
+      "date": "2026-06-25",
+      "juridiction": "Justice de Paix de Luxembourg",
+      "chambre": "",
+      "horaire": "15:00",
+      "salle": "JP 0.02",
+      "jours_txt": "jeudi (2e), 15h00"
+    },
+    {
+      "uid": "67e11042-3e45-45c0-b192-c3751cbae9dc",
+      "date": "2026-06-25",
+      "juridiction": "Justice de Paix de Luxembourg",
+      "chambre": "Affaires civiles et commerciales - référé",
+      "horaire": "15:00",
+      "salle": "JP 1.19",
+      "jours_txt": "jeudi, 15h00"
+    },
+    {
+      "uid": "3101c27d-2f48-4898-8fee-35d7fcb30f00",
+      "date": "2026-06-25",
+      "juridiction": "Justice de Paix de Luxembourg",
+      "chambre": "",
+      "horaire": "15:00",
+      "salle": "JP 0.02",
+      "jours_txt": "jeudi (1er, 3e, 4e), 15h00"
+    },
+    {
+      "uid": "c6b2b1c8-6f98-4493-a98c-63de5def90c6",
+      "date": "2026-06-25",
+      "juridiction": "Justice de Paix de Luxembourg",
+      "chambre": "",
+      "horaire": "15:00",
+      "salle": "JP 0.15",
+      "jours_txt": "jeudi (4e), 15h00"
+    },
+    {
+      "uid": "d17e15cf-e279-4eee-9bb7-9eda50194002",
+      "date": "2026-06-25",
+      "juridiction": "Justice de Paix de Luxembourg",
+      "chambre": "Affaires de recours en matière d'assistance judiciaire",
+      "horaire": "15:00",
+      "salle": "JP 1.19",
+      "jours_txt": "jeudi, 15h00"
+    },
+    {
+      "uid": "77775889-4dcd-457e-8a1e-763d494d7772",
+      "date": "2026-06-25",
+      "juridiction": "Justice de Paix d'Esch-sur-Alzette",
+      "chambre": "affaires droit du travail",
+      "horaire": "15:00",
+      "salle": "2 2 3 2 1",
+      "jours_txt": "lundi (1er, 2e, 3e et 4e), 15h00 mardi (1er), 15h00 mardi (1er, 2e, 3e), 9h00 jeudi, (1er et 2e), 9h00 jeudi (4e), 9h00"
+    },
+    {
+      "uid": "fe94b5d3-9b32-4e93-94ac-678ac7b459b2",
+      "date": "2026-06-25",
+      "juridiction": "Tribunal administratif",
+      "chambre": "Deuxième chambre",
+      "horaire": "15:00",
+      "salle": "",
+      "jours_txt": "lundi à 15h00 (salle d'aud.du trib.ad.) jeudi à 15h00 (salle d'aud. de la Cour ad.)"
+    },
+    {
+      "uid": "fdf876c5-41ad-44dd-9986-c8f9083df1c4",
+      "date": "2026-06-25",
+      "juridiction": "Conseil arbitral de la sécurité sociale",
+      "chambre": "",
+      "horaire": "15:00",
+      "salle": "Salle 3 – B0.110",
+      "jours_txt": "Jeudi après-midi à 15 :00 heures Salle 3 – B0.110"
+    },
+    {
+      "uid": "4f4bdc2b-3970-4619-83d6-f78393bdda0f",
+      "date": "2026-06-25",
+      "juridiction": "Justice de Paix de Diekirch",
+      "chambre": "affaires civiles et commerciales, contredits à ordonnances de paiement, les affaires de règlement des petits litiges et les injonctions de payer européennes",
+      "horaire": "14:30",
+      "salle": "1 2",
+      "jours_txt": "lundi, mercredi, jeudi, 14h30 vendredi, 9h30"
+    },
+    {
+      "uid": "257e5189-c35e-4d66-a1f9-d3c760f7f150",
+      "date": "2026-06-25",
+      "juridiction": "Justice de Paix de Diekirch",
+      "chambre": "affaires de bail à loyer",
+      "horaire": "14:30",
+      "salle": "1 2",
+      "jours_txt": "lundi, mercredi, jeudi, 14h30 vendredi, 9h30"
+    },
+    {
+      "uid": "c701c461-48f4-40ce-8bb8-3a55a941ab6b",
+      "date": "2026-06-25",
+      "juridiction": "Justice de Paix de Diekirch",
+      "chambre": "affaires de saisie-arrêt et de cession sur salaire",
+      "horaire": "14:30",
+      "salle": "1",
+      "jours_txt": "lundi, mercredi, jeudi, 14h30"
+    },
+    {
+      "uid": "e708ee22-9758-4b5e-a420-85bdbace92e2",
+      "date": "2026-06-25",
+      "juridiction": "Justice de Paix de Diekirch",
+      "chambre": "affaires de recours en matière d'assistance judiciaire",
+      "horaire": "14:30",
+      "salle": "1",
+      "jours_txt": "lundi, mercredi. jeudi, 14h30"
+    },
+    {
+      "uid": "9b02390c-9193-4a22-ad28-0c92312a1d93",
+      "date": "2026-06-25",
+      "juridiction": "Tribunal d'arrondissement de Luxembourg",
+      "chambre": "Audiences présidentielles: A) dans les matières hors référé relevant de la compétence du Président du Tribunal d’arrondissement de Luxembourg et pour lesquelles le législateur a uniquement prévu la forme des référés avec assignation à comparaître; B) dans les matières hors référé relevant de la compétence du magistrat présidant la chambre du Tribunal d’arrondissement de Luxembourg siégeant en matière civile; C) dans les matières hors référé relevant de la compétence du magistrat présidant la chambre du Tribunal d’arrondissement de Luxembourg siégeant en matière commerciale et pour lesquelles le législateur a prévu la forme des référés avec assignation à comparaître; Pour plus de détails, voir Legilux B3270",
+      "horaire": "14:15",
+      "salle": "TL 1.04 TL 3.09 CO 1.01",
+      "jours_txt": "lundi, 14h15 (et selon les besoins du service) jeudi, 9h00 mardi (2e,4e), 15h00"
+    },
+    {
+      "uid": "1814d17c-1ff8-44c0-b6cb-e0cd34a1f8e7",
+      "date": "2026-06-25",
+      "juridiction": "Tribunal d'arrondissement de Diekirch",
+      "chambre": "Chambre du conseil Salle d'audience II",
+      "horaire": "11:00",
+      "salle": "",
+      "jours_txt": "mardi, 11h00 jeudi, 10h00"
+    },
+    {
+      "uid": "aca70a12-63b0-4a5d-be03-7b82bbce90b6",
+      "date": "2026-06-25",
+      "juridiction": "Cour de Cassation",
+      "chambre": "",
+      "horaire": "09:00",
+      "salle": "CR 0.19. Dernière mise à jour 05",
+      "jours_txt": "jeudis matin"
+    },
+    {
+      "uid": "bbc803b0-207a-40e5-b58f-5945a7f21c83",
+      "date": "2026-06-25",
+      "juridiction": "Cour d'appel",
+      "chambre": "3e chambre (affaires de droit du travail)",
+      "horaire": "09:00",
+      "salle": "CR 2.28 CR 2.28",
+      "jours_txt": "mardi, 9h00 jeudi, 15h00"
+    },
+    {
+      "uid": "9d0b6fbc-72c1-4fc1-a4db-599534f3c702",
+      "date": "2026-06-25",
+      "juridiction": "Cour d'appel",
+      "chambre": "8e chambre (affaires de droit du travail)",
+      "horaire": "09:00",
+      "salle": "CR 2.28 CR 0.19",
+      "jours_txt": "lundi, 9h00 jeudi, 15h00"
+    },
+    {
+      "uid": "6a751465-65ac-4776-9f29-710518f5389a",
+      "date": "2026-06-25",
+      "juridiction": "Cour d'appel",
+      "chambre": "9e chambre (affaires civiles/commerciales)",
+      "horaire": "09:00",
+      "salle": "CR 2.29 CR 2.29",
+      "jours_txt": "mercredi, 9h00 jeudi, 15h00"
+    },
+    {
+      "uid": "8f05a4c1-8ef4-41e0-875c-5e1284fc44a7",
+      "date": "2026-06-25",
+      "juridiction": "Cour d'appel",
+      "chambre": "1re chambre du conseil Cour appel (assumée par la 6e chambre)",
+      "horaire": "09:00",
+      "salle": "CR 0.19 CR 1.25",
+      "jours_txt": "lundi, 9h00 mardi, jeudi, 9h00"
+    },
+    {
+      "uid": "6a5d7727-46ff-4256-bbaf-6fa354a795f6",
+      "date": "2026-06-25",
+      "juridiction": "Cour d'appel",
+      "chambre": "chambre d'appel jeunesse",
+      "horaire": "09:00",
+      "salle": "CR 2.28",
+      "jours_txt": "les jeudis, 18.09.2025; 02.10.; 16.10.; 30.10.; 13.11.; 27.11.; 11.12; 08.01.2026; 22.01.; 05.02.; 26.02.; 12.03.; 26.03.; 16.04.; 30.04.; 21.05.; 04.06.; 18.06.; 02.07.2026, chaque fois à 9h00"
+    },
+    {
+      "uid": "59e00935-6bea-47f3-bcd1-c4acef6a9727",
+      "date": "2026-06-25",
+      "juridiction": "Tribunal d'arrondissement de Luxembourg",
+      "chambre": "1re chambre (affaires civiles)",
+      "horaire": "09:00",
+      "salle": "TL 3.09 TL 3.09",
+      "jours_txt": "jeudi, 9h00 vendredi, 9h00"
+    },
+    {
+      "uid": "c9c37299-6648-45cc-9b51-4a5b1f789705",
+      "date": "2026-06-25",
+      "juridiction": "Tribunal d'arrondissement de Luxembourg",
+      "chambre": "2e chambre (affaires commerciales)",
+      "horaire": "09:00",
+      "salle": "CO 1.01 CO 1.26 CO 1.01",
+      "jours_txt": "mercredi, jeudi, vendredi, 9h00 vérification des créances, mardi, 9h00 vendredi, 14h30"
+    },
+    {
+      "uid": "8d61a97b-8806-46ad-8d09-03a22aef59f6",
+      "date": "2026-06-25",
+      "juridiction": "Tribunal d'arrondissement de Luxembourg",
+      "chambre": "4e chambre (affaires de divorce)",
+      "horaire": "09:00",
+      "salle": "TL 3.09",
+      "jours_txt": "jeudi, vendredi, 9h00"
+    },
+    {
+      "uid": "06164028-9878-4f31-8cd7-d777ddf67573",
+      "date": "2026-06-25",
+      "juridiction": "Tribunal d'arrondissement de Luxembourg",
+      "chambre": "6e chambre (affaires commerciales)",
+      "horaire": "09:00",
+      "salle": "CO 1.02 CO 1.02",
+      "jours_txt": "mardi, mercredi, jeudi, 9h00 vérification des créances, vendredi, 9h30"
+    },
+    {
+      "uid": "a09c2b65-c124-4969-96d9-5b25dbd6d761",
+      "date": "2026-06-25",
+      "juridiction": "Tribunal d'arrondissement de Luxembourg",
+      "chambre": "12e chambre (affaires correctionnelles/criminelles)",
+      "horaire": "09:00",
+      "salle": "TL 1.10 TL 1.10 TL 1.10 TL 1.10 TL 1.10",
+      "jours_txt": "lundi (2e, 4e), 9h00 mardi, 15h00 mercredi, 15h00 jeudi, 9h00 vendredi, 9h00"
+    },
+    {
+      "uid": "8fd21954-a30b-466c-93a4-6fa991f2c871",
+      "date": "2026-06-25",
+      "juridiction": "Tribunal d'arrondissement de Luxembourg",
+      "chambre": "13e chambre (affaires correctionnelles/criminelles)",
+      "horaire": "09:00",
+      "salle": "TL 3.09 TL 1.10 TL 1.07 TL 1.10 TL 1.04",
+      "jours_txt": "lundi (1er, 3e), 9h00 mardi, 9h00 mercredi, 15h00 jeudi, 15h00 vendredi, 9h00"
+    },
+    {
+      "uid": "1443a2b9-bde1-49b0-887b-b11ea8c9c303",
+      "date": "2026-06-25",
+      "juridiction": "Tribunal d'arrondissement de Luxembourg",
+      "chambre": "16e chambre (correctionnelles/notamment affaires écon. et financières)",
+      "horaire": "09:00",
+      "salle": "TL 1.07 TL1.10 TL 3.09 TL 1.07 TL 1.04 TL 1.04",
+      "jours_txt": "lundi(2e, 4e), 9h00 lundi (1er, 3e), 9h00 mardi, 9h00 mercredi, 9h00 jeudi, 15h00 vendredi (2e, 4e), 15h00"
+    },
+    {
+      "uid": "4e78d86d-377b-4580-93ba-d51b91abc478",
+      "date": "2026-06-25",
+      "juridiction": "Tribunal d'arrondissement de Luxembourg",
+      "chambre": "18e chambre (affaires correctionnelles)",
+      "horaire": "09:00",
+      "salle": "TL 1.07 TL 3.09 TL 1.04 TL 1.10 TL 1.07 TL 1.04",
+      "jours_txt": "lundi (1er, 3e), 9h00 lundi (2e, 4e), 9h00 mardi, 9h00 mercredi, 9h00 jeudi, 9h00 vendredi (1er, 3e), 15h00"
+    },
+    {
+      "uid": "5ba0e601-2dc4-42e0-9765-21205fbec6fa",
+      "date": "2026-06-25",
+      "juridiction": "Tribunal d'arrondissement de Luxembourg",
+      "chambre": "24e chambre (affaires civiles)",
+      "horaire": "09:00",
+      "salle": "TL 3.06",
+      "jours_txt": "jeudi, 9h00"
+    },
+    {
+      "uid": "e39feeb9-4d8b-4e6e-8396-22a3d25ca44d",
+      "date": "2026-06-25",
+      "juridiction": "Tribunal d'arrondissement de Luxembourg",
+      "chambre": "Référés ordinaires Référés en matière de divorce",
+      "horaire": "09:00",
+      "salle": "TL 0.11 TL 1.04 TL 3.06 TL0.11 JT 0.02",
+      "jours_txt": "lundi, 9h00 lundi, 14h30 mardi, 9h00 jeudi, 9h00 lundi, 11h00"
+    },
+    {
+      "uid": "1848a3c7-7963-47b5-b080-8d92861597e9",
+      "date": "2026-06-25",
+      "juridiction": "Justice de Paix de Luxembourg",
+      "chambre": "Affaires de police",
+      "horaire": "09:00",
+      "salle": "JP 1.19 JP 1.19 JP 1.19",
+      "jours_txt": "chaque lundi et mardi, 9h00 mercredi (2e et 4e), 9h00 jeudi (1er), 9h00"
+    },
+    {
+      "uid": "fe7afba2-3ae1-4323-8111-0be759b3153e",
+      "date": "2026-06-25",
+      "juridiction": "Justice de Paix de Luxembourg",
+      "chambre": "",
+      "horaire": "09:00",
+      "salle": "JP 0.15",
+      "jours_txt": "jeudi (2e, 3e, 5e), 9h00"
+    },
+    {
+      "uid": "29809a78-2194-4daf-8cd0-e69e52152f82",
+      "date": "2026-06-25",
+      "juridiction": "Justice de Paix de Luxembourg",
+      "chambre": "",
+      "horaire": "09:00",
+      "salle": "JP 1.19",
+      "jours_txt": "jeudi (2e, 3e, 4e, 5e), 9h00"
+    },
+    {
+      "uid": "84102dc0-79b8-407a-a553-7a9cd999fe11",
+      "date": "2026-06-25",
+      "juridiction": "Justice de Paix de Luxembourg",
+      "chambre": "",
+      "horaire": "09:00",
+      "salle": "JP 0.02",
+      "jours_txt": "jeudi, 9h00"
+    },
+    {
+      "uid": "7c12a603-8531-4958-bace-9070c860df29",
+      "date": "2026-06-25",
+      "juridiction": "Justice de Paix de Luxembourg",
+      "chambre": "",
+      "horaire": "09:00",
+      "salle": "JP 0.15",
+      "jours_txt": "jeudi (4e), 9h00"
+    },
+    {
+      "uid": "ace4dfc2-91d9-456e-a3ab-1d078ea718be",
+      "date": "2026-06-25",
+      "juridiction": "Justice de Paix de Luxembourg",
+      "chambre": "Affaires de surendettement",
+      "horaire": "09:00",
+      "salle": "JP 0.02 JP 0.02 JP 1.19 JP 1.19 JP 0.02",
+      "jours_txt": "mardi (4e), 9h00 mercredi (1er, 3e), 15h00 mercredi (1er), 15h00 jeudi (2e, 3e, 4e, 5e), 9h00 vendredi (1er, 3e, 4e, 5e), 9h00"
+    },
+    {
+      "uid": "7e511357-75dc-4435-96d3-ad92edaf7a1a",
+      "date": "2026-06-25",
+      "juridiction": "Justice de Paix d'Esch-sur-Alzette",
+      "chambre": "affaires civiles et commerciales/ contredits à ordonnances de paiement, affaires de règlements des petits litiges et les injonctions de payer européennes",
+      "horaire": "09:00",
+      "salle": "1 1 2 3 2",
+      "jours_txt": "lundi (1er, 2e, 3e, 4e), 9h00 mardi (1er, 2e, 3e, 4e), 09h00 mercredi (1er, 2e, 3e, 4e), 9h00 jeudi (2e), 9h00 jeudi (4e), 9h00"
+    },
+    {
+      "uid": "bceb2fc2-d0a7-4ff4-8cdb-3f087dc398db",
+      "date": "2026-06-25",
+      "juridiction": "Justice de Paix d'Esch-sur-Alzette",
+      "chambre": "affaires bail à loyer",
+      "horaire": "09:00",
+      "salle": "1 1 1 3",
+      "jours_txt": "mercredi (2e, 4e), 9h00 mercredi (3e et 4e), 15h00 jeudi (1er, 2e, 3e, 4e), 15h00 vendredi, (1er, 2e, 3e, 4e), 9h00"
+    },
+    {
+      "uid": "409aef35-b263-464a-82d1-875123d3f06d",
+      "date": "2026-06-25",
+      "juridiction": "Justice de Paix d'Esch-sur-Alzette",
+      "chambre": "affaires de droit du travail-référé",
+      "horaire": "09:00",
+      "salle": "3 1 3",
+      "jours_txt": "mercredi (2e), 9h00 jeudi (3e), 9h00 vendredi (4e), 15h00"
+    },
+    {
+      "uid": "070d9dec-6f63-44e8-8ab0-c28560faf01a",
+      "date": "2026-06-25",
+      "juridiction": "Cour administrative",
+      "chambre": "",
+      "horaire": "09:00",
+      "salle": "",
+      "jours_txt": "jeudi"
+    },
+    {
+      "uid": "0b0574d5-0174-4bbe-812a-007ba07e231e",
+      "date": "2026-06-25",
+      "juridiction": "Conseil arbitral de la sécurité sociale",
+      "chambre": "",
+      "horaire": "09:00",
+      "salle": "Salle 1 – B0.140",
+      "jours_txt": "Jeudi matin à 09 :00 heures Salle 1 – B0.140"
+    },
+    {
+      "uid": "ee7ee393-022f-4b4d-a4e0-4aa50d4b3617",
+      "date": "2026-06-25",
+      "juridiction": "Conseil arbitral de la sécurité sociale",
+      "chambre": "",
+      "horaire": "09:00",
+      "salle": "Salle 2 – B0.120",
+      "jours_txt": "Jeudi matin à 09 :00 heures Salle 2 – B0.120"
+    },
+    {
+      "uid": "cd7f3c8c-a2b4-4c0b-945b-f641a1712f03",
+      "date": "2026-06-25",
+      "juridiction": "Conseil arbitral de la sécurité sociale",
+      "chambre": "",
+      "horaire": "09:00",
+      "salle": "Salle 3 – B0.110",
+      "jours_txt": "Jeudi matin à 09 :00 heures Salle 3 – B0.110"
+    },
+    {
+      "uid": "fe4546ec-25cb-4f36-b806-79401e4877ca",
+      "date": "2026-06-25",
+      "juridiction": "Tribunal d'arrondissement de Diekirch",
+      "chambre": "JAF (juge aux affaires familiales) Salle d'audience II Jeunesse Salle II Tutelles Salle d'audience II Salle d'audience III",
+      "horaire": "08:30",
+      "salle": "",
+      "jours_txt": "lundi, 8h30 mercredi, 9h30 mercredi (4e), 14h15 vendredi, 8h30 mercredi (1er, 3e), 14h15 mercredi (2e, 4e), 14h15 jeudi, 9h00 vendredi, 9h00"
+    }
+  ]
+}
