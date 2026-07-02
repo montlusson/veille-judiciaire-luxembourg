@@ -455,6 +455,27 @@ details.alt-table th,details.alt-table td{border:1px solid var(--card-border);pa
   transition:background 1s ease, color 1s ease;
 }
 .agenda-update-banner.stale{background:var(--card-border);color:var(--text-faint);}
+
+/* ── Bandeau date extraction audiences ── */
+.agenda-data-strip{
+  display:flex;align-items:flex-start;gap:12px;
+  background:var(--card-bg);border:1px solid var(--card-border);border-radius:var(--radius-md);
+  padding:13px 16px;margin-bottom:20px;
+}
+.agenda-data-dot{
+  width:8px;height:8px;border-radius:50%;flex:0 0 8px;margin-top:5px;
+  transition:background .3s;
+}
+.agenda-data-dot.fresh{background:var(--success-icon-bg);}
+.agenda-data-dot.stale{background:var(--accent-gold);}
+.agenda-data-dot.old{background:var(--card-border);}
+.agenda-data-label{font-weight:700;font-size:13.5px;color:var(--text);}
+.agenda-data-meta{font-size:12.5px;color:var(--text-muted);margin-top:3px;}
+.agenda-data-note{
+  display:flex;align-items:center;gap:5px;
+  margin-top:5px;font-size:11.5px;color:var(--text-faint);
+  padding-top:5px;border-top:1px solid var(--row-sep);
+}
 .convoc-card{
   background:#F0F4F9;border:1.5px solid #C0D0E4;border-radius:var(--radius-lg);
   padding:18px 20px;margin-bottom:22px;
@@ -1212,7 +1233,18 @@ table.analyse-tbl tbody tr:hover{background:var(--row-sep);}
       <h1 id="h-agenda" class="title" data-i18n="agenda_title">Audiences & agenda</h1>
       <p class="intro" data-i18n="agenda_intro">Séances hebdomadaires récurrentes de toutes les juridictions luxembourgeoises. Données issues de <strong>justice.public.lu</strong>. Exportez vers votre agenda ou filtrez par juridiction.</p>
 
-      <!-- Bandeau mise à jour -->
+      <!-- Bandeau date extraction audiences -->
+      <div id="agenda-data-strip" class="agenda-data-strip" style="display:none;" role="status" aria-live="polite">
+        <div id="agenda-data-dot" class="agenda-data-dot" aria-hidden="true"></div>
+        <div style="flex:1;min-width:0;">
+          <div id="agenda-data-label" class="agenda-data-label"></div>
+          <div id="agenda-data-meta" class="agenda-data-meta"></div>
+          <div class="agenda-data-note">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>
+            <span id="agenda-data-note"></span>
+          </div>
+        </div>
+      </div>
 
       <div style="display:flex;align-items:center;gap:10px;margin-bottom:20px;flex-wrap:wrap;">
         <a id="ics-download" href="#" download="audiences-luxembourg.ics" class="ics-btn">
@@ -2876,6 +2908,7 @@ function renderAll(){
   renderTimeline();
   renderUploadList();
   renderAgenda();
+  renderAudiencesStrip();
   renderArchives();
   renderAffaires();
   renderWatchlistPanel();
@@ -2887,6 +2920,33 @@ function renderAll(){
 
 /* ===================== AGENDA AUDIENCES ===================== */
 let AUDIENCES = [];
+let AUDIENCES_META = null;
+
+function renderAudiencesStrip(){
+  const strip = $('#agenda-data-strip');
+  if(!strip || !AUDIENCES_META || !AUDIENCES_META.generated_at){ return; }
+  const scrapedDate = new Date(AUDIENCES_META.generated_at);
+  const daysDiff = Math.floor((Date.now() - scrapedDate.getTime()) / 86400000);
+  const dot = $('#agenda-data-dot');
+  if(dot) dot.className = 'agenda-data-dot ' + (daysDiff < 7 ? 'fresh' : daysDiff < 21 ? 'stale' : 'old');
+  const locale = currentLang === 'de' ? 'de-DE' : 'fr-LU';
+  const dateStr = scrapedDate.toLocaleDateString(locale, {day:'2-digit', month:'long', year:'numeric'});
+  const timeStr = scrapedDate.toLocaleTimeString(locale, {hour:'2-digit', minute:'2-digit'});
+  const n = AUDIENCES_META.total_seances;
+  const lbl  = $('#agenda-data-label');
+  const meta = $('#agenda-data-meta');
+  const note = $('#agenda-data-note');
+  if(lbl)  lbl.textContent  = currentLang === 'de'
+    ? `Ladungen — Abgerufen am ${dateStr} um ${timeStr}`
+    : `Convocations — Extraites le ${dateStr} à ${timeStr}`;
+  if(meta) meta.textContent = currentLang === 'de'
+    ? `${n.toLocaleString('de-DE')} Sitzungen referenziert`
+    : `${n.toLocaleString('fr-LU')} séances référencées`;
+  if(note) note.textContent = currentLang === 'de'
+    ? 'Unabhängig vom Aktualisierungsdatum der Entscheidungsdatenbank'
+    : 'Distinct de la mise à jour de la base de décisions';
+  strip.style.display = 'flex';
+}
 
 /* PDFs de convocations toujours à jour — mis à jour en place par les greffes */
 const CONVOCATIONS = {
@@ -2939,6 +2999,12 @@ async function loadAudiencesJSON(){
     if(!r.ok) throw new Error('not found');
     const data = await r.json();
     AUDIENCES = data.events || [];
+    AUDIENCES_META = {
+      generated_at:   data.generated_at   || null,
+      total_seances:  data.total_seances  || data.total_events || AUDIENCES.length
+    };
+    renderAudiencesStrip();
+
     /* Lien .ics */
     const icsBtn = $('#ics-download');
     if(icsBtn){
