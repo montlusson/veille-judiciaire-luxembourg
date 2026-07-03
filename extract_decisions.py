@@ -202,14 +202,28 @@ def resolve_zip_urls(slug: str) -> dict[int, str]:
         r.raise_for_status()
         data = r.json()
         urls: dict[int, str] = {}
+        zip_resources = []
         for res in data.get("resources", []):
             res_url = res.get("url", "")
-            title   = (res.get("title", "") + " " + res_url).lower()
             fmt     = res.get("format", "").upper()
             if fmt != "ZIP" and not res_url.lower().endswith(".zip"):
                 continue
+            zip_resources.append(res)
+        # Passe 1 : nom de fichier exact ("…/2025.zip") — fiable.
+        # Le titre/URL contient aussi le timestamp d'upload (ex. 20260608)
+        # qui matcherait "2026" par sous-chaîne et fausserait l'année.
+        for res in zip_resources:
+            res_url  = res.get("url", "")
+            basename = res_url.rsplit("/", 1)[-1].lower()
             for year in (2026, 2025, 2024):
-                if str(year) in title and year not in urls:
+                if year not in urls and basename == f"{year}.zip":
+                    urls[year] = res_url
+        # Passe 2 (fallback) : année dans le titre seul (jamais l'URL)
+        for res in zip_resources:
+            res_url = res.get("url", "")
+            title   = res.get("title", "").lower()
+            for year in (2026, 2025, 2024):
+                if year not in urls and str(year) in title:
                     urls[year] = res_url
         _URL_CACHE[slug] = urls
         return urls
@@ -635,10 +649,15 @@ def main() -> None:
             if (d.get("jur"), d.get("source_year")) not in reprocessed]
     all_decisions = kept + new_decisions
 
-    # Migration des anciens IDs (format "nom-année-fichier") vers le hash stable
+    # Migration des anciens IDs (format "nom-année-fichier") vers le hash stable.
+    # Ne PAS recalculer un hash déjà au bon format : les décisions rechargées depuis
+    # decisions_index.json (excerpt tronqué, sans fulltext) produiraient un hash
+    # différent → doublons dans Supabase au prochain push.
+    _HASH_ID = re.compile(r"^[0-9a-f]{16}$")
     for d in all_decisions:
-        d["id"] = _make_id(d.get("jur", ""), d.get("source_year", 0),
-                           d.get("ref", ""), d.get("excerpt", ""), d.get("fulltext", ""))
+        if not _HASH_ID.match(str(d.get("id", ""))):
+            d["id"] = _make_id(d.get("jur", ""), d.get("source_year", 0),
+                               d.get("ref", ""), d.get("excerpt", ""), d.get("fulltext", ""))
 
     all_decisions.sort(key=lambda d: d.get("date") or "", reverse=True)
 

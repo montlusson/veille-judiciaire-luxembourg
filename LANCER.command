@@ -29,6 +29,7 @@ echo "→ Extraction des décisions judiciaires..."
 echo "  (cela peut prendre 20 à 40 minutes selon votre connexion)"
 echo ""
 python3 extract_decisions.py
+EXTRACT_STATUS=$?
 
 echo ""
 echo "→ Récupération du calendrier des audiences..."
@@ -38,8 +39,9 @@ if [ $? -ne 0 ]; then
   pip3 install beautifulsoup4 --quiet
 fi
 python3 scrape_audiences.py
+SCRAPE_STATUS=$?
 
-if [ $? -ne 0 ]; then
+if [ $EXTRACT_STATUS -ne 0 ] || [ $SCRAPE_STATUS -ne 0 ]; then
   echo ""
   echo "❌ L'extraction a rencontré une erreur."
   read -p "Appuyez sur Entrée pour fermer..."
@@ -77,10 +79,9 @@ echo ""
 echo "═══════════════════════════════════════════════════════"
 echo "  ✓ Module disponible sur http://127.0.0.1:$PORT/$HTML_FILE"
 echo ""
-echo "  Partagez ce terminal ouvert avec vos collègues sur le"
-echo "  même réseau : remplacez 127.0.0.1 par votre IP locale"
-echo "  (ex. 192.168.1.x) pour qu'ils y accèdent depuis leur"
-echo "  navigateur sans installation."
+echo "  Le serveur n'est accessible que depuis cet ordinateur"
+echo "  (127.0.0.1). Pour partager le module avec les collègues,"
+echo "  utilisez la version publiée sur GitHub Pages."
 echo ""
 echo "  Appuyez sur Ctrl+C pour arrêter le serveur."
 echo "═══════════════════════════════════════════════════════"

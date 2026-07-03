@@ -1472,9 +1472,16 @@ table.analyse-tbl tbody tr:hover{background:var(--row-sep);}
   </main>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.110.0/dist/umd/supabase.js"
+        integrity="sha384-3wY11tldQ5+yWqAvmTN4XtQvnjoTva0cV15O/O/O5NTtp0ivVopSzLOzsVXWZse9" crossorigin="anonymous"></script>
+<script type="module">
+  /* pdf.js ≥ 4.2.67 (correctif CVE-2024-4367) — build ESM uniquement, exposé en global pour le module analyse */
+  import * as pdfjsLib from 'https://cdn.jsdelivr.net/npm/pdfjs-dist@4.10.38/build/pdf.min.mjs';
+  pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdn.jsdelivr.net/npm/pdfjs-dist@4.10.38/build/pdf.worker.min.mjs';
+  window.pdfjsLib = pdfjsLib;
+</script>
+<script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"
+        integrity="sha384-EnyY0/GSHQGSxSgMwaIPzSESbqoOLSexfnSMN2AP+39Ckmn92stwABZynq1JyzdT" crossorigin="anonymous"></script>
 <script>
 'use strict';
 
@@ -1485,7 +1492,7 @@ const SUPABASE_ANON_KEY = 'sb_publishable_By72uskVkqxh9KNzxl2-bQ_NOSc5UgI';   //
 // ── BYPASS AUTH ──────────────────────────────────────────
 // true  → accès direct sans authentification (tests & développement)
 // false → auth obligatoire via lien magique @reporter.lu  (démo / production)
-const AUTH_BYPASS = true;
+const AUTH_BYPASS = false;
 // ─────────────────────────────────────────────────────────
 
 const _sb = (SUPABASE_URL !== 'VOTRE_URL_SUPABASE')
@@ -2286,7 +2293,7 @@ function renderDashboard(){
       recentEl.innerHTML = uploadedFiles.slice(0,5).map(f => `
         <div class="list-row">
           <div class="list-ic" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6"/></svg></div>
-          <div style="min-width:0;"><div class="meta-title">${f.name}</div><div class="meta-sub">${formatFileSize(f.size)}</div></div>
+          <div style="min-width:0;"><div class="meta-title">${escHtml(f.name)}</div><div class="meta-sub">${formatFileSize(f.size)}</div></div>
           <div class="meta-date">${new Date().toLocaleDateString(currentLang==='de'?'de-DE':'fr-LU')}</div>
         </div>`).join('');
     }
@@ -2313,16 +2320,16 @@ function renderSources(){
       html += `<div class="source-row">
         <span class="badge badge-official">${t('open_data')}</span>
         <div style="min-width:0;flex:1;">
-          <div class="source-name">${s.name}</div>
-          <div class="source-sub">${s.years} ${lbl.years} · <span style="color:var(--success-fg)">CC BY-ND 4.0</span></div>
+          <div class="source-name">${escHtml(s.name)}</div>
+          <div class="source-sub">${escHtml(s.years)} ${lbl.years} · <span style="color:var(--success-fg)">CC BY-ND 4.0</span></div>
         </div>
         <div class="source-actions">
           ${s.zip2026
-            ? `<a href="${s.zip2026}" target="_blank" rel="noopener" class="btn-dl btn-dl-2026" title="Archive 2026 (depuis 01/01)">2026 ↓</a>`
+            ? `<a href="${escHtml(s.zip2026)}" target="_blank" rel="noopener" class="btn-dl btn-dl-2026" title="Archive 2026 (depuis 01/01)">2026 ↓</a>`
             : '<span class="btn-dl btn-dl-disabled" title="Pas encore disponible">2026</span>'}
-          ${s.zip2025 ? `<a href="${s.zip2025}" target="_blank" rel="noopener" class="btn-dl btn-dl-secondary">2025 ↓</a>` : ''}
-          ${s.zip2024 ? `<a href="${s.zip2024}" target="_blank" rel="noopener" class="btn-dl btn-dl-secondary">2024 ↓</a>` : ''}
-          <a href="${pageUrl}" target="_blank" rel="noopener" class="btn-dl btn-dl-page" title="Fiche Open Data">↗</a>
+          ${s.zip2025 ? `<a href="${escHtml(s.zip2025)}" target="_blank" rel="noopener" class="btn-dl btn-dl-secondary">2025 ↓</a>` : ''}
+          ${s.zip2024 ? `<a href="${escHtml(s.zip2024)}" target="_blank" rel="noopener" class="btn-dl btn-dl-secondary">2024 ↓</a>` : ''}
+          <a href="${escHtml(pageUrl)}" target="_blank" rel="noopener" class="btn-dl btn-dl-page" title="Fiche Open Data">↗</a>
         </div>
       </div>`;
     });
@@ -2497,14 +2504,14 @@ function renderUploadList(){
     return `<div class="upload-item">
       <div class="upload-item-icon ${ftype}">${ftype.toUpperCase()}</div>
       <div class="upload-item-body">
-        <div class="upload-item-name" title="${f.name}">${f.name}</div>
+        <div class="upload-item-name" title="${escHtml(f.name)}">${escHtml(f.name)}</div>
         <div class="upload-item-meta">${formatFileSize(f.size)} · <span class="badge badge-official">${t('file_indexed')}</span> · ${t('file_uploaded_on',{date:today})}</div>
       </div>
       <div class="upload-item-actions">
         <button class="btn-icon" title="${t('upload_search')}" onclick="showScreen('recherche')" aria-label="${t('upload_search')}">
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
         </button>
-        <button class="btn-icon del" title="${t('upload_delete')}" onclick="removeFile(${i})" aria-label="${t('upload_delete')} ${f.name}">
+        <button class="btn-icon del" title="${t('upload_delete')}" onclick="removeFile(${i})" aria-label="${t('upload_delete')} ${escHtml(f.name)}">
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6"/></svg>
         </button>
       </div>
@@ -2594,13 +2601,13 @@ function renderResults(){
     const ann = hasAnnotation(d.id);
     const firstParty = ann && ANNOTATIONS[d.id].parties.length ? ANNOTATIONS[d.id].parties[0] : '';
     const subLine = firstParty
-      ? `<div class="ref-sub" style="color:#8A6418;">✎ ${firstParty}</div>`
-      : `<div class="ref-sub">${(d.entities&&d.entities.societes[0])||''}</div>`;
+      ? `<div class="ref-sub" style="color:#8A6418;">✎ ${escHtml(firstParty)}</div>`
+      : `<div class="ref-sub">${escHtml((d.entities&&d.entities.societes[0])||'')}</div>`;
     const isSel = d.id === selectedDecisionId;
-    return `<tr data-id="${d.id}" tabindex="0" class="${isSel?'selected':''}">
-      <td>${d.date}<div class="ref-sub">${d.jur}</div></td>
-      <td class="ref-cell">${ann?'<span class="annot-row-dot"></span>':''}${d.ref}${subLine}</td>
-      <td>${d.type}</td>
+    return `<tr data-id="${escHtml(d.id)}" tabindex="0" class="${isSel?'selected':''}">
+      <td>${escHtml(d.date)}<div class="ref-sub">${escHtml(d.jur)}</div></td>
+      <td class="ref-cell">${ann?'<span class="annot-row-dot"></span>':''}${escHtml(d.ref)}${subLine}</td>
+      <td>${escHtml(d.type)}</td>
     </tr>`;
   }).join('');
   $all('#results-body tr').forEach(row => {
@@ -2621,12 +2628,14 @@ function openReader(id){
   const ann = getAnnotation(id)||{parties:[],notes:'',journalist:'',tags:[]};
   const q   = searchState.q.trim();
   function hl(text){
-    if(!q||!text) return text||'';
-    const re = new RegExp('('+q.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+')','gi');
-    return text.replace(re,'<mark>$1</mark>');
+    /* Échappe TOUJOURS avant de surligner — le texte vient de PDF externes (XSS) */
+    const safe = escHtml(text||'');
+    if(!q||!safe) return safe;
+    const re = new RegExp('('+escHtml(q).replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+')','gi');
+    return safe.replace(re,'<mark>$1</mark>');
   }
   function renderTagChips(arr, type){
-    return arr.map((v,i)=>`<span class="annot-tag">${v}<button onclick="removeAnnotItem('${id}','${type}',${i})" aria-label="Supprimer">×</button></span>`).join('');
+    return arr.map((v,i)=>`<span class="annot-tag">${escHtml(v)}<button onclick="removeAnnotItem('${id}','${type}',${i})" aria-label="Supprimer">×</button></span>`).join('');
   }
 
   const isDE = currentLang==='de';
@@ -2635,8 +2644,8 @@ function openReader(id){
 
   function renderTextZone(){
     textZone.innerHTML = `
-      <div class="detail-full-ref">${d.ref} — ${d.type}</div>
-      <div class="detail-full-meta">${d.jur} · ${d.date}</div>
+      <div class="detail-full-ref">${escHtml(d.ref)} — ${escHtml(d.type)}</div>
+      <div class="detail-full-meta">${escHtml(d.jur)} · ${escHtml(d.date)}</div>
       <div class="reader-section-title" style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--text-faint);margin:14px 0 10px;">
         ${isDE?'Auszug aus dem Urteil':'Texte extrait du jugement'}
       </div>
@@ -2690,11 +2699,11 @@ function openReader(id){
       <div style="display:flex;gap:12px;margin-top:10px;">
         <div style="flex:1;">
           <label>${isDE?'Notizen':'Notes d\'enquête'}</label>
-          <textarea class="input" id="annot-notes" placeholder="${isDE?'Kontext, Verbindungen…':'Contexte, liens avec d\'autres affaires…'}" style="height:60px;resize:none;">${ann.notes||''}</textarea>
+          <textarea class="input" id="annot-notes" placeholder="${isDE?'Kontext, Verbindungen…':'Contexte, liens avec d\'autres affaires…'}" style="height:60px;resize:none;">${escHtml(ann.notes||'')}</textarea>
         </div>
         <div style="flex:0 0 160px;">
           <label>${isDE?'Journalist':'Journaliste'}</label>
-          <input class="input" id="annot-journalist" placeholder="${isDE?'Ihr Name':'Votre nom'}" value="${ann.journalist||''}">
+          <input class="input" id="annot-journalist" placeholder="${isDE?'Ihr Name':'Votre nom'}" value="${escHtml(ann.journalist||'')}">
         </div>
       </div>
       <div style="display:flex;gap:10px;margin-top:12px;align-items:center;flex-wrap:wrap;">
@@ -2731,7 +2740,7 @@ function addAnnotItem(id, type){
   if(!arr.includes(val)) arr.push(val);
   saveAnnotation(id, ann); inp.value='';
   const el = type==='party' ? $('#annot-parties') : $('#annot-tags');
-  el.innerHTML = arr.map((v,i)=>`<span class="annot-tag">${v}<button onclick="removeAnnotItem('${id}','${type}',${i})" aria-label="Supprimer">×</button></span>`).join('');
+  el.innerHTML = arr.map((v,i)=>`<span class="annot-tag">${escHtml(v)}<button onclick="removeAnnotItem('${id}','${type}',${i})" aria-label="Supprimer">×</button></span>`).join('');
   renderResults();
 }
 
@@ -2817,12 +2826,12 @@ function renderAlerts(){
   }
   el.innerHTML = ALERTS.map((a,i) => `
     <div class="alert-card">
-      <button class="switch ${a.on?'on':''}" data-i="${i}" aria-pressed="${a.on}" aria-label="${a.on?t('alert_disable'):t('alert_enable')} ${a.kw}"></button>
+      <button class="switch ${a.on?'on':''}" data-i="${i}" aria-pressed="${a.on}" aria-label="${a.on?t('alert_disable'):t('alert_enable')} ${escHtml(a.kw)}"></button>
       <div class="alert-main">
-        <div class="alert-kw">${a.kw}</div>
+        <div class="alert-kw">${escHtml(a.kw)}</div>
         <div class="alert-meta">${freqLabel(a.freq)} · ${a.matches===1?t('alert_matches',{n:a.matches}):t('alert_matches_pl',{n:a.matches})}</div>
       </div>
-      <button class="btn-icon del" onclick="deleteAlert(${i})" aria-label="${t('upload_delete')} ${a.kw}">
+      <button class="btn-icon del" onclick="deleteAlert(${i})" aria-label="${t('upload_delete')} ${escHtml(a.kw)}">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6"/></svg>
       </button>
     </div>`).join('');
@@ -2873,7 +2882,7 @@ function renderTimeline(){
     activeAlerts.some(a => alertMatch(a.kw, decSearchText(d)))
   ).slice(0,8).map(d => {
     const a = activeAlerts.find(a => alertMatch(a.kw, decSearchText(d)));
-    return { type:'decision', date:d.date, label:d.ref, sub:d.jur, kw:a.kw, action:`openReader('${d.id}');showScreen('recherche')` };
+    return { type:'decision', date:d.date, label:d.ref, sub:d.jur, kw:a.kw, action:`openReader(${JSON.stringify(String(d.id))});showScreen('recherche')` };
   });
 
   /* ── Archives convocations ── */
@@ -2881,7 +2890,7 @@ function renderTimeline(){
     activeAlerts.some(a => alertMatch(a.kw, f.court, f.chambre, f.text, f.snippet))
   ).slice(0,4).map(f => {
     const a = activeAlerts.find(a => alertMatch(a.kw, f.court, f.chambre, f.text, f.snippet));
-    return { type:'archive', date:f.week, label:f.court, sub:f.chambre||'', kw:a.kw, action:`openViewer('${f.path}','${(f.court||'').replace(/'/g,"\\'")}');switchAgendaTab('archives');showScreen('agenda')` };
+    return { type:'archive', date:f.week, label:f.court, sub:f.chambre||'', kw:a.kw, action:`openViewer(${JSON.stringify(String(f.path||''))},${JSON.stringify(String(f.court||''))});switchAgendaTab('archives');showScreen('agenda')` };
   });
 
   const all = [...decMatches, ...arcMatches]
@@ -2904,21 +2913,21 @@ function renderTimeline(){
 
   wrap.innerHTML = `<div class="timeline-line" aria-hidden="true"></div><div class="tl-items" id="timeline-items"></div>`;
   $('#timeline-items').innerHTML = all.map(m => `
-    <div class="tl-item" style="cursor:pointer;" onclick="${m.action}">
+    <div class="tl-item" style="cursor:pointer;" onclick="${escHtml(m.action)}">
       <span class="tl-dot" aria-hidden="true"></span>
-      <div class="tl-year">${(m.date||'').slice(0,7)||m.date||'—'}</div>
+      <div class="tl-year">${escHtml((m.date||'').slice(0,7)||m.date||'—')}</div>
       <div class="tl-label">
-        ${m.label}
+        ${escHtml(m.label)}
         <span class="tl-badge ${badgeClass[m.type]}">${badgeLabel[m.type][lang]}</span>
       </div>
-      <div style="font-size:11.5px;color:var(--text-muted);margin-top:2px;">${m.sub} · <em>${m.kw}</em></div>
+      <div style="font-size:11.5px;color:var(--text-muted);margin-top:2px;">${escHtml(m.sub)} · <em>${escHtml(m.kw)}</em></div>
     </div>`).join('');
 
   $('#timeline-table tbody').innerHTML = all.map(m =>
-    `<tr onclick="${m.action}" style="cursor:pointer;">
-      <td>${m.date||'—'}</td>
-      <td>${m.label} <span class="tl-badge ${badgeClass[m.type]}">${badgeLabel[m.type][lang]}</span></td>
-      <td>${m.kw}</td>
+    `<tr onclick="${escHtml(m.action)}" style="cursor:pointer;">
+      <td>${escHtml(m.date||'—')}</td>
+      <td>${escHtml(m.label)} <span class="tl-badge ${badgeClass[m.type]}">${badgeLabel[m.type][lang]}</span></td>
+      <td>${escHtml(m.kw)}</td>
     </tr>`).join('');
 }
 
@@ -3058,7 +3067,7 @@ function populateAgendaFilters(){
   const jurs = [...new Set(AUDIENCES.map(e => e.juridiction))].sort();
   const allLabel = t('agenda_filter_all');
   container.innerHTML = `<button class="agenda-chip${agendaActiveJur === '' ? ' active' : ''}" onclick="setAgendaJur('')">${allLabel}</button>`
-    + jurs.map(j => `<button class="agenda-chip${agendaActiveJur === j ? ' active' : ''}" onclick="setAgendaJur('${j.replace(/'/g,"\\'")}')">${j}</button>`).join('');
+    + jurs.map(j => `<button class="agenda-chip${agendaActiveJur === j ? ' active' : ''}" onclick="${escHtml(`setAgendaJur(${JSON.stringify(String(j))})`)}">${escHtml(j)}</button>`).join('');
 }
 
 function setAgendaJur(jur){
@@ -3131,16 +3140,16 @@ function renderAgenda(){
     const label   = d.toLocaleDateString(locale, {weekday:'long', day:'numeric', month:'long', year:'numeric'});
     const rows    = evts.sort((a,b) => a.horaire.localeCompare(b.horaire)).map(e => {
       const sep = `<span class="agenda-sep">·</span>`;
-      const chambreHtml = e.chambre ? `${sep}<span class="agenda-chambre-inline">${e.chambre}</span>` : '';
-      const salleHtml   = e.salle   ? `${sep}<span class="agenda-salle-inline">${e.salle}</span>`   : '';
-      const safeArgs    = [label, e.horaire, e.juridiction, e.chambre||'', e.salle||''].map(s => s.replace(/'/g,"\\'"));
+      const chambreHtml = e.chambre ? `${sep}<span class="agenda-chambre-inline">${escHtml(e.chambre)}</span>` : '';
+      const salleHtml   = e.salle   ? `${sep}<span class="agenda-salle-inline">${escHtml(e.salle)}</span>`   : '';
+      const safeArgs    = [label, e.horaire, e.juridiction, e.chambre||'', e.salle||''].map(s => JSON.stringify(String(s)));
       return `<div class="agenda-row">
-        <span class="agenda-time">${e.horaire}</span>
+        <span class="agenda-time">${escHtml(e.horaire)}</span>
         <span class="agenda-inline">
-          <span class="agenda-jur-inline">${e.juridiction}</span>
+          <span class="agenda-jur-inline">${escHtml(e.juridiction)}</span>
           ${chambreHtml}${salleHtml}
         </span>
-        <button class="agenda-copy-btn" title="" onclick="copyHearing(this,'${safeArgs[1]}','${safeArgs[2]}','${safeArgs[3]}','${safeArgs[4]}','${safeArgs[0]}')">${COPY_ICON}</button>
+        <button class="agenda-copy-btn" title="" onclick="${escHtml(`copyHearing(this,${safeArgs[1]},${safeArgs[2]},${safeArgs[3]},${safeArgs[4]},${safeArgs[0]})`)}">${COPY_ICON}</button>
       </div>`;
     }).join('');
     return `<div class="agenda-day">
@@ -3158,6 +3167,9 @@ $('#agenda-filter-semaine')?.addEventListener('change', renderAgenda);
 
 /* ── Viewer PDF inline ── */
 function openViewer(url, title){
+  /* Garde-fou : uniquement des PDF d'archives relatifs ou des URLs https (bloque javascript: & co) */
+  url = String(url || '');
+  if(!/^(archives\/[\w\-.%]+\.pdf|https:\/\/[^\s"'<>]+)$/i.test(url)) return;
   const panel = document.getElementById('viewer-panel');
   const backdrop = document.getElementById('viewer-backdrop');
   const iframe = document.getElementById('viewer-iframe');
@@ -3252,12 +3264,12 @@ function renderAudiencesArchive(){
       const label = d.toLocaleDateString(locale, {weekday:'long', day:'numeric', month:'long', year:'numeric'});
       const rows  = dayEvts.sort((a,b) => a.horaire.localeCompare(b.horaire)).map(e => {
         const sep = `<span class="agenda-sep">·</span>`;
-        const chambreHtml = e.chambre ? `${sep}<span class="agenda-chambre-inline">${e.chambre}</span>` : '';
-        const salleHtml   = e.salle   ? `${sep}<span class="agenda-salle-inline">${e.salle}</span>`   : '';
+        const chambreHtml = e.chambre ? `${sep}<span class="agenda-chambre-inline">${escHtml(e.chambre)}</span>` : '';
+        const salleHtml   = e.salle   ? `${sep}<span class="agenda-salle-inline">${escHtml(e.salle)}</span>`   : '';
         return `<div class="agenda-row">
-          <span class="agenda-time">${e.horaire}</span>
+          <span class="agenda-time">${escHtml(e.horaire)}</span>
           <span class="agenda-inline">
-            <span class="agenda-jur-inline">${e.juridiction}</span>
+            <span class="agenda-jur-inline">${escHtml(e.juridiction)}</span>
             ${chambreHtml}${salleHtml}
           </span>
         </div>`;
@@ -3312,12 +3324,14 @@ function renderArchives(){
   });
 
   function highlight(text){
-    if(!q || !text) return text || '';
+    /* Échappe chaque fragment — le texte vient de PDF scrapés (XSS) */
+    text = String(text || '');
+    if(!q || !text) return escHtml(text);
     var out = '', src = text, ql = q.length, lo = q.toLowerCase();
     while(src.length){
       var i = src.toLowerCase().indexOf(lo);
-      if(i < 0){ out += src; break; }
-      out += src.slice(0,i) + '<span class="search-hit">' + src.slice(i,i+ql) + '</span>';
+      if(i < 0){ out += escHtml(src); break; }
+      out += escHtml(src.slice(0,i)) + '<span class="search-hit">' + escHtml(src.slice(i,i+ql)) + '</span>';
       src = src.slice(i+ql);
     }
     return out;
@@ -3330,13 +3344,13 @@ function renderArchives(){
         + '<div class="archive-pdf-icon">PDF</div>'
         + '<div class="archive-pdf-main">'
         + '<div class="archive-pdf-name">' + highlight(f.court) + (f.chambre ? ' — ' + highlight(f.chambre) : '') + '</div>'
-        + '<div class="archive-pdf-meta">' + t('archive_downloaded').replace('{w}', f.week).replace('{d}', f.downloaded) + '</div>'
+        + '<div class="archive-pdf-meta">' + t('archive_downloaded').replace('{w}', escHtml(f.week)).replace('{d}', escHtml(f.downloaded)) + '</div>'
         + (q && f.snippet ? '<div style="font-size:12px;color:var(--text-muted);margin-top:4px;border-top:1px solid var(--row-sep);padding-top:4px;">' + highlight(f.snippet) + '</div>' : '')
         + '</div>'
         + '<div class="archive-pdf-actions">'
-        + '<button class="btn btn-secondary" style="font-size:12px;padding:5px 11px;" onclick="openViewer(\'' + f.path + '\',\'' + f.court.replace(/'/g,"\\'") + '\')">'
+        + '<button class="btn btn-secondary" style="font-size:12px;padding:5px 11px;" onclick="' + escHtml('openViewer(' + JSON.stringify(String(f.path||'')) + ',' + JSON.stringify(String(f.court||'')) + ')') + '">'
         + '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg> ' + t('archive_open') + '</button>'
-        + '<a href="' + f.path + '" download class="btn btn-secondary" style="font-size:12px;padding:5px 11px;">'
+        + '<a href="' + escHtml(f.path) + '" download class="btn btn-secondary" style="font-size:12px;padding:5px 11px;">'
         + '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg></a>'
         + '</div></div>';
     }).join('');
@@ -3506,10 +3520,7 @@ async function loadDecisionsJSON(forceRefresh = false){
 
 /* ===================== ANALYSE DOCUMENTS ===================== */
 
-/* Configurer PDF.js worker */
-if(typeof pdfjsLib !== 'undefined'){
-  pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.worker.min.js';
-}
+/* PDF.js : worker configuré dans le module d'import (pdfjs-dist 4.x) */
 
 const analyseZone  = $('#analyse-drop');
 const analyseInput = $('#analyse-file-input');
@@ -3559,7 +3570,7 @@ async function handleAnalyseFile(file){
   }
 }
 
-function escHtml(s){ return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function escHtml(s){ return String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }
 
 /* ── Normalisation légère des espaces issus de l'extraction PDF ──
    NB: la majorité des espaces parasites est corrigée en amont par la
@@ -3634,7 +3645,7 @@ async function extractPageLines(page){
 async function analysePDF(file, bodyEl){
   if(typeof pdfjsLib === 'undefined') throw new Error('PDF.js non chargé');
   const arrayBuffer = await file.arrayBuffer();
-  const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+  const pdf = await pdfjsLib.getDocument({ data: arrayBuffer, isEvalSupported: false }).promise;
   const totalPages = pdf.numPages;
 
   /* Extraction de toutes les pages */
@@ -4406,13 +4417,13 @@ function renderAffaireRow(a, hideJur){
   const inWL = _watchlist.includes(a.num);
   const jur  = a.juridiction || (_isCour(a) ? "Cour adm." : "Trib. adm.");
   return `<tr>
-    <td class="num-cell">${a.num}</td>
-    ${hideJur ? '' : `<td style="font-size:11.5px;color:var(--text-muted);">${jur}</td>`}
-    <td>${a.matiere}</td>
-    <td style="color:var(--text-muted);font-size:12.5px;">${a.defendeur}</td>
-    <td><span class="stade-badge ${sc.cls}">${sc.label}</span></td>
+    <td class="num-cell">${escHtml(a.num)}</td>
+    ${hideJur ? '' : `<td style="font-size:11.5px;color:var(--text-muted);">${escHtml(jur)}</td>`}
+    <td>${escHtml(a.matiere)}</td>
+    <td style="color:var(--text-muted);font-size:12.5px;">${escHtml(a.defendeur)}</td>
+    <td><span class="stade-badge ${sc.cls}">${escHtml(sc.label)}</span></td>
     <td style="text-align:right;">
-      <button onclick="toggleWatchlist('${a.num}')" class="watchlist-toggle${inWL?' watching':''}" aria-pressed="${inWL}">
+      <button onclick="${escHtml(`toggleWatchlist(${JSON.stringify(String(a.num))})`)}" class="watchlist-toggle${inWL?' watching':''}" aria-pressed="${inWL}">
         ${inWL ? "✓ Suivi" : "Surveiller"}
       </button>
     </td>
@@ -4449,7 +4460,7 @@ function renderAffaires(){
       .sort((a,b) => b[1]-a[1])
       .map(([k,v]) => `<span class="affaires-summary-item">
         <span class="affaires-summary-dot" style="background:${STADE_DOT[k]||'var(--text-faint)'}"></span>
-        <strong style="color:var(--text-main);">${v}</strong>&nbsp;${k.toLowerCase()}
+        <strong style="color:var(--text-main);">${v}</strong>&nbsp;${escHtml(k.toLowerCase())}
       </span>`).join('');
   }
 
@@ -4520,10 +4531,10 @@ function renderWatchlistPanel(){
     const a = _aData.find(d => d.num === num);
     return `<div class="watchlist-item">
       <div>
-        <span style="font-family:monospace;font-weight:700;font-size:13px;color:var(--text-main);">${num}</span>
-        ${a ? `<span style="font-size:12px;color:var(--text-muted);margin-left:10px;">${a.matiere} — ${a.stade}</span>` : `<span style="font-size:12px;color:var(--text-faint);margin-left:10px;">N° non trouvé dans les données actuelles</span>`}
+        <span style="font-family:monospace;font-weight:700;font-size:13px;color:var(--text-main);">${escHtml(num)}</span>
+        ${a ? `<span style="font-size:12px;color:var(--text-muted);margin-left:10px;">${escHtml(a.matiere)} — ${escHtml(a.stade)}</span>` : `<span style="font-size:12px;color:var(--text-faint);margin-left:10px;">N° non trouvé dans les données actuelles</span>`}
       </div>
-      <button onclick="toggleWatchlist('${num}')" style="font-size:11.5px;padding:3px 9px;border-radius:4px;border:1px solid var(--card-border);background:transparent;color:var(--text-muted);cursor:pointer;">Retirer</button>
+      <button onclick="${escHtml(`toggleWatchlist(${JSON.stringify(String(num))})`)}" style="font-size:11.5px;padding:3px 9px;border-radius:4px;border:1px solid var(--card-border);background:transparent;color:var(--text-muted);cursor:pointer;">Retirer</button>
     </div>`;
   }).join("");
 }
@@ -4541,14 +4552,14 @@ function lookupAffaire(){
     const jur = found.juridiction || (found.num.endsWith("C") ? "Cour adm." : "Trib. adm.");
     out.innerHTML = `<div class="lookup-result-box" style="margin-top:14px;padding:16px 18px;background:var(--card-bg);border:1px solid var(--card-border);border-radius:var(--radius-lg);">
       <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:10px;">
-        <span style="font-family:monospace;font-weight:700;font-size:15px;">${found.num}</span>
-        <span class="stade-badge ${sc.cls}">${sc.label}</span>
+        <span style="font-family:monospace;font-weight:700;font-size:15px;">${escHtml(found.num)}</span>
+        <span class="stade-badge ${sc.cls}">${escHtml(sc.label)}</span>
       </div>
       <div style="display:grid;grid-template-columns:140px 1fr;gap:6px 12px;font-size:12.5px;">
-        <span style="color:var(--text-faint);">Juridiction</span><span>${jur}</span>
-        <span style="color:var(--text-faint);">Matière</span><span>${found.matiere}</span>
-        <span style="color:var(--text-faint);">Défendeur</span><span>${found.defendeur}</span>
-        <span style="color:var(--text-faint);">Avocat</span><span>${found.avocat}</span>
+        <span style="color:var(--text-faint);">Juridiction</span><span>${escHtml(jur)}</span>
+        <span style="color:var(--text-faint);">Matière</span><span>${escHtml(found.matiere)}</span>
+        <span style="color:var(--text-faint);">Défendeur</span><span>${escHtml(found.defendeur)}</span>
+        <span style="color:var(--text-faint);">Avocat</span><span>${escHtml(found.avocat)}</span>
       </div>
       <div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--card-border);">
         <a href="https://jurad.public.lu" target="_blank" rel="noopener" style="font-size:12.5px;color:var(--accent-red);">Vérifier manuellement sur jurad.public.lu</a>
@@ -4557,7 +4568,7 @@ function lookupAffaire(){
     </div>`;
   } else {
     out.innerHTML = `<div style="margin-top:12px;padding:12px 14px;background:var(--accent-red-tint);border-radius:var(--radius-lg);font-size:12.5px;color:#7A2420;">
-      Affaire <strong>${q}</strong> introuvable dans les données du W25 (25/06/2026). Elle ne figurait peut-être pas au rôle cette semaine-là.
+      Affaire <strong>${escHtml(q)}</strong> introuvable dans les données du W25 (25/06/2026). Elle ne figurait peut-être pas au rôle cette semaine-là.
     </div>`;
   }
 }
@@ -4571,7 +4582,7 @@ function renderStats(){
     el.innerHTML = sorted.map(([k,v]) => `
       <div style="margin-bottom:10px;">
         <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px;">
-          <span style="color:var(--text-main);">${k}</span>
+          <span style="color:var(--text-main);">${escHtml(k)}</span>
           <span style="color:var(--text-faint);font-variant-numeric:tabular-nums;">${v}</span>
         </div>
         <div class="stat-bar-track">

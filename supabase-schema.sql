@@ -53,11 +53,13 @@ CREATE TRIGGER decisions_updated_at
 -- ── Sécurité (Row Level Security) ──────────────────────────────
 ALTER TABLE decisions ENABLE ROW LEVEL SECURITY;
 
--- Lecture publique (les décisions judiciaires sont publiques)
+-- Lecture réservée aux comptes @reporter.lu authentifiés
+-- (le contrôle du domaine côté client est contournable — celui-ci ne l'est pas)
 DROP POLICY IF EXISTS "Public read decisions" ON decisions;
-CREATE POLICY "Public read decisions"
+DROP POLICY IF EXISTS "Reporter read decisions" ON decisions;
+CREATE POLICY "Reporter read decisions"
   ON decisions FOR SELECT
-  USING (true);
+  USING ((auth.jwt() ->> 'email') ILIKE '%@reporter.lu');
 
 -- Écriture réservée au service_role (GitHub Actions)
 DROP POLICY IF EXISTS "Service write decisions" ON decisions;
@@ -73,7 +75,10 @@ CREATE TABLE IF NOT EXISTS meta (
 );
 
 ALTER TABLE meta ENABLE ROW LEVEL SECURITY;
-CREATE POLICY "Public read meta" ON meta FOR SELECT USING (true);
+DROP POLICY IF EXISTS "Public read meta" ON meta;
+DROP POLICY IF EXISTS "Reporter read meta" ON meta;
+CREATE POLICY "Reporter read meta" ON meta FOR SELECT
+  USING ((auth.jwt() ->> 'email') ILIKE '%@reporter.lu');
 CREATE POLICY "Service write meta" ON meta FOR ALL USING (auth.role() = 'service_role');
 
 -- ── Vérification ───────────────────────────────────────────────
