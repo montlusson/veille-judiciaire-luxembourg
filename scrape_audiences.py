@@ -13,6 +13,7 @@ from __future__ import annotations
 import hashlib
 import io
 import json
+import os
 import re
 import uuid
 from datetime import date, datetime, timedelta, timezone
@@ -442,6 +443,37 @@ def update_audiences_archive(out_dir: Path, old_events: list[dict], today: date)
     return len(newly_past)
 
 
+def push_files_to_supabase(payloads: dict) -> None:
+    """
+    Pousse les blobs de données (audiences, archives, ics) vers la table
+    `files` de Supabase. Les fichiers JSON ne sont plus publiés sur GitHub
+    Pages : Supabase (lecture réservée @reporter.lu) est la seule source
+    de données en ligne.
+    """
+    url = os.environ.get("SUPABASE_URL")
+    key = os.environ.get("SUPABASE_KEY")
+    if not url or not key:
+        log("  ⚠ Supabase non configuré (SUPABASE_URL / SUPABASE_KEY) — blobs non poussés")
+        return
+
+    headers = {
+        "apikey":        key,
+        "Authorization": f"Bearer {key}",
+        "Content-Type":  "application/json",
+        "Prefer":        "resolution=merge-duplicates",
+    }
+    now = datetime.now().isoformat()
+    rows = [{"key": k, "content": v, "updated_at": now} for k, v in payloads.items()]
+    try:
+        r = requests.post(f"{url}/rest/v1/files", headers=headers, json=rows, timeout=60)
+        if r.status_code in (200, 201):
+            log(f"  ✓ Supabase files : {', '.join(payloads.keys())}")
+        else:
+            log(f"  ✗ Supabase files : {r.status_code} — {r.text[:200]}")
+    except Exception as e:
+        log(f"  ✗ Supabase files : {e}")
+
+
 def main() -> None:
     log("═══════════════════════════════════════════════════════")
     log("  Scraper audiences judiciaires — justice.public.lu")
@@ -526,7 +558,20 @@ def main() -> None:
 
     # ── Archives PDF convocations ──────────────────────────────
     log("\n── Téléchargement des convocations PDF ──")
-    download_pdf_archive(out_dir)
+    archive_records = download_pdf_archive(out_dir)
+
+    # ── Push Supabase (table files) — seule source de données en ligne ──
+    log("\n── Push Supabase (table files) ──")
+    try:
+        archive_events = json.loads((out_dir / "audiences_archive.json").read_text(encoding="utf-8"))
+    except Exception:
+        archive_events = {"events": []}
+    push_files_to_supabase({
+        "audiences":         output,
+        "audiences_archive": archive_events,
+        "archives_index":    archive_records,
+        "audiences_ics":     {"ics": ical},
+    })
 
     log(f"\n═══════════════════════════════════════════════════════")
     log(f"  Terminé : {len(events)} audiences générées ({len(JURIDICTIONS)} juridictions)")

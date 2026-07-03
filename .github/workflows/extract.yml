@@ -9,9 +9,9 @@ on:
 
 jobs:
   extract:
-    name: Extraire et mettre à jour l'index statique
+    name: Extraire et pousser vers Supabase
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 60
     permissions:
       contents: write
 
@@ -27,16 +27,26 @@ jobs:
       - name: Installer les dépendances
         run: pip install pdfplumber requests beautifulsoup4
 
-      - name: Lancer l'extraction
-        run: python extract_decisions.py
+      # Les données ne sont plus commitées dans le repo public :
+      # elles partent vers Supabase (lecture réservée @reporter.lu).
+      - name: Lancer l'extraction (nouvelles décisions → Supabase)
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+        run: python extract_decisions.py --push-new
 
-      - name: Scraper les audiences
+      - name: Scraper les audiences (blobs → Supabase)
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
         run: python scrape_audiences.py || true
 
-      - name: Committer les fichiers générés
+      # Seul le cache d'URLs est committé (URLs publiques data.public.lu,
+      # nécessaire à l'extraction incrémentale entre deux runs CI)
+      - name: Committer le cache d'extraction
         run: |
           git config user.name  "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add decisions_index.json decisions_meta.json zip_cache.json audiences.json audiences_archive.json archives/index.json || true
-          git diff --cached --quiet || git commit -m "chore: mise à jour index $(date -u +'%Y-%m-%d')"
+          git add zip_cache.json || true
+          git diff --cached --quiet || git commit -m "chore: cache extraction $(date -u +'%Y-%m-%d')"
           git push || true

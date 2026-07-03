@@ -81,6 +81,21 @@ CREATE POLICY "Reporter read meta" ON meta FOR SELECT
   USING ((auth.jwt() ->> 'email') ILIKE '%@reporter.lu');
 CREATE POLICY "Service write meta" ON meta FOR ALL USING (auth.role() = 'service_role');
 
+-- ── Table files : blobs de données (audiences, archives, ics) ──
+-- Remplace les fichiers JSON qui étaient publiés sur GitHub Pages.
+CREATE TABLE IF NOT EXISTS files (
+  key        TEXT PRIMARY KEY,
+  content    JSONB NOT NULL DEFAULT '{}',
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+ALTER TABLE files ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "Reporter read files" ON files;
+CREATE POLICY "Reporter read files" ON files FOR SELECT
+  USING ((auth.jwt() ->> 'email') ILIKE '%@reporter.lu');
+DROP POLICY IF EXISTS "Service write files" ON files;
+CREATE POLICY "Service write files" ON files FOR ALL USING (auth.role() = 'service_role');
+
 -- ── Vérification ───────────────────────────────────────────────
 -- Après exécution, vous devriez voir :
 --   decisions : 0 lignes (elles arriveront via GitHub Actions)

@@ -1,6 +1,12 @@
-# Données volumineuses générées localement
+# Données générées localement — plus jamais publiées dans le repo public :
+# elles vivent dans Supabase (lecture réservée @reporter.lu)
 decisions.json
-archives/*.pdf
+decisions_index.json
+decisions_meta.json
+audiences.json
+audiences_archive.json
+audiences.ics
+archives/
 
 # macOS
 .DS_Store

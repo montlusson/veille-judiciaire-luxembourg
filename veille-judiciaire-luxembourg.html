@@ -3027,11 +3027,28 @@ function renderConvocations(jurFilter){
   }).join('');
 }
 
+/* ── Données : Supabase (table files, accès authentifié) d'abord,
+      fichier local en secours (mode LANCER.command uniquement — ces
+      fichiers ne sont plus publiés sur GitHub Pages) ── */
+async function _vjFetchFile(key, localPath){
+  if(_sb){
+    try {
+      const { data, error } = await _sb.from('files').select('content').eq('key', key).single();
+      if(!error && data && data.content) return data.content;
+    } catch(e){ /* table absente ou non autorisé → fallback local */ }
+  }
+  const r = await fetch(localPath, { cache: 'no-cache' });
+  if(!r.ok) throw new Error('not found');
+  return r.json();
+}
+
+/* Les PDF d'archives ne sont disponibles que sur la machine qui exécute
+   scrape_audiences.py — jamais publiés en ligne (noms avant anonymisation). */
+const PDF_FILES_LOCAL = ['localhost','127.0.0.1'].includes(location.hostname);
+
 async function loadAudiencesJSON(){
   try {
-    const r = await fetch('audiences.json', { cache: 'no-cache' });
-    if(!r.ok) throw new Error('not found');
-    const data = await r.json();
+    const data = await _vjFetchFile('audiences', 'audiences.json');
     AUDIENCES = data.events || [];
     AUDIENCES_META = {
       generated_at:   data.generated_at   || null,
@@ -3043,9 +3060,19 @@ async function loadAudiencesJSON(){
     const icsBtn = $('#ics-download');
     if(icsBtn){
       try {
-        const ri = await fetch('audiences.ics', {cache:'no-cache'});
-        if(ri.ok){
-          const blob = new Blob([await ri.text()], {type:'text/calendar'});
+        let icsText = null;
+        if(_sb){
+          try {
+            const { data: fd, error } = await _sb.from('files').select('content').eq('key', 'audiences_ics').single();
+            if(!error && fd && fd.content && fd.content.ics) icsText = fd.content.ics;
+          } catch(e){}
+        }
+        if(!icsText){
+          const ri = await fetch('audiences.ics', {cache:'no-cache'});
+          if(ri.ok) icsText = await ri.text();
+        }
+        if(icsText){
+          const blob = new Blob([icsText], {type:'text/calendar'});
           icsBtn.href = URL.createObjectURL(blob);
         }
       } catch {}
@@ -3170,6 +3197,8 @@ function openViewer(url, title){
   /* Garde-fou : uniquement des PDF d'archives relatifs ou des URLs https (bloque javascript: & co) */
   url = String(url || '');
   if(!/^(archives\/[\w\-.%]+\.pdf|https:\/\/[^\s"'<>]+)$/i.test(url)) return;
+  /* Les PDF relatifs n'existent que sur la machine locale (jamais publiés) */
+  if(!/^https:/i.test(url) && !PDF_FILES_LOCAL) return;
   const panel = document.getElementById('viewer-panel');
   const backdrop = document.getElementById('viewer-backdrop');
   const iframe = document.getElementById('viewer-iframe');
@@ -3207,9 +3236,7 @@ let AUDIENCES_ARCHIVE = [];
 
 async function loadAudiencesArchiveJSON(){
   try {
-    const r = await fetch('audiences_archive.json', { cache: 'no-cache' });
-    if(!r.ok) throw new Error('not found');
-    const data = await r.json();
+    const data = await _vjFetchFile('audiences_archive', 'audiences_archive.json');
     AUDIENCES_ARCHIVE = data.events || [];
     renderAudiencesArchive();
   } catch {
@@ -3285,9 +3312,7 @@ let ARCHIVES_DATA = [];
 
 async function loadArchives(){
   try {
-    const r = await fetch('archives/index.json', { cache: 'no-cache' });
-    if(!r.ok) throw new Error('not found');
-    ARCHIVES_DATA = await r.json();
+    ARCHIVES_DATA = await _vjFetchFile('archives_index', 'archives/index.json');
     renderArchives();
   } catch {
     /* Pas encore d'archives — message déjà en place dans le HTML */
@@ -3347,12 +3372,15 @@ function renderArchives(){
         + '<div class="archive-pdf-meta">' + t('archive_downloaded').replace('{w}', escHtml(f.week)).replace('{d}', escHtml(f.downloaded)) + '</div>'
         + (q && f.snippet ? '<div style="font-size:12px;color:var(--text-muted);margin-top:4px;border-top:1px solid var(--row-sep);padding-top:4px;">' + highlight(f.snippet) + '</div>' : '')
         + '</div>'
-        + '<div class="archive-pdf-actions">'
-        + '<button class="btn btn-secondary" style="font-size:12px;padding:5px 11px;" onclick="' + escHtml('openViewer(' + JSON.stringify(String(f.path||'')) + ',' + JSON.stringify(String(f.court||'')) + ')') + '">'
-        + '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg> ' + t('archive_open') + '</button>'
-        + '<a href="' + escHtml(f.path) + '" download class="btn btn-secondary" style="font-size:12px;padding:5px 11px;">'
-        + '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg></a>'
-        + '</div></div>';
+        + (PDF_FILES_LOCAL
+          ? '<div class="archive-pdf-actions">'
+            + '<button class="btn btn-secondary" style="font-size:12px;padding:5px 11px;" onclick="' + escHtml('openViewer(' + JSON.stringify(String(f.path||'')) + ',' + JSON.stringify(String(f.court||'')) + ')') + '">'
+            + '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg> ' + t('archive_open') + '</button>'
+            + '<a href="' + escHtml(f.path) + '" download class="btn btn-secondary" style="font-size:12px;padding:5px 11px;">'
+            + '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg></a>'
+            + '</div>'
+          : '<div class="archive-pdf-actions"><span style="font-size:11px;color:var(--text-faint);">PDF disponible en local uniquement</span></div>')
+        + '</div>';
     }).join('');
     return '<div class="archive-week"><div class="archive-week-header">' + t('archive_week_label') + ' ' + week + '</div>' + rows + '</div>';
   }).join('');
@@ -3387,26 +3415,55 @@ async function loadDecisionsFromSupabase(forceRefresh = false){
   await loadDecisionsJSON(forceRefresh);
 }
 
-/* Vérification silencieuse du manifeste — rechargement depuis decisions_index.json si nouveau */
+/* ── Lecture Supabase : timestamp de dernière extraction (table meta) ── */
+async function _sbLastGenerated(){
+  if(!_sb) return null;
+  try {
+    const { data, error } = await _sb.from('meta').select('value').eq('key', 'last_generated').single();
+    return (!error && data) ? data.value : null;
+  } catch(e){ return null; }
+}
+
+/* ── Lecture Supabase : toutes les décisions (sans fulltext) par pages de 1000 ── */
+async function _sbFetchAllDecisions(){
+  const PAGE = 1000;
+  let all = [], from = 0;
+  for(;;){
+    const { data, error } = await _sb.from('decisions')
+      .select('id,ref,date,jur,group,type,excerpt,entities,source_year')
+      .order('date', { ascending: false })
+      .range(from, from + PAGE - 1);
+    if(error) throw error;
+    all = all.concat(data || []);
+    if(!data || data.length < PAGE) break;
+    from += PAGE;
+  }
+  /* Déduplication : la table peut contenir la même décision sous un ID
+     ancien format ET un ID hash (migration). On préfère la ligne hash.
+     Purge définitive : voir verrouillage-acces.sql. */
+  const hex16 = /^[0-9a-f]{16}$/;
+  const seen = new Map();
+  for(const d of all){
+    const k = [d.jur, d.ref, d.date, d.source_year].join('::');
+    const prev = seen.get(k);
+    if(!prev || (hex16.test(d.id) && !hex16.test(prev.id))) seen.set(k, d);
+  }
+  return [...seen.values()];
+}
+
+/* Vérification silencieuse en arrière-plan — rechargement si nouvelle extraction */
 async function _checkStaticUpdate(){
   try {
     const stored = localStorage.getItem('vj_last_generated');
-    const metaR  = await fetch('decisions_meta.json', { cache: 'no-cache' });
-    if(!metaR.ok) return;
-    const meta = await metaR.json();
-    if(!meta.generated_at || (stored && meta.generated_at <= stored)) return;
-    /* Nouvelles données disponibles : rechargement silencieux */
-    const r = await fetch('decisions_index.json', { cache: 'no-cache' });
-    if(!r.ok) return;
-    const data = await r.json();
-    if(!Array.isArray(data.decisions) || data.decisions.length === 0) return;
-    const prevCount = DECISIONS.filter(d => !d._demo).length;
-    DECISIONS = data.decisions.filter(d => !d.archived);
-    const newDelta = Math.max(0, DECISIONS.length - prevCount);
-    localStorage.setItem('vj_delta', newDelta);
-    localStorage.setItem('vj_last_generated', meta.generated_at);
-    _vjOpenDB().then(db => _vjIDBPut(db, 'decisions', DECISIONS)).catch(()=>{});
-    renderAll();
+    let latest = await _sbLastGenerated();
+    if(!latest){
+      try {
+        const metaR = await fetch('decisions_meta.json', { cache: 'no-cache' });
+        if(metaR.ok) latest = (await metaR.json()).generated_at || null;
+      } catch(e){}
+    }
+    if(!latest || (stored && latest <= stored)) return;
+    await loadDecisionsJSON(false);
   } catch(e){ /* silencieux */ }
 }
 
@@ -3449,12 +3506,14 @@ async function loadDecisionsJSON(forceRefresh = false){
 
   const lastGenerated = forceRefresh ? null : localStorage.getItem(LAST_KEY);
 
-  /* ── Étape 1 : lire le manifeste léger ── */
-  let newGenerated = null;
-  try {
-    const metaR = await fetch('decisions_meta.json', { cache: 'no-cache' });
-    if(metaR.ok) newGenerated = (await metaR.json()).generated_at || null;
-  } catch(e) { /* manifeste absent → première génération ou ancienne version */ }
+  /* ── Étape 1 : timestamp de dernière extraction — Supabase (meta), manifeste local en secours ── */
+  let newGenerated = await _sbLastGenerated();
+  if(!newGenerated){
+    try {
+      const metaR = await fetch('decisions_meta.json', { cache: 'no-cache' });
+      if(metaR.ok) newGenerated = (await metaR.json()).generated_at || null;
+    } catch(e) { /* manifeste absent → première génération ou ancienne version */ }
+  }
 
   /* ── Étape 2a : cache IndexedDB si rien n'a changé (hors refresh forcé) ── */
   if(!forceRefresh && newGenerated && lastGenerated === newGenerated){
@@ -3473,14 +3532,23 @@ async function loadDecisionsJSON(forceRefresh = false){
     } catch(e) { /* IDB inaccessible → on retombe sur le chargement complet */ }
   }
 
-  /* ── Étape 2b : chargement complet du JSON ── */
+  /* ── Étape 2b : chargement complet — Supabase (authentifié), index local en secours ── */
   try {
-    const r = await fetch('decisions_index.json', { cache: 'no-cache' });
-    if(!r.ok) throw new Error('not found');
-    const data = await r.json();
-    if(!Array.isArray(data.decisions) || data.decisions.length === 0) throw new Error('empty');
-
-    const fetchedGenerated = data.generated_at || '';
+    let fresh = null, fetchedGenerated = newGenerated || '';
+    if(_sb){
+      try { fresh = await _sbFetchAllDecisions(); } catch(e){ fresh = null; }
+      if(fresh && fresh.length === 0) fresh = null; /* table vide ou accès refusé → fallback */
+    }
+    if(!fresh){
+      /* Secours : index statique local (mode LANCER.command — plus publié en ligne) */
+      const r = await fetch('decisions_index.json', { cache: 'no-cache' });
+      if(!r.ok) throw new Error('not found');
+      const idx = await r.json();
+      if(!Array.isArray(idx.decisions) || idx.decisions.length === 0) throw new Error('empty');
+      fresh = idx.decisions;
+      fetchedGenerated = idx.generated_at || fetchedGenerated;
+    }
+    const data = { decisions: fresh };
     const existingIds = new Set(DECISIONS.filter(d => !d._demo).map(d => d.id));
     const newDecisions = data.decisions.filter(d => !existingIds.has(d.id));
     const newCount = newDecisions.length;
@@ -3509,7 +3577,9 @@ async function loadDecisionsJSON(forceRefresh = false){
       showBanner(`✓ Synchronisé ${fmt} · Index identique`, 'var(--card-border)', 'var(--text-faint)');
     }
   } catch(e) {
-    const msg = '⚠ Données indisponibles — decisions_index.json introuvable (relancez extract_decisions.py)';
+    const msg = currentLang==='de'
+      ? '⚠ Daten nicht verfügbar — Anmeldung erforderlich oder Pipeline noch nicht gelaufen'
+      : '⚠ Données indisponibles — connexion requise ou pipeline pas encore exécuté';
     showBanner(msg, 'var(--accent-red)', '#fff');
   }
   setButtonsDisabled(false);
@@ -4307,9 +4377,8 @@ function parseConvocationText(text, court, chambre){
 
 async function loadArchivesJSON(){
   try {
-    const resp = await fetch("archives/index.json");
-    if(!resp.ok) return;
-    const index = await resp.json();
+    const index = await _vjFetchFile('archives_index', 'archives/index.json');
+    if(!Array.isArray(index)) return;
     const all = [];
     for(const entry of index){
       if(!entry.text) continue;

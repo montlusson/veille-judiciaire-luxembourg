@@ -704,17 +704,26 @@ def main() -> None:
     log(f"  Fichier : {OUTPUT_FILE}")
     log(f"═══════════════════════════════════════════════════════")
 
-    # Poussée Supabase uniquement si explicitement demandée (--push-supabase)
-    # IMPORTANT : ne lancez cette option que localement avec decisions.json présent.
-    # En CI, decisions.json est absent → load_existing_decisions() lit decisions_index.json
-    # (sans fulltext) → le push écraserait le fulltext Supabase par des chaînes vides.
-    if "--push-supabase" in sys.argv:
+    # ── Poussée Supabase ────────────────────────────────────────────────────
+    # --push-new     (CI hebdo) : pousse UNIQUEMENT les décisions fraîchement
+    #                extraites (fulltext complet). Les lignes Supabase des
+    #                archives inchangées ne sont pas touchées → fulltext intact.
+    # --push-supabase (local)   : pousse tout all_decisions. Requiert
+    #                decisions.json (fulltext) — jamais en CI, où
+    #                load_existing_decisions() lirait decisions_index.json
+    #                (sans fulltext) et écraserait le fulltext Supabase.
+    if "--push-new" in sys.argv:
+        if new_decisions:
+            push_to_supabase(new_decisions, output["generated_at"])
+        else:
+            log("  Supabase : aucune nouvelle décision — push ignoré")
+    elif "--push-supabase" in sys.argv:
         if not OUTPUT_FILE.exists():
             log("  ✗ --push-supabase requiert decisions.json (fulltext). Lancez d'abord le script sans ce flag.")
             sys.exit(1)
         push_to_supabase(all_decisions, output["generated_at"])
     else:
-        log("  Supabase push ignoré (lancez localement avec --push-supabase pour forcer)")
+        log("  Supabase push ignoré (--push-new en CI, --push-supabase en local)")
 
 
 if __name__ == "__main__":
