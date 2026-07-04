@@ -3042,9 +3042,29 @@ async function _vjFetchFile(key, localPath){
   return r.json();
 }
 
-/* Les PDF d'archives ne sont disponibles que sur la machine qui exécute
-   scrape_audiences.py — jamais publiés en ligne (noms avant anonymisation). */
+/* PDF de convocations : servis depuis le bucket privé Supabase Storage
+   (URL signée, accès authentifié). En local (LANCER.command), le fichier
+   du disque est utilisé directement. */
 const PDF_FILES_LOCAL = ['localhost','127.0.0.1'].includes(location.hostname);
+
+async function _archiveSignedUrl(path){
+  if(!_sb) return null;
+  try {
+    const key = String(path||'').replace(/^archives\//,'');
+    const { data, error } = await _sb.storage.from('archives').createSignedUrl(key, 3600);
+    if(!error && data && data.signedUrl) return data.signedUrl;
+  } catch(e){}
+  return null;
+}
+
+async function downloadArchivePdf(path){
+  if(PDF_FILES_LOCAL){ window.open(path, '_blank'); return; }
+  const s = await _archiveSignedUrl(path);
+  if(s) window.open(s, '_blank');
+  else alert(currentLang==='de'
+    ? 'PDF nicht online verfügbar (vor der Online-Archivierung gespeichert).'
+    : 'PDF non disponible en ligne (archivé avant la mise en place du stockage en ligne).');
+}
 
 async function loadAudiencesJSON(){
   try {
@@ -3193,12 +3213,21 @@ $('#agenda-filter-semaine')?.addEventListener('change', renderAgenda);
 
 
 /* ── Viewer PDF inline ── */
-function openViewer(url, title){
+async function openViewer(url, title){
   /* Garde-fou : uniquement des PDF d'archives relatifs ou des URLs https (bloque javascript: & co) */
   url = String(url || '');
   if(!/^(archives\/[\w\-.%]+\.pdf|https:\/\/[^\s"'<>]+)$/i.test(url)) return;
-  /* Les PDF relatifs n'existent que sur la machine locale (jamais publiés) */
-  if(!/^https:/i.test(url) && !PDF_FILES_LOCAL) return;
+  /* Chemin relatif : fichier local en mode LANCER.command, sinon URL signée du bucket */
+  if(!/^https:/i.test(url) && !PDF_FILES_LOCAL){
+    const signed = await _archiveSignedUrl(url);
+    if(!signed){
+      alert(currentLang==='de'
+        ? 'PDF nicht online verfügbar (vor der Online-Archivierung gespeichert).'
+        : 'PDF non disponible en ligne (archivé avant la mise en place du stockage en ligne).');
+      return;
+    }
+    url = signed;
+  }
   const panel = document.getElementById('viewer-panel');
   const backdrop = document.getElementById('viewer-backdrop');
   const iframe = document.getElementById('viewer-iframe');
@@ -3372,15 +3401,12 @@ function renderArchives(){
         + '<div class="archive-pdf-meta">' + t('archive_downloaded').replace('{w}', escHtml(f.week)).replace('{d}', escHtml(f.downloaded)) + '</div>'
         + (q && f.snippet ? '<div style="font-size:12px;color:var(--text-muted);margin-top:4px;border-top:1px solid var(--row-sep);padding-top:4px;">' + highlight(f.snippet) + '</div>' : '')
         + '</div>'
-        + (PDF_FILES_LOCAL
-          ? '<div class="archive-pdf-actions">'
-            + '<button class="btn btn-secondary" style="font-size:12px;padding:5px 11px;" onclick="' + escHtml('openViewer(' + JSON.stringify(String(f.path||'')) + ',' + JSON.stringify(String(f.court||'')) + ')') + '">'
-            + '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg> ' + t('archive_open') + '</button>'
-            + '<a href="' + escHtml(f.path) + '" download class="btn btn-secondary" style="font-size:12px;padding:5px 11px;">'
-            + '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg></a>'
-            + '</div>'
-          : '<div class="archive-pdf-actions"><span style="font-size:11px;color:var(--text-faint);">PDF disponible en local uniquement</span></div>')
-        + '</div>';
+        + '<div class="archive-pdf-actions">'
+        + '<button class="btn btn-secondary" style="font-size:12px;padding:5px 11px;" onclick="' + escHtml('openViewer(' + JSON.stringify(String(f.path||'')) + ',' + JSON.stringify(String(f.court||'')) + ')') + '">'
+        + '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg> ' + t('archive_open') + '</button>'
+        + '<button class="btn btn-secondary" style="font-size:12px;padding:5px 11px;" onclick="' + escHtml('downloadArchivePdf(' + JSON.stringify(String(f.path||'')) + ')') + '" title="Télécharger">'
+        + '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg></button>'
+        + '</div></div>';
     }).join('');
     return '<div class="archive-week"><div class="archive-week-header">' + t('archive_week_label') + ' ' + week + '</div>' + rows + '</div>';
   }).join('');

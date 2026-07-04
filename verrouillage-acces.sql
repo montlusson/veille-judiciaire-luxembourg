@@ -42,6 +42,18 @@ CREATE POLICY "Service write files"
   ON files FOR ALL
   USING (auth.role() = 'service_role');
 
+-- ── Bucket privé pour les PDF de convocations ──────────────────
+-- Alimenté chaque semaine par GitHub Actions ; consultation via URLs
+-- signées, réservée aux comptes @reporter.lu connectés.
+INSERT INTO storage.buckets (id, name, public)
+VALUES ('archives', 'archives', false)
+ON CONFLICT (id) DO NOTHING;
+
+DROP POLICY IF EXISTS "Reporter read archives" ON storage.objects;
+CREATE POLICY "Reporter read archives"
+  ON storage.objects FOR SELECT
+  USING (bucket_id = 'archives' AND (auth.jwt() ->> 'email') ILIKE '%@reporter.lu');
+
 -- ═══════════════════════════════════════════════════════════════
 -- ÉTAPE 2 (recommandée) — Purge des doublons de la table decisions
 -- La table contient ~26 000 lignes pour ~10 400 décisions réelles :

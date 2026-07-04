@@ -365,6 +365,11 @@ def download_pdf_archive(out_dir: Path) -> list[dict]:
             log(f"    ✗ Erreur téléchargement : {e}")
             continue
 
+        # Copie en ligne (bucket privé) pour que la rédaction y accède
+        # même quand la machine qui a lancé le scraping est éteinte
+        if upload_pdf_to_supabase(filename, r.content):
+            log(f"    ✓ PDF poussé vers Supabase Storage")
+
         # Extraction texte pour recherche
         text = ""
         if has_pdfplumber:
@@ -388,7 +393,8 @@ def download_pdf_archive(out_dir: Path) -> list[dict]:
             "snippet":    snippet,
         })
 
-    # Lire l'index existant et ajouter les nouvelles entrées (sans doublons)
+    # Lire l'index existant : fichier local + blob Supabase (le CI repart
+    # d'un workspace vide — l'historique en ligne fait foi) et fusionner
     index_path = archives_dir / "index.json"
     existing: list[dict] = []
     if index_path.exists():
@@ -396,6 +402,10 @@ def download_pdf_archive(out_dir: Path) -> list[dict]:
             existing = json.loads(index_path.read_text(encoding="utf-8"))
         except Exception:
             existing = []
+    remote = fetch_supabase_file("archives_index")
+    if isinstance(remote, list):
+        local_keys = {(r["court"], r["chambre"], r["week"]) for r in existing}
+        existing += [r for r in remote if (r.get("court"), r.get("chambre"), r.get("week")) not in local_keys]
 
     # Clé d'unicité : court + chambre + week
     existing_keys = {(r["court"], r["chambre"], r["week"]) for r in existing}
@@ -423,6 +433,11 @@ def update_audiences_archive(out_dir: Path, old_events: list[dict], today: date)
             existing = json.loads(archive_path.read_text(encoding="utf-8")).get("events", [])
         except Exception:
             existing = []
+    if not existing:
+        # CI : workspace vide → repartir de l'historique en ligne
+        remote = fetch_supabase_file("audiences_archive")
+        if isinstance(remote, dict) and isinstance(remote.get("events"), list):
+            existing = remote["events"]
 
     existing_uids = {e["uid"] for e in existing}
     today_str = today.isoformat()
@@ -441,6 +456,59 @@ def update_audiences_archive(out_dir: Path, old_events: list[dict], today: date)
 
     log(f"✓ audiences_archive.json → {len(merged)} audiences passées ({len(newly_past)} nouvellement archivées)")
     return len(newly_past)
+
+
+def _sb_env() -> tuple[str, str] | None:
+    url = os.environ.get("SUPABASE_URL")
+    key = os.environ.get("SUPABASE_KEY")
+    return (url, key) if url and key else None
+
+
+def upload_pdf_to_supabase(filename: str, content: bytes) -> bool:
+    """Upload (upsert) un PDF de convocation dans le bucket privé `archives`."""
+    env = _sb_env()
+    if not env:
+        return False
+    url, key = env
+    try:
+        r = requests.post(
+            f"{url}/storage/v1/object/archives/{filename}",
+            headers={
+                "apikey":        key,
+                "Authorization": f"Bearer {key}",
+                "Content-Type":  "application/pdf",
+                "x-upsert":      "true",
+            },
+            data=content,
+            timeout=60,
+        )
+        if r.status_code in (200, 201):
+            return True
+        log(f"    ✗ Storage {filename} : {r.status_code} — {r.text[:150]}")
+    except Exception as e:
+        log(f"    ✗ Storage {filename} : {e}")
+    return False
+
+
+def fetch_supabase_file(file_key: str):
+    """Lit un blob de la table files (service_role, contourne RLS)."""
+    env = _sb_env()
+    if not env:
+        return None
+    url, key = env
+    try:
+        r = requests.get(
+            f"{url}/rest/v1/files?key=eq.{file_key}&select=content",
+            headers={"apikey": key, "Authorization": f"Bearer {key}"},
+            timeout=30,
+        )
+        if r.status_code == 200:
+            rows = r.json()
+            if rows:
+                return rows[0].get("content")
+    except Exception as e:
+        log(f"  ⚠ Lecture files/{file_key} : {e}")
+    return None
 
 
 def push_files_to_supabase(payloads: dict) -> None:
@@ -494,6 +562,11 @@ def main() -> None:
             old_events = json.loads(old_audiences_path.read_text(encoding="utf-8")).get("events", [])
         except Exception:
             old_events = []
+    if not old_events:
+        # CI : workspace vide → comparer avec la dernière extraction en ligne
+        remote = fetch_supabase_file("audiences")
+        if isinstance(remote, dict) and isinstance(remote.get("events"), list):
+            old_events = remote["events"]
 
     for jur in JURIDICTIONS:
         log(f"── {jur['nom']} ──")
