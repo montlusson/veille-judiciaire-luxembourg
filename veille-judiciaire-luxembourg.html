@@ -4255,7 +4255,12 @@ async function authSubmit(){
   try {
     const { error } = await _sb.auth.signInWithOtp({
       email,
-      options: { data: { lang: currentLang } }
+      options: {
+        data: { lang: currentLang },
+        /* Retour EXACTEMENT sur cette page (l'URL doit figurer dans
+           Supabase → Auth → URL Configuration → Redirect URLs) */
+        emailRedirectTo: location.origin + location.pathname
+      }
     });
     if(error) throw error;
     authClearMsg();
