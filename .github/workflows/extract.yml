@@ -31,14 +31,14 @@ jobs:
       # elles partent vers Supabase (lecture réservée @reporter.lu).
       - name: Lancer l'extraction (nouvelles décisions → Supabase)
         env:
-          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
-          SUPABASE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL || 'https://lhtkvogmkebslihuwfyu.supabase.co' }}
+          SUPABASE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY || secrets.SUPABASE }}
         run: python extract_decisions.py --push-new
 
       - name: Scraper les audiences (blobs → Supabase)
         env:
-          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
-          SUPABASE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL || 'https://lhtkvogmkebslihuwfyu.supabase.co' }}
+          SUPABASE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY || secrets.SUPABASE }}
         run: python scrape_audiences.py || true
 
       # Seul le cache d'URLs est committé (URLs publiques data.public.lu,
