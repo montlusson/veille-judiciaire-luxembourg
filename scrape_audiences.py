@@ -459,8 +459,10 @@ def update_audiences_archive(out_dir: Path, old_events: list[dict], today: date)
 
 
 def _sb_env() -> tuple[str, str] | None:
-    url = os.environ.get("SUPABASE_URL")
-    key = os.environ.get("SUPABASE_KEY")
+    # .strip() : un secret GitHub collé avec un retour à la ligne final rend
+    # le header HTTP invalide (requests.InvalidHeader) — nettoyage systématique
+    url = (os.environ.get("SUPABASE_URL") or "").strip().rstrip("/")
+    key = (os.environ.get("SUPABASE_KEY") or "").strip()
     return (url, key) if url and key else None
 
 

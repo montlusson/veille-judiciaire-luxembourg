@@ -432,8 +432,10 @@ def process_pdf(pdf_bytes: bytes, filename: str, source: dict, year: int, zip_ur
 
 def push_to_supabase(decisions: list[dict], generated_at: str) -> None:
     """Envoie les décisions vers Supabase via service_role key."""
-    url = os.environ.get("SUPABASE_URL")
-    key = os.environ.get("SUPABASE_KEY")
+    # .strip() : un secret GitHub collé avec un retour à la ligne final rend
+    # le header HTTP invalide (requests.InvalidHeader) — nettoyage systématique
+    url = (os.environ.get("SUPABASE_URL") or "").strip().rstrip("/")
+    key = (os.environ.get("SUPABASE_KEY") or "").strip()
     if not url or not key:
         log("  ⚠ Supabase non configuré (SUPABASE_URL / SUPABASE_KEY manquants) — ignoré")
         return

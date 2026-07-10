@@ -36,6 +36,7 @@ jobs:
         run: python extract_decisions.py --push-new
 
       - name: Scraper les audiences (blobs → Supabase)
+        if: always()   # tourne même si l'extraction des décisions a échoué
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL || 'https://lhtkvogmkebslihuwfyu.supabase.co' }}
           SUPABASE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY || secrets.SUPABASE }}
