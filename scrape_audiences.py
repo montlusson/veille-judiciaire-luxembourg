@@ -459,10 +459,15 @@ def update_audiences_archive(out_dir: Path, old_events: list[dict], today: date)
 
 
 def _sb_env() -> tuple[str, str] | None:
-    # .strip() : un secret GitHub collé avec un retour à la ligne final rend
-    # le header HTTP invalide (requests.InvalidHeader) — nettoyage systématique
-    url = (os.environ.get("SUPABASE_URL") or "").strip().rstrip("/")
-    key = (os.environ.get("SUPABASE_KEY") or "").strip()
+    # Reconstruction robuste : le secret GitHub peut contenir des retours à la
+    # ligne internes (clé fragmentée, ou URL et clé collées ensemble) qui rendent
+    # le header HTTP invalide. Une clé Supabase ne contient jamais d'espace :
+    # on retire les fragments d'URL et on recolle le reste.
+    raw_url = os.environ.get("SUPABASE_URL") or ""
+    raw_key = os.environ.get("SUPABASE_KEY") or ""
+    url_tokens = [t for t in (raw_url.split() + raw_key.split()) if t.lower().startswith("http")]
+    url = url_tokens[0].rstrip("/") if url_tokens else ""
+    key = "".join(t for t in raw_key.split() if not t.lower().startswith("http"))
     return (url, key) if url and key else None
 
 

@@ -45,6 +45,7 @@ jobs:
       # Seul le cache d'URLs est committé (URLs publiques data.public.lu,
       # nécessaire à l'extraction incrémentale entre deux runs CI)
       - name: Committer le cache d'extraction
+        if: always()   # évite de re-télécharger les mêmes archives au run suivant
         run: |
           git config user.name  "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"

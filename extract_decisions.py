@@ -432,10 +432,15 @@ def process_pdf(pdf_bytes: bytes, filename: str, source: dict, year: int, zip_ur
 
 def push_to_supabase(decisions: list[dict], generated_at: str) -> None:
     """Envoie les décisions vers Supabase via service_role key."""
-    # .strip() : un secret GitHub collé avec un retour à la ligne final rend
-    # le header HTTP invalide (requests.InvalidHeader) — nettoyage systématique
-    url = (os.environ.get("SUPABASE_URL") or "").strip().rstrip("/")
-    key = (os.environ.get("SUPABASE_KEY") or "").strip()
+    # Reconstruction robuste : le secret GitHub peut contenir des retours à la
+    # ligne internes (clé fragmentée, ou URL et clé collées ensemble) qui rendent
+    # le header HTTP invalide. Une clé Supabase ne contient jamais d'espace :
+    # on retire les fragments d'URL et on recolle le reste.
+    raw_url = os.environ.get("SUPABASE_URL") or ""
+    raw_key = os.environ.get("SUPABASE_KEY") or ""
+    url_tokens = [t for t in (raw_url.split() + raw_key.split()) if t.lower().startswith("http")]
+    url = url_tokens[0].rstrip("/") if url_tokens else ""
+    key = "".join(t for t in raw_key.split() if not t.lower().startswith("http"))
     if not url or not key:
         log("  ⚠ Supabase non configuré (SUPABASE_URL / SUPABASE_KEY manquants) — ignoré")
         return
