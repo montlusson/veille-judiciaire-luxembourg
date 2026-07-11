@@ -525,11 +525,11 @@ def push_files_to_supabase(payloads: dict) -> None:
     Pages : Supabase (lecture réservée @reporter.lu) est la seule source
     de données en ligne.
     """
-    url = os.environ.get("SUPABASE_URL")
-    key = os.environ.get("SUPABASE_KEY")
-    if not url or not key:
+    env = _sb_env()
+    if not env:
         log("  ⚠ Supabase non configuré (SUPABASE_URL / SUPABASE_KEY) — blobs non poussés")
         return
+    url, key = env
 
     headers = {
         "apikey":        key,
