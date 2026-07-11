@@ -613,6 +613,8 @@ table.analyse-tbl tbody tr:hover{background:var(--row-sep);}
 .auth-field input:focus{border-color:var(--accent-blue);}
 .auth-btn{width:100%;padding:11px;background:var(--sidebar-bg);color:#fff;border:none;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer;margin-top:6px;transition:opacity .15s;font-family:inherit;}
 .auth-btn:hover{opacity:.88;}
+.auth-linkbtn{width:100%;background:none;border:none;color:var(--accent-blue);font-size:12.5px;font-family:inherit;cursor:pointer;margin-top:12px;padding:4px;text-align:center;text-decoration:underline;}
+.auth-linkbtn:hover{opacity:.75;}
 .auth-toggle{text-align:center;margin-top:16px;font-size:12.5px;color:var(--text-muted);}
 .auth-toggle a{color:var(--accent-blue);cursor:pointer;font-weight:700;text-decoration:none;}
 .auth-msg{font-size:12.5px;border-radius:7px;padding:9px 12px;margin-bottom:12px;display:none;}
@@ -811,13 +813,19 @@ table.analyse-tbl tbody tr:hover{background:var(--row-sep);}
       <div class="auth-field">
         <label for="auth-email" data-i18n="auth_email_label">Adresse e-mail</label>
         <input type="email" id="auth-email" autocomplete="email" data-i18n-placeholder="auth_email_ph"
-          onkeydown="if(event.key==='Enter') authSubmit()">
+          onkeydown="if(event.key==='Enter') authPrimary()">
+      </div>
+      <div class="auth-field" id="auth-password-field">
+        <label for="auth-password" data-i18n="auth_password_label">Mot de passe</label>
+        <input type="password" id="auth-password" autocomplete="current-password"
+          onkeydown="if(event.key==='Enter') authPrimary()">
       </div>
       <div class="auth-domain-badge" id="auth-domain-badge">
         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
         <span data-i18n="auth_domain_badge">Réservé aux adresses @reporter.lu</span>
       </div>
-      <button class="auth-btn" onclick="authSubmit()" id="auth-submit-btn" data-i18n="auth_login_btn">Recevoir un lien de connexion</button>
+      <button class="auth-btn" onclick="authPrimary()" id="auth-submit-btn" data-i18n="auth_password_btn">Se connecter</button>
+      <button class="auth-linkbtn" onclick="authToggleMode()" id="auth-toggle-mode" data-i18n="auth_switch_to_link">Première connexion / mot de passe oublié ?</button>
     </div>
     <!-- État "lien envoyé" -->
     <div id="auth-sent-block" style="display:none;text-align:center;">
@@ -880,6 +888,7 @@ table.analyse-tbl tbody tr:hover{background:var(--row-sep);}
     </div>
     <div class="sidebar-user" id="sidebar-user" style="display:none;">
       <div class="sidebar-user-email" id="sidebar-user-email"></div>
+      <button class="sidebar-user-btn" onclick="authSetPassword()" id="sidebar-setpw-btn" data-i18n="auth_set_password" style="margin-bottom:6px;">Définir un mot de passe</button>
       <button class="sidebar-user-btn" onclick="authSignOut()" id="sidebar-logout-btn" data-i18n="auth_logout">Se déconnecter</button>
     </div>
   </aside>
@@ -1706,12 +1715,24 @@ const TRANSLATIONS = {
     auth_email_ph: "prenom.nom@reporter.lu",
     auth_domain_badge: "Réservé aux adresses @reporter.lu",
     auth_login_btn: "Recevoir un lien de connexion",
+    auth_password_label: "Mot de passe",
+    auth_password_btn: "Se connecter",
+    auth_switch_to_link: "Première connexion / mot de passe oublié ?",
+    auth_switch_to_password: "← Connexion par mot de passe",
     auth_logout: "Se déconnecter",
+    auth_set_password: "Définir un mot de passe",
+    auth_setpw_prompt: "Choisissez un mot de passe (8 caractères minimum) :",
+    auth_setpw_ok: "✓ Mot de passe enregistré. Vous pourrez désormais vous connecter directement.",
+    auth_setpw_short: "Mot de passe trop court (8 caractères minimum).",
+    auth_setpw_err: "Impossible d'enregistrer le mot de passe. Réessayez.",
     auth_err_fields: "Veuillez saisir votre adresse e-mail.",
+    auth_err_password_fields: "Veuillez saisir votre e-mail et votre mot de passe.",
     auth_err_domain: "Accès réservé aux adresses @reporter.lu.",
+    auth_err_badcreds: "E-mail ou mot de passe incorrect. Première connexion ? Utilisez le lien par e-mail ci-dessous.",
     auth_err_generic: "Une erreur est survenue. Réessayez dans quelques instants.",
     auth_err_ratelimit: "Trop de tentatives. Attendez quelques minutes avant de réessayer.",
     auth_loading: "Envoi en cours…",
+    auth_loading_login: "Connexion en cours…",
     auth_sent_title: "Lien envoyé !",
     auth_sent_desc: "Un lien de connexion a été envoyé à {email}. Cliquez dessus pour accéder au module.",
     auth_sent_back: "← Modifier l'adresse",
@@ -1918,12 +1939,24 @@ const TRANSLATIONS = {
     auth_email_ph: "vorname.name@reporter.lu",
     auth_domain_badge: "Nur für @reporter.lu-Adressen",
     auth_login_btn: "Anmeldelink erhalten",
+    auth_password_label: "Passwort",
+    auth_password_btn: "Anmelden",
+    auth_switch_to_link: "Erste Anmeldung / Passwort vergessen?",
+    auth_switch_to_password: "← Anmeldung mit Passwort",
     auth_logout: "Abmelden",
+    auth_set_password: "Passwort festlegen",
+    auth_setpw_prompt: "Wählen Sie ein Passwort (mindestens 8 Zeichen):",
+    auth_setpw_ok: "✓ Passwort gespeichert. Sie können sich künftig direkt anmelden.",
+    auth_setpw_short: "Passwort zu kurz (mindestens 8 Zeichen).",
+    auth_setpw_err: "Passwort konnte nicht gespeichert werden. Bitte erneut versuchen.",
     auth_err_fields: "Bitte E-Mail-Adresse eingeben.",
+    auth_err_password_fields: "Bitte E-Mail und Passwort eingeben.",
     auth_err_domain: "Zugang nur für @reporter.lu-Adressen.",
+    auth_err_badcreds: "E-Mail oder Passwort falsch. Erste Anmeldung? Nutzen Sie den E-Mail-Link unten.",
     auth_err_generic: "Ein Fehler ist aufgetreten. Bitte erneut versuchen.",
     auth_err_ratelimit: "Zu viele Versuche. Bitte einige Minuten warten.",
     auth_loading: "Wird gesendet…",
+    auth_loading_login: "Anmeldung läuft…",
     auth_sent_title: "Link gesendet!",
     auth_sent_desc: "Ein Anmeldelink wurde an {email} gesendet. Klicken Sie darauf, um auf das Modul zuzugreifen.",
     auth_sent_back: "← Adresse ändern",
@@ -4188,6 +4221,7 @@ function buildTableHtml(rows){
 /* ===================== AUTH ===================== */
 const AUTH_DOMAIN = '@reporter.lu';
 let _currentUser = null;
+let _authMode = 'password';   // 'password' (défaut) | 'link' (secours e-mail)
 
 function authSetLang(lang){
   currentLang = lang;
@@ -4211,12 +4245,30 @@ function authSetLang(lang){
   set('[data-i18n="auth_login_title"]',  'auth_login_title');
   set('[data-i18n="auth_login_sub"]',    'auth_login_sub');
   set('[data-i18n="auth_email_label"]',  'auth_email_label');
+  set('[data-i18n="auth_password_label"]', 'auth_password_label');
   set('[data-i18n="auth_domain_badge"]', 'auth_domain_badge');
-  set('[data-i18n="auth_login_btn"]',    'auth_login_btn');
   set('[data-i18n="auth_sent_title"]',   'auth_sent_title');
   set('[data-i18n="auth_sent_back"]',    'auth_sent_back');
+  set('[data-i18n="auth_set_password"]', 'auth_set_password');
   const emailInput = $('#auth-email');
   if(emailInput) emailInput.placeholder = t('auth_email_ph');
+  authApplyMode();   /* boutons dont le libellé dépend du mode courant */
+}
+
+/* Affiche/masque le champ mot de passe et adapte les libellés selon le mode */
+function authApplyMode(){
+  const pwField = $('#auth-password-field');
+  const submit  = $('#auth-submit-btn');
+  const toggle  = $('#auth-toggle-mode');
+  if(pwField) pwField.style.display = (_authMode === 'password') ? '' : 'none';
+  if(submit)  submit.textContent = t(_authMode === 'password' ? 'auth_password_btn' : 'auth_login_btn');
+  if(toggle)  toggle.textContent = t(_authMode === 'password' ? 'auth_switch_to_link' : 'auth_switch_to_password');
+}
+
+function authToggleMode(){
+  _authMode = (_authMode === 'password') ? 'link' : 'password';
+  authClearMsg();
+  authApplyMode();
 }
 
 function authShowMsg(text, type='error'){
@@ -4230,7 +4282,40 @@ function authResetForm(){
   $('#auth-form-block').style.display = '';
   $('#auth-sent-block').style.display = 'none';
   $('#auth-email').value = '';
+  const pw = $('#auth-password'); if(pw) pw.value = '';
   authClearMsg();
+  authApplyMode();
+}
+
+/* Bouton principal : dispatch selon le mode courant */
+function authPrimary(){
+  return _authMode === 'password' ? authPasswordLogin() : authSubmit();
+}
+
+/* Connexion e-mail + mot de passe — pas d'attente d'e-mail */
+async function authPasswordLogin(){
+  const email = ($('#auth-email').value || '').trim().toLowerCase();
+  const password = $('#auth-password').value || '';
+
+  if(!email || !password){ authShowMsg(t('auth_err_password_fields')); return; }
+  if(!email.endsWith(AUTH_DOMAIN)){ authShowMsg(t('auth_err_domain')); return; }
+
+  if(!_sb){ authShowMsg(t('auth_err_generic')); return; }
+
+  const btn = $('#auth-submit-btn');
+  btn.textContent = t('auth_loading_login');
+  btn.disabled = true;
+  try {
+    const { error } = await _sb.auth.signInWithPassword({ email, password });
+    if(error) throw error;
+    authClearMsg();
+    /* onAuthStateChange (SIGNED_IN) prend le relais et charge le module */
+  } catch(e){
+    const bad = /invalid login credentials|invalid.*password|email not confirmed/i.test(e.message || '');
+    authShowMsg(bad ? t('auth_err_badcreds') : t('auth_err_generic'));
+    btn.disabled = false;
+    authApplyMode();
+  }
 }
 
 async function authSubmit(){
@@ -4272,6 +4357,21 @@ async function authSubmit(){
     authShowMsg(msg);
     btn.textContent = t('auth_login_btn');
     btn.disabled = false;
+  }
+}
+
+/* Définir / changer le mot de passe (depuis la sidebar, une fois connecté) */
+async function authSetPassword(){
+  if(!_sb || !_currentUser) return;
+  const pw = prompt(t('auth_setpw_prompt'));
+  if(pw === null) return;                    /* annulé */
+  if(pw.length < 8){ alert(t('auth_setpw_short')); return; }
+  try {
+    const { error } = await _sb.auth.updateUser({ password: pw });
+    if(error) throw error;
+    alert(t('auth_setpw_ok'));
+  } catch(e){
+    alert(t('auth_setpw_err'));
   }
 }
 
