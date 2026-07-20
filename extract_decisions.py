@@ -430,8 +430,11 @@ def process_pdf(pdf_bytes: bytes, filename: str, source: dict, year: int, zip_ur
     }
 
 
-def push_to_supabase(decisions: list[dict], generated_at: str) -> None:
-    """Envoie les décisions vers Supabase via service_role key."""
+def push_to_supabase(decisions: list[dict], generated_at: str) -> bool:
+    """Envoie les décisions vers Supabase via service_role key.
+    Renvoie True si l'envoi a réussi (aucun lot en erreur), False sinon —
+    le cache n'est enregistré qu'en cas de succès pour ne pas perdre des
+    décisions si le projet est injoignable (ex. projet gratuit en pause)."""
     # Reconstruction robuste : le secret GitHub peut contenir des retours à la
     # ligne internes (clé fragmentée, ou URL et clé collées ensemble) qui rendent
     # le header HTTP invalide. Une clé Supabase ne contient jamais d'espace :
@@ -443,7 +446,7 @@ def push_to_supabase(decisions: list[dict], generated_at: str) -> None:
     key = "".join(t for t in raw_key.split() if not t.lower().startswith("http"))
     if not url or not key:
         log("  ⚠ Supabase non configuré (SUPABASE_URL / SUPABASE_KEY manquants) — ignoré")
-        return
+        return False
 
     log(f"\n── Envoi vers Supabase ({len(decisions)} décisions) ──")
 
@@ -487,26 +490,32 @@ def push_to_supabase(decisions: list[dict], generated_at: str) -> None:
                     errors += 1
                     log(f"  ✗ Lot {batch_num} : {r.status_code} — {r.text[:200]}")
                     break
-            except requests.exceptions.Timeout:
+            except requests.exceptions.RequestException as e:
+                # Couvre timeout ET erreurs réseau/DNS (projet en pause → injoignable)
                 if attempt < 2:
-                    log(f"  ↻ Lot {batch_num} timeout — retry {attempt+2}/3…")
+                    log(f"  ↻ Lot {batch_num} réseau — retry {attempt+2}/3…")
                     time.sleep(5 * (attempt + 1))
                 else:
                     errors += 1
-                    log(f"  ✗ Lot {batch_num} : timeout après 3 tentatives")
+                    log(f"  ✗ Lot {batch_num} : échec réseau après 3 tentatives — {str(e)[:120]}")
 
     # Mettre à jour la table meta (timestamp)
-    meta_payload = [{"key": "last_generated", "value": generated_at, "updated_at": generated_at}]
-    r = requests.post(f"{url}/rest/v1/meta", headers={**headers, "Prefer": "resolution=merge-duplicates"}, json=meta_payload, timeout=10)
-    if r.status_code in (200, 201):
-        log(f"  ✓ Table meta mise à jour ({generated_at})")
-    else:
-        log(f"  ✗ Meta : {r.status_code} — {r.text[:100]}")
+    try:
+        meta_payload = [{"key": "last_generated", "value": generated_at, "updated_at": generated_at}]
+        r = requests.post(f"{url}/rest/v1/meta", headers={**headers, "Prefer": "resolution=merge-duplicates"}, json=meta_payload, timeout=10)
+        if r.status_code in (200, 201):
+            log(f"  ✓ Table meta mise à jour ({generated_at})")
+        else:
+            log(f"  ✗ Meta : {r.status_code} — {r.text[:100]}")
+    except requests.exceptions.RequestException as e:
+        errors += 1
+        log(f"  ✗ Meta : échec réseau — {str(e)[:120]}")
 
     if errors == 0:
         log(f"  ✓ Supabase synchronisé — {len(decisions)} décisions")
-    else:
-        log(f"  ⚠ {errors} lot(s) en erreur — vérifiez les droits service_role")
+        return True
+    log(f"  ⚠ {errors} lot(s) en erreur — projet injoignable (pause ?) ou droits service_role")
+    return False
 
 
 MAX_WORKERS = 8  # téléchargements simultanés
@@ -700,8 +709,6 @@ def main() -> None:
     )
     log(f"  Index   : {index_file} ({index_file.stat().st_size / 1024 / 1024:.1f} MB)")
 
-    save_zip_cache(zip_cache)
-
     log(f"\n═══════════════════════════════════════════════════════")
     log(f"  Terminé : {len(all_decisions)} décisions ({stats['decisions']} nouvelles, "
         f"{stats['skipped']} archives sautées)")
@@ -719,18 +726,29 @@ def main() -> None:
     #                decisions.json (fulltext) — jamais en CI, où
     #                load_existing_decisions() lirait decisions_index.json
     #                (sans fulltext) et écraserait le fulltext Supabase.
+    #
+    # Le cache n'est enregistré qu'APRÈS un push réussi : si Supabase est
+    # injoignable (projet gratuit en pause), les archives ne sont pas marquées
+    # « traitées » et seront ré-extraites + repoussées au prochain run.
+    push_requested = "--push-new" in sys.argv or "--push-supabase" in sys.argv
+    push_ok = True
     if "--push-new" in sys.argv:
         if new_decisions:
-            push_to_supabase(new_decisions, output["generated_at"])
+            push_ok = push_to_supabase(new_decisions, output["generated_at"])
         else:
             log("  Supabase : aucune nouvelle décision — push ignoré")
     elif "--push-supabase" in sys.argv:
         if not OUTPUT_FILE.exists():
             log("  ✗ --push-supabase requiert decisions.json (fulltext). Lancez d'abord le script sans ce flag.")
             sys.exit(1)
-        push_to_supabase(all_decisions, output["generated_at"])
+        push_ok = push_to_supabase(all_decisions, output["generated_at"])
     else:
         log("  Supabase push ignoré (--push-new en CI, --push-supabase en local)")
+
+    if push_requested and not push_ok:
+        log("  ⚠ Cache NON enregistré (push échoué) — ré-extraction au prochain run")
+        sys.exit(1)
+    save_zip_cache(zip_cache)
 
 
 if __name__ == "__main__":

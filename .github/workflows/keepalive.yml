@@ -1,0 +1,31 @@
+name: Keep-alive Supabase
+
+# Les projets Supabase gratuits sont mis en pause après ~7 jours d'inactivité.
+# Ce job envoie une requête légère chaque jour pour réinitialiser le compteur
+# d'inactivité et empêcher la mise en veille (sinon le site et l'extraction
+# hebdomadaire tombent en panne). Requête anonyme (clé publique), aucune
+# donnée lue grâce au verrouillage RLS — c'est juste un « ping » qui compte
+# comme activité de la base.
+
+on:
+  schedule:
+    - cron: '17 5 * * *'   # tous les jours à 5h17 UTC
+  workflow_dispatch:
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Ping Supabase (garde le projet actif)
+        run: |
+          URL="https://lhtkvogmkebslihuwfyu.supabase.co/rest/v1/meta?select=key&limit=1"
+          KEY="sb_publishable_By72uskVkqxh9KNzxl2-bQ_NOSc5UgI"
+          CODE=$(curl -s -m 20 -o /dev/null -w '%{http_code}' "$URL" -H "apikey: $KEY")
+          echo "Supabase a répondu HTTP $CODE"
+          # 200 = actif. 000 = injoignable (projet en pause → à restaurer
+          # manuellement dans le dashboard). On échoue pour alerter dans ce cas.
+          if [ "$CODE" = "000" ]; then
+            echo "::error::Projet Supabase injoignable — probablement en pause. Restaurez-le dans le dashboard."
+            exit 1
+          fi
