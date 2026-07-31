@@ -1,0 +1,20 @@
+name: file-size-guard
+on: [push, pull_request]
+
+jobs:
+  max-lines:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Refuse les fichiers trop longs
+        run: |
+          MAX=500
+          fail=0
+          while IFS= read -r f; do
+            n=$(awk 'END{print NR+0}' "$f")
+            if [ "$n" -gt "$MAX" ]; then
+              echo "::error file=$f::$n lignes (plafond $MAX)"
+              fail=1
+            fi
+          done < <(git ls-files '*.py' '*.sh')
+          exit $fail
