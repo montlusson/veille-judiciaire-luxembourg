@@ -1,11 +1,11 @@
 name: Keep-alive Supabase
 
 # Les projets Supabase gratuits sont mis en pause après ~7 jours d'inactivité.
-# Ce job envoie une requête légère chaque jour pour réinitialiser le compteur
+# Ce job écrit chaque jour dans la table `meta` pour réinitialiser le compteur
 # d'inactivité et empêcher la mise en veille (sinon le site et l'extraction
-# hebdomadaire tombent en panne). Requête anonyme (clé publique), aucune
-# donnée lue grâce au verrouillage RLS — c'est juste un « ping » qui compte
-# comme activité de la base.
+# hebdomadaire tombent en panne). Un simple SELECT anonyme ne suffisait pas
+# à être compté comme activité par Supabase : on fait donc un upsert (écriture
+# réelle) avec la clé service_role, déjà utilisée par extract.yml.
 
 on:
   schedule:
@@ -17,15 +17,22 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
-      - name: Ping Supabase (garde le projet actif)
+      - name: Écrire dans Supabase (garde le projet actif)
+        env:
+          SUPABASE_KEY: ${{ secrets.SUPABASE }}
         run: |
-          URL="https://lhtkvogmkebslihuwfyu.supabase.co/rest/v1/meta?select=key&limit=1"
-          KEY="sb_publishable_By72uskVkqxh9KNzxl2-bQ_NOSc5UgI"
-          CODE=$(curl -s -m 20 -o /dev/null -w '%{http_code}' "$URL" -H "apikey: $KEY")
+          URL="https://lhtkvogmkebslihuwfyu.supabase.co/rest/v1/meta?on_conflict=key"
+          CODE=$(curl -s -m 20 -o /dev/null -w '%{http_code}' "$URL" \
+            -X POST \
+            -H "apikey: $SUPABASE_KEY" \
+            -H "Authorization: Bearer $SUPABASE_KEY" \
+            -H "Content-Type: application/json" \
+            -H "Prefer: resolution=merge-duplicates" \
+            -d '{"key":"keepalive","value":"'"$(date -u +%FT%TZ)"'"}')
           echo "Supabase a répondu HTTP $CODE"
-          # 200 = actif. 000 = injoignable (projet en pause → à restaurer
-          # manuellement dans le dashboard). On échoue pour alerter dans ce cas.
-          if [ "$CODE" = "000" ]; then
-            echo "::error::Projet Supabase injoignable — probablement en pause. Restaurez-le dans le dashboard."
+          # 201/200 = écriture réussie. 000 = injoignable (projet en pause →
+          # à restaurer manuellement dans le dashboard). On échoue pour alerter.
+          if [ "$CODE" != "200" ] && [ "$CODE" != "201" ]; then
+            echo "::error::Écriture Supabase échouée (HTTP $CODE) — projet peut-être en pause. Restaurez-le dans le dashboard."
             exit 1
           fi
