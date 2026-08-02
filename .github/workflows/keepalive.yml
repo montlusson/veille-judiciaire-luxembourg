@@ -36,3 +36,17 @@ jobs:
             echo "::error::Écriture Supabase échouée (HTTP $CODE) — projet peut-être en pause. Restaurez-le dans le dashboard."
             exit 1
           fi
+
+      - name: Purger les pistes de rapprochement expirées (rétention 6 mois)
+        env:
+          SUPABASE_KEY: ${{ secrets.SUPABASE }}
+        run: |
+          NOW=$(date -u +%FT%TZ)
+          URL="https://lhtkvogmkebslihuwfyu.supabase.co/rest/v1/rapprochement?suivi_editorial=eq.false&expires_at=lt.$NOW"
+          CODE=$(curl -s -m 20 -o /dev/null -w '%{http_code}' "$URL" \
+            -X DELETE \
+            -H "apikey: $SUPABASE_KEY" \
+            -H "Authorization: Bearer $SUPABASE_KEY")
+          echo "Purge rapprochement — HTTP $CODE"
+          # Ne fait pas échouer le job : la table peut ne pas encore exister
+          # tant que rapprochement-schema.sql n'a pas été exécuté manuellement.
