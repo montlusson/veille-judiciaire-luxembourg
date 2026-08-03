@@ -132,6 +132,8 @@ h1.title{font-size:28px;}
 .action-icon.grn{background:var(--success-icon-bg);color:#fff;}
 .action-card h3{font-size:14.5px;margin-bottom:2px;}
 .action-card p{color:var(--text-muted);font-size:12.5px;line-height:1.4;}
+.dash-lang-btn{padding:5px 11px;border:1px solid var(--card-border);background:var(--card-bg);color:var(--text-muted);border-radius:var(--radius-sm);cursor:pointer;font-size:11.5px;font-weight:700;letter-spacing:.03em;}
+.dash-lang-btn.active{background:var(--accent-red);border-color:var(--accent-red);color:#fff;}
 .action-card.dark p{color:var(--sidebar-text-muted);}
 .action-card.green p{color:var(--success-fg);}
 .action-card button{margin-top:auto;align-self:flex-start;}
@@ -1005,6 +1007,17 @@ table.analyse-tbl tbody tr:hover{background:var(--row-sep);}
       <h1 id="h-dashboard" class="title" data-i18n="dashboard_title">Bonjour</h1>
       <p class="intro" data-i18n="dashboard_intro">Explorez les décisions de justice luxembourgeoises et suivez les affaires en cours.</p>
 
+      <!-- Strip statut index — informatif uniquement, la mise à jour est automatique (pipeline hebdomadaire) -->
+      <div class="index-update-strip" id="index-update-strip">
+        <div class="index-update-info">
+          <div class="index-update-dot" id="index-update-dot"></div>
+          <div>
+            <div class="index-update-label" id="index-update-label" data-i18n="index_strip_loading">Index des décisions</div>
+            <div class="index-update-sub" id="index-update-sub">Chargement…</div>
+          </div>
+        </div>
+      </div>
+
       <div class="kpi-grid">
         <button class="kpi-card kpi-dark" onclick="showScreen('recherche')" aria-label="Voir toutes les décisions indexées">
           <div class="kpi-num" id="kpi-total">0</div>
@@ -1037,21 +1050,6 @@ table.analyse-tbl tbody tr:hover{background:var(--row-sep);}
             <span data-i18n="kpi_affaires_foot">W25 · Cour administrative</span>
             <svg class="kpi-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
           </div>
-        </button>
-      </div>
-
-      <!-- Strip statut index — visible, avec CTA clair -->
-      <div class="index-update-strip" id="index-update-strip">
-        <div class="index-update-info">
-          <div class="index-update-dot" id="index-update-dot"></div>
-          <div>
-            <div class="index-update-label" id="index-update-label" data-i18n="index_strip_loading">Index des décisions</div>
-            <div class="index-update-sub" id="index-update-sub">Chargement…</div>
-          </div>
-        </div>
-        <button class="btn btn-primary" id="dashboard-refresh-btn" onclick="refreshDecisions(true)" style="font-size:13px;white-space:nowrap;">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M23 4v6h-6"/><path d="M1 20v-6h6"/><path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/></svg>
-          <span data-i18n="dashboard_refresh_btn">Charger les nouvelles décisions</span>
         </button>
       </div>
 
@@ -1095,6 +1093,20 @@ table.analyse-tbl tbody tr:hover{background:var(--row-sep);}
           <h3 data-i18n="action_rappr_title">Identifier une personne concernée</h3>
           <p data-i18n="action_rappr_desc">Depuis une décision, vérifiez si elle concerne un professionnel identifiable — avec les garde-fous légaux intégrés.</p>
           <button class="btn btn-secondary" data-target="recherche" data-i18n="action_rappr_btn">Voir les décisions</button>
+        </div>
+        <div class="action-card light">
+          <div class="action-icon r" aria-hidden="true">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 11-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 11-2.83-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 112.83-2.83l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 112.83 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+          </div>
+          <h3 data-i18n="action_account_title">Mon compte</h3>
+          <p id="dashboard-account-email">—</p>
+          <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:2px;">
+            <div style="display:flex;gap:4px;">
+              <button class="dash-lang-btn" id="dash-lang-fr" onclick="setLang('fr')">FR</button>
+              <button class="dash-lang-btn" id="dash-lang-de" onclick="setLang('de')">DE</button>
+            </div>
+            <button class="btn btn-secondary" style="font-size:12px;padding:6px 12px;" onclick="authSetPassword()" data-i18n="auth_set_password">Définir un mot de passe</button>
+          </div>
         </div>
       </div>
 
@@ -1564,13 +1576,13 @@ const TRANSLATIONS = {
     action_rappr_desc: "Depuis une décision, vérifiez si elle concerne un professionnel identifiable — avec les garde-fous légaux intégrés.",
     action_rappr_btn: "Voir les décisions",
     rappr_eyebrow: "Piste d'identification — mode manuel assisté",
+    action_account_title: "Mon compte",
     legal_noshow: "Ne plus afficher au démarrage",
     legal_acknowledge: "J'ai pris connaissance",
     recent_activity: "Activité récente",
     index_strip_loading: "Index des décisions",
     index_strip_ok: "Index à jour",
     index_strip_error: "Données d'exemple",
-    dashboard_refresh_btn: "Charger les nouvelles décisions",
     update_card_title: "Charger les nouvelles décisions",
     update_card_desc: "Vérifie si de nouvelles décisions sont disponibles sur le serveur et met à jour l'index local.",
     api_refresh_short: "Actualiser les liens",
@@ -1792,13 +1804,13 @@ const TRANSLATIONS = {
     action_rappr_desc: "Prüfen Sie direkt bei einer Entscheidung, ob sie eine identifizierbare Fachperson betrifft — mit integrierten rechtlichen Schutzmaßnahmen.",
     action_rappr_btn: "Entscheidungen ansehen",
     rappr_eyebrow: "Beteiligte Person identifizieren — manuell unterstützter Modus",
+    action_account_title: "Mein Konto",
     legal_noshow: "Beim Start nicht mehr anzeigen",
     legal_acknowledge: "Zur Kenntnis genommen",
     recent_activity: "Aktuelle Aktivität",
     index_strip_loading: "Entscheidungsindex",
     index_strip_ok: "Index aktuell",
     index_strip_error: "Beispieldaten",
-    dashboard_refresh_btn: "Neue Entscheidungen laden",
     update_card_title: "Neue Entscheidungen laden",
     update_card_desc: "Prüft, ob neue Entscheidungen auf dem Server verfügbar sind, und aktualisiert den lokalen Index.",
     api_refresh_short: "Links aktualisieren",
@@ -1994,6 +2006,8 @@ function setLang(lang) {
   currentLang = lang;
   document.getElementById('lang-fr').classList.toggle('active', lang === 'fr');
   document.getElementById('lang-de').classList.toggle('active', lang === 'de');
+  document.getElementById('dash-lang-fr')?.classList.toggle('active', lang === 'fr');
+  document.getElementById('dash-lang-de')?.classList.toggle('active', lang === 'de');
   document.documentElement.lang = lang;
   localStorage.setItem('vj_lang', lang);
   if(_sb && _currentUser) _sb.auth.updateUser({ data:{ lang } });
@@ -2286,6 +2300,11 @@ function renderDashboard(){
     const first = _greetFirstName();
     greetEl.textContent = first ? `${t('dashboard_title')}, ${first}` : t('dashboard_title');
   }
+
+  const acctEmailEl = $('#dashboard-account-email');
+  if(acctEmailEl) acctEmailEl.textContent = _currentUser?.email || (currentLang==='de' ? 'Nicht verbunden' : 'Non connecté');
+  $('#dash-lang-fr')?.classList.toggle('active', currentLang === 'fr');
+  $('#dash-lang-de')?.classList.toggle('active', currentLang === 'de');
 
   /* Strip de statut index */
   const dot   = $('#index-update-dot');
