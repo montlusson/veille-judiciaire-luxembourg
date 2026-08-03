@@ -1003,6 +1003,17 @@ table.analyse-tbl tbody tr:hover{background:var(--row-sep);}
       </div>
     </div>
 
+    <!-- MODAL DÉTAIL DES CONNEXIONS (accès restreint côté base de données) -->
+    <div class="legal-modal-overlay" id="connexions-modal-overlay" style="display:none;" onclick="if(event.target===this)closeConnexionsModal()">
+      <div class="fulltext-modal" style="max-width:480px;height:auto;max-height:80vh;" role="dialog" aria-modal="true" aria-labelledby="connexions-modal-title">
+        <div class="fulltext-modal-bar">
+          <span id="connexions-modal-title" data-i18n="connexions_detail_title">Détail des connexions</span>
+          <button class="legal-modal-close" onclick="closeConnexionsModal()" aria-label="Fermer">&times;</button>
+        </div>
+        <div class="fulltext-modal-body" id="connexions-modal-body" style="white-space:normal;"></div>
+      </div>
+    </div>
+
     <!-- DASHBOARD -->
     <section class="screen active" data-screen="dashboard" aria-labelledby="h-dashboard">
       <div class="eyebrow" data-i18n="dashboard_eyebrow">Vue d'ensemble</div>
@@ -1108,6 +1119,10 @@ table.analyse-tbl tbody tr:hover{background:var(--row-sep);}
               <button class="dash-lang-btn" id="dash-lang-de" onclick="setLang('de')">DE</button>
             </div>
             <button class="btn btn-secondary" style="font-size:12px;padding:6px 12px;" onclick="authSetPassword()" data-i18n="auth_set_password">Définir un mot de passe</button>
+          </div>
+          <div style="font-size:11.5px;color:var(--text-faint);margin-top:8px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+            <span data-i18n="connexions_count_label">Connexions enregistrées :</span> <strong id="dashboard-connexions-count">—</strong>
+            <button id="dashboard-connexions-detail-btn" class="btn btn-secondary" style="display:none;font-size:11px;padding:3px 10px;" onclick="openConnexionsModal()" data-i18n="connexions_detail_btn">Voir le détail</button>
           </div>
         </div>
       </div>
@@ -1575,6 +1590,9 @@ const TRANSLATIONS = {
     action_rappr_btn: "Découvrir",
     rappr_eyebrow: "Piste d'identification — mode manuel assisté",
     action_account_title: "Mon compte",
+    connexions_count_label: "Connexions enregistrées :",
+    connexions_detail_btn: "Voir le détail",
+    connexions_detail_title: "Détail des connexions",
     legal_noshow: "Ne plus afficher au démarrage",
     legal_acknowledge: "J'ai pris connaissance",
     recent_activity: "Activité récente",
@@ -1803,6 +1821,9 @@ const TRANSLATIONS = {
     action_rappr_btn: "Entdecken",
     rappr_eyebrow: "Beteiligte Person identifizieren — manuell unterstützter Modus",
     action_account_title: "Mein Konto",
+    connexions_count_label: "Erfasste Verbindungen:",
+    connexions_detail_btn: "Details ansehen",
+    connexions_detail_title: "Verbindungsdetails",
     legal_noshow: "Beim Start nicht mehr anzeigen",
     legal_acknowledge: "Zur Kenntnis genommen",
     recent_activity: "Aktuelle Aktivität",
@@ -2302,6 +2323,7 @@ function renderDashboard(){
   if(acctEmailEl) acctEmailEl.textContent = _currentUser?.email || (currentLang==='de' ? 'Nicht verbunden' : 'Non connecté');
   $('#dash-lang-fr')?.classList.toggle('active', currentLang === 'fr');
   $('#dash-lang-de')?.classList.toggle('active', currentLang === 'de');
+  renderConnexionsStats();
 
   /* Strip de statut index */
   const dot   = $('#index-update-dot');
@@ -2887,6 +2909,59 @@ function closeAnnotModal(){
   document.getElementById('annot-modal-overlay').style.display = 'none';
   document.body.style.overflow = '';
   _annotModalDecisionId = null;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   JOURNALISATION DES CONNEXIONS — deux niveaux
+   Niveau 1 (tous) : nombre total uniquement, via RPC ne renvoyant qu'un
+   chiffre (get_connexions_count) — aucune ligne individuelle exposée.
+   Niveau 2 (emails listés côté Supabase dans connexions_log_viewers,
+   jamais dans ce fichier) : détail complet, contrôlé par RLS.
+   ═══════════════════════════════════════════════════════════════ */
+function _logConnexion(){
+  if(!_sb || !_currentUser) return;
+  if(sessionStorage.getItem('vj_connexion_logged') === '1') return;
+  sessionStorage.setItem('vj_connexion_logged', '1');
+  _sb.from('connexions_log').insert({ email: _currentUser.email })
+    .then(({error}) => { if(error) console.warn('[connexions_log] insert', error); });
+}
+
+async function renderConnexionsStats(){
+  if(!_sb || !_currentUser) return;
+  const countEl = $('#dashboard-connexions-count');
+  const detailBtn = $('#dashboard-connexions-detail-btn');
+  if(!countEl) return;
+  const { data: count, error } = await _sb.rpc('get_connexions_count');
+  countEl.textContent = error ? '—' : count;
+  if(detailBtn){
+    const { data: isViewer } = await _sb.rpc('is_connexion_log_viewer');
+    detailBtn.style.display = isViewer ? 'inline-flex' : 'none';
+  }
+}
+
+function openConnexionsModal(){
+  if(!_sb) return;
+  const isDE = currentLang==='de';
+  const body = document.getElementById('connexions-modal-body');
+  document.getElementById('connexions-modal-overlay').style.display = 'flex';
+  document.body.style.overflow = 'hidden';
+  body.textContent = isDE ? 'Wird geladen…' : 'Chargement…';
+  _sb.from('connexions_log').select('email,created_at').order('created_at',{ascending:false}).limit(500)
+    .then(({data, error}) => {
+      if(error || !data){
+        body.textContent = isDE ? 'Zugriff verweigert oder Fehler.' : 'Accès refusé ou erreur.';
+        return;
+      }
+      body.innerHTML = data.length ? data.map(r =>
+        `<div style="padding:7px 0;border-bottom:1px solid var(--row-sep);font-size:13px;display:flex;justify-content:space-between;gap:12px;">
+          <span>${escHtml(r.email)}</span><span style="color:var(--text-faint);white-space:nowrap;">${new Date(r.created_at).toLocaleString(isDE?'de-LU':'fr-LU')}</span>
+        </div>`).join('') : (isDE ? 'Keine Verbindung erfasst.' : 'Aucune connexion enregistrée.');
+    });
+}
+
+function closeConnexionsModal(){
+  document.getElementById('connexions-modal-overlay').style.display = 'none';
+  document.body.style.overflow = '';
 }
 
 ['search-input','filter-juridiction','filter-annee','filter-type'].forEach(id => {
@@ -4466,6 +4541,7 @@ async function authOnSession(session){
   loadAudiencesJSON();
   loadAudiencesArchiveJSON();
   loadArchivesJSON();
+  _logConnexion();
 }
 
 async function authSignOut(){
