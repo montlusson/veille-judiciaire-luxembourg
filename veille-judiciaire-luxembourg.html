@@ -131,6 +131,7 @@ h1.title{font-size:28px;}
 .action-icon.g{background:var(--accent-red);color:#fff;}
 .action-icon.grn{background:var(--success-icon-bg);color:#fff;}
 .action-card h3{font-size:14.5px;margin-bottom:2px;}
+.action-card.dark h3{color:var(--sidebar-text);}
 .action-card p{color:var(--text-muted);font-size:12.5px;line-height:1.4;}
 .dash-lang-btn{padding:5px 11px;border:1px solid var(--card-border);background:var(--card-bg);color:var(--text-muted);border-radius:var(--radius-sm);cursor:pointer;font-size:11.5px;font-weight:700;letter-spacing:.03em;}
 .dash-lang-btn.active{background:var(--accent-red);border-color:var(--accent-red);color:#fff;}
@@ -1055,7 +1056,7 @@ table.analyse-tbl tbody tr:hover{background:var(--row-sep);}
 
       <div class="action-grid">
         <div class="action-card dark">
-          <div class="action-icon" aria-hidden="true" style="color:var(--accent-red);">
+          <div class="action-icon g" aria-hidden="true">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/><path d="M9 12h6M9 16h4"/></svg>
           </div>
           <h3 data-i18n="action_affaires_title">Affaires en cours</h3>
@@ -1070,29 +1071,29 @@ table.analyse-tbl tbody tr:hover{background:var(--row-sep);}
           <p data-i18n="action_agenda_desc">Consultez les prochaines audiences et ajoutez-les à votre agenda.</p>
           <button class="btn btn-secondary" data-target="agenda" data-i18n="action_agenda_btn">Voir l'agenda</button>
         </div>
-        <div class="action-card light">
-          <div class="action-icon r" aria-hidden="true">
+        <div class="action-card dark">
+          <div class="action-icon g" aria-hidden="true">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
           </div>
           <h3 data-i18n="action_search_title">Lancer une recherche</h3>
           <p data-i18n="action_search_desc">Recherchez un mot, une société ou une référence dans le texte des décisions.</p>
-          <button class="btn btn-secondary" data-target="recherche" data-i18n="action_search_btn">Ouvrir la recherche</button>
+          <button class="btn btn-inverse" data-target="recherche" data-i18n="action_search_btn">Ouvrir la recherche</button>
         </div>
-        <div class="action-card dark">
-          <div class="action-icon g" aria-hidden="true">
+        <div class="action-card light">
+          <div class="action-icon r" aria-hidden="true">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8a6 6 0 10-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 01-3.4 0"/></svg>
           </div>
           <h3 data-i18n="action_alert_title">Ouvrir le radar</h3>
           <p data-i18n="action_alert_desc">Enregistrez un mot-clé à surveiller : les nouvelles décisions correspondantes s'affichent ici automatiquement.</p>
-          <button class="btn btn-inverse" data-target="veille" data-i18n="action_alert_btn">Ouvrir le radar</button>
+          <button class="btn btn-secondary" data-target="veille" data-i18n="action_alert_btn">Ouvrir le radar</button>
         </div>
-        <div class="action-card light">
-          <div class="action-icon r" aria-hidden="true">
+        <div class="action-card dark">
+          <div class="action-icon g" aria-hidden="true">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="2"/><path d="M7 16c.5-1.5 1.7-2 2-2s1.5.5 2 2"/><path d="M14 9h4M14 13h3"/></svg>
           </div>
-          <h3 data-i18n="action_rappr_title">Identifier une personne concernée</h3>
-          <p data-i18n="action_rappr_desc">Depuis une décision, vérifiez si elle concerne un professionnel identifiable — avec les garde-fous légaux intégrés.</p>
-          <button class="btn btn-secondary" data-target="recherche" data-i18n="action_rappr_btn">Voir les décisions</button>
+          <h3 data-i18n="action_rappr_title">Qui est concerné ?</h3>
+          <p data-i18n="action_rappr_desc">Depuis une décision, vérifiez si elle concerne un professionnel identifiable, avec les garde-fous légaux intégrés.</p>
+          <button class="btn btn-inverse" data-target="recherche" data-i18n="action_rappr_btn">Voir les décisions</button>
         </div>
         <div class="action-card light">
           <div class="action-icon r" aria-hidden="true">
@@ -1572,8 +1573,8 @@ const TRANSLATIONS = {
     action_alert_title: "Ouvrir le radar",
     action_alert_desc: "Enregistrez un mot-clé à surveiller : les nouvelles décisions correspondantes s'affichent ici automatiquement.",
     action_alert_btn: "Ouvrir le radar",
-    action_rappr_title: "Identifier une personne concernée",
-    action_rappr_desc: "Depuis une décision, vérifiez si elle concerne un professionnel identifiable — avec les garde-fous légaux intégrés.",
+    action_rappr_title: "Qui est concerné ?",
+    action_rappr_desc: "Depuis une décision, vérifiez si elle concerne un professionnel identifiable, avec les garde-fous légaux intégrés.",
     action_rappr_btn: "Voir les décisions",
     rappr_eyebrow: "Piste d'identification — mode manuel assisté",
     action_account_title: "Mon compte",
@@ -1800,8 +1801,8 @@ const TRANSLATIONS = {
     action_alert_title: "Radar öffnen",
     action_alert_desc: "Speichern Sie ein zu überwachendes Stichwort: passende neue Entscheidungen erscheinen hier automatisch.",
     action_alert_btn: "Radar öffnen",
-    action_rappr_title: "Beteiligte Person identifizieren",
-    action_rappr_desc: "Prüfen Sie direkt bei einer Entscheidung, ob sie eine identifizierbare Fachperson betrifft — mit integrierten rechtlichen Schutzmaßnahmen.",
+    action_rappr_title: "Wer ist betroffen?",
+    action_rappr_desc: "Prüfen Sie direkt bei einer Entscheidung, ob sie eine identifizierbare Fachperson betrifft, mit integrierten rechtlichen Schutzmaßnahmen.",
     action_rappr_btn: "Entscheidungen ansehen",
     rappr_eyebrow: "Beteiligte Person identifizieren — manuell unterstützter Modus",
     action_account_title: "Mein Konto",
