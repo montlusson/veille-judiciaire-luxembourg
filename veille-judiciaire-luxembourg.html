@@ -85,7 +85,7 @@ main{flex:1;min-width:0;padding:36px 40px 56px;max-width:1180px;}
 .screen{display:none;}
 .screen.active{display:block;}
 .eyebrow{font-size:12.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--accent-red);font-weight:700;margin-bottom:8px;}
-.intro{color:var(--text-muted);max-width:680px;margin-top:10px;margin-bottom:24px;}
+.intro{color:var(--text-muted);max-width:680px;margin-top:10px;margin-bottom:16px;}
 h1.title{font-size:28px;}
 
 .kpi-grid{display:grid;grid-template-columns:1.65fr 1fr 1fr 1fr;gap:12px;margin-top:26px;}
@@ -117,21 +117,21 @@ h1.title{font-size:28px;}
 .kpi-arrow{opacity:0;transition:opacity .2s,transform .25s cubic-bezier(0.16,1,0.3,1);transform:translateX(-4px);}
 .kpi-card:hover .kpi-arrow,.kpi-card:focus-visible .kpi-arrow{opacity:1;transform:translateX(0);}
 
-.action-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:22px;}
+.action-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:18px;}
 .action-card{
-  border-radius:var(--radius-lg);padding:22px;display:flex;flex-direction:column;gap:10px;min-height:140px;
+  border-radius:var(--radius-lg);padding:16px 18px;display:flex;flex-direction:column;gap:6px;min-height:112px;
   transition:transform .25s cubic-bezier(0.16,1,0.3,1),box-shadow .25s cubic-bezier(0.16,1,0.3,1);
 }
 .action-card:hover{transform:translateY(-2px);}
 .action-card.light{background:var(--card-bg);border:1px solid var(--card-border);}
 .action-card.dark{background:var(--sidebar-bg);color:var(--sidebar-text);}
 .action-card.green{background:var(--success-bg);border:1px solid var(--success-border);}
-.action-icon{width:36px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;}
+.action-icon{width:30px;height:30px;border-radius:7px;display:flex;align-items:center;justify-content:center;}
 .action-icon.r{background:var(--accent-red-tint);color:var(--accent-red);}
 .action-icon.g{background:var(--accent-red);color:#fff;}
 .action-icon.grn{background:var(--success-icon-bg);color:#fff;}
-.action-card h3{font-size:16px;margin-bottom:6px;}
-.action-card p{color:var(--text-muted);font-size:13.5px;}
+.action-card h3{font-size:14.5px;margin-bottom:2px;}
+.action-card p{color:var(--text-muted);font-size:12.5px;line-height:1.4;}
 .action-card.dark p{color:var(--sidebar-text-muted);}
 .action-card.green p{color:var(--success-fg);}
 .action-card button{margin-top:auto;align-self:flex-start;}
@@ -266,7 +266,12 @@ select,.input{border:1px solid var(--card-border);background:#fff;border-radius:
 .detail-resizer{flex-shrink:0;height:6px;background:var(--card-border);cursor:ns-resize;transition:background .15s;user-select:none;}
 .detail-resizer:hover,.detail-resizer.dragging{background:var(--accent-red);}
 .detail-annot-zone{flex-shrink:0;overflow-y:auto;padding:14px 28px 18px;background:var(--sidebar-bg);border-top:1.5px solid var(--card-border);min-height:60px;}
-.detail-annot-zone .annot-section-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--text-faint);margin-bottom:12px;display:flex;align-items:center;gap:8px;}
+.detail-annot-zone .annot-section-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--text-faint);margin-bottom:12px;display:flex;align-items:center;gap:8px;cursor:pointer;user-select:none;}
+.detail-annot-zone.collapsed{overflow:visible;}
+.detail-annot-zone .annot-section-label:hover{color:var(--text-muted);}
+.annot-toggle-chevron{margin-left:auto;transition:transform .2s;flex-shrink:0;}
+.annot-toggle-chevron.open{transform:rotate(180deg);}
+.annot-count-badge{background:var(--accent-red-tint);color:var(--accent-red);font-size:10px;font-weight:700;padding:1px 7px;border-radius:20px;}
 .detail-annot-zone .annot-section-label span{font-weight:400;text-transform:none;letter-spacing:0;}
 .detail-annot-placeholder{font-size:13px;color:var(--text-faint);padding:12px 0;}
 .detail-placeholder{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;color:var(--text-faint);text-align:center;gap:14px;}
@@ -742,6 +747,11 @@ table.analyse-tbl tbody tr:hover{background:var(--row-sep);}
 .legal-modal-footer{display:flex;align-items:center;justify-content:space-between;padding:16px 28px;border-top:1px solid var(--card-border);gap:12px;flex-wrap:wrap;}
 .legal-modal-footer label{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--text-muted);cursor:pointer;}
 
+/* ── Modal plein écran — texte de la décision ── */
+.fulltext-modal{background:var(--bg);border-radius:var(--radius-lg);max-width:920px;width:100%;height:92vh;display:flex;flex-direction:column;box-shadow:0 24px 80px rgba(0,0,0,.28);border:1px solid var(--card-border);}
+.fulltext-modal-bar{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:16px 24px;border-bottom:1px solid var(--card-border);flex:0 0 auto;font-family:'PT Serif',serif;font-weight:700;font-size:15px;color:var(--text-main);}
+.fulltext-modal-body{flex:1;overflow-y:auto;padding:26px 32px;font-size:15px;line-height:1.85;white-space:pre-wrap;word-break:break-word;color:var(--text);}
+
 /* ── Notice courte par section ── */
 .section-notice{border-left:3px solid var(--accent-red);background:var(--accent-red-tint);border-radius:0 5px 5px 0;padding:7px 13px;margin-bottom:16px;font-size:12px;color:#7A2420;line-height:1.45;}
 .section-notice a{color:#7A2420;font-weight:600;cursor:pointer;text-decoration:underline;}
@@ -749,8 +759,10 @@ table.analyse-tbl tbody tr:hover{background:var(--row-sep);}
 .section-notice.moderate a{color:#8A6418;}
 
 /* ── Rapprochement d'identité (mode manuel assisté) ── */
-.rappr-trigger-btn{display:inline-flex;align-items:center;gap:6px;background:var(--accent-red-tint);color:var(--accent-red);border:1px solid #F5C5BF;border-radius:var(--radius-sm);padding:6px 12px;font-size:12px;font-weight:700;cursor:pointer;margin-top:10px;}
-.rappr-trigger-btn:hover{background:#F5C5BF;}
+.rappr-trigger-btn{display:inline-flex;align-items:center;gap:7px;background:#E8EDF5;color:var(--accent-blue);border:1px solid #C8D4E3;border-radius:var(--radius-sm);padding:8px 14px;font-size:12.5px;font-weight:700;cursor:pointer;margin-top:10px;min-height:36px;}
+.rappr-trigger-btn:hover{background:#D0E2F5;border-color:var(--accent-blue);}
+.rappr-new-badge{display:inline-flex;align-items:center;background:var(--accent-red);color:#fff;font-size:9.5px;font-weight:800;text-transform:uppercase;letter-spacing:.04em;padding:1px 6px;border-radius:20px;margin-left:2px;}
+.section-notice.info{border-left:3px solid var(--accent-blue);background:#F0F4F9;border-radius:0 5px 5px 0;padding:7px 13px;margin-bottom:16px;font-size:12px;color:#2B4C6F;line-height:1.45;}
 .rappr-gate{border:1.5px solid var(--accent-red);border-radius:var(--radius-md);padding:16px 18px;margin-bottom:18px;background:var(--accent-red-tint);}
 .rappr-gate-title{font-weight:700;font-size:13px;color:#7A2420;margin-bottom:8px;}
 .rappr-gate p{font-size:12.5px;color:#7A2420;line-height:1.6;margin:0 0 12px;}
@@ -767,6 +779,7 @@ table.analyse-tbl tbody tr:hover{background:var(--row-sep);}
 .rappr-badge{font-size:10.5px;font-weight:700;padding:2px 8px;border-radius:20px;white-space:nowrap;}
 .rappr-badge.blocked{background:var(--accent-red-tint);color:#7A2420;}
 .rappr-badge.unknown{background:#FBF1DC;color:#8A6418;}
+.rappr-badge.permissive{background:#E8F4EC;color:#2B6B3C;}
 .rappr-card-note{font-size:12px;color:var(--text-muted);line-height:1.55;margin:8px 0;}
 .rappr-card-link{font-size:12px;font-weight:600;color:var(--accent-blue);text-decoration:underline;}
 .rappr-card-form{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;padding-top:10px;border-top:1px dashed var(--card-border);}
@@ -916,7 +929,7 @@ table.analyse-tbl tbody tr:hover{background:var(--row-sep);}
       <button class="lang-btn" id="lang-de" onclick="setLang('de')">DE</button>
     </div>
     <div class="sidebar-footer" id="sidebar-footer-el">
-      Outil de démonstration — données fictives reconstituées à partir de la structure des jeux de données ouverts de l'Administration judiciaire (data.public.lu). Aucune décision réelle n'est représentée.
+      Sources officielles : Administration judiciaire — data.public.lu · Licence CC BY-ND 4.0. Nouvelles décisions indexées chaque semaine.
     </div>
     <div class="sidebar-user" id="sidebar-user" style="display:none;">
       <div class="sidebar-user-email" id="sidebar-user-email"></div>
@@ -966,7 +979,7 @@ table.analyse-tbl tbody tr:hover{background:var(--row-sep);}
       <div class="legal-modal" role="dialog" aria-modal="true" aria-labelledby="rappr-modal-title">
         <div class="legal-modal-head">
           <div>
-            <div style="font-family:'PT Serif',serif;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--text-faint);margin-bottom:6px;">Piste d'identification — mode manuel assisté</div>
+            <div style="font-family:'PT Serif',serif;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--text-faint);margin-bottom:6px;" data-i18n="rappr_eyebrow">Piste d'identification — mode manuel assisté</div>
             <div class="legal-modal-title" id="rappr-modal-title">—</div>
           </div>
           <button class="legal-modal-close" onclick="closeRapprochement()" aria-label="Fermer">&times;</button>
@@ -975,11 +988,22 @@ table.analyse-tbl tbody tr:hover{background:var(--row-sep);}
       </div>
     </div>
 
+    <!-- MODAL PLEIN ÉCRAN — texte de la décision -->
+    <div class="legal-modal-overlay" id="fulltext-modal-overlay" style="display:none;" onclick="if(event.target===this)closeFulltextModal()">
+      <div class="fulltext-modal" role="dialog" aria-modal="true" aria-labelledby="fulltext-modal-title">
+        <div class="fulltext-modal-bar">
+          <span id="fulltext-modal-title"></span>
+          <button class="legal-modal-close" onclick="closeFulltextModal()" aria-label="Fermer">&times;</button>
+        </div>
+        <div class="fulltext-modal-body" id="fulltext-modal-body"></div>
+      </div>
+    </div>
+
     <!-- DASHBOARD -->
     <section class="screen active" data-screen="dashboard" aria-labelledby="h-dashboard">
       <div class="eyebrow" data-i18n="dashboard_eyebrow">Vue d'ensemble</div>
       <h1 id="h-dashboard" class="title" data-i18n="dashboard_title">Bonjour</h1>
-      <p class="intro" data-i18n="dashboard_intro">Accédez aux affaires en cours, au calendrier des audiences, à la recherche plein texte dans les décisions indexées et au radar de veille par mots-clés.</p>
+      <p class="intro" data-i18n="dashboard_intro">Explorez les décisions de justice luxembourgeoises et suivez les affaires en cours.</p>
 
       <div class="kpi-grid">
         <button class="kpi-card kpi-dark" onclick="showScreen('recherche')" aria-label="Voir toutes les décisions indexées">
@@ -1037,7 +1061,7 @@ table.analyse-tbl tbody tr:hover{background:var(--row-sep);}
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/><path d="M9 12h6M9 16h4"/></svg>
           </div>
           <h3 data-i18n="action_affaires_title">Affaires en cours</h3>
-          <p data-i18n="action_affaires_desc">Suivez les affaires au rôle de la Cour administrative, consultez leur stade procédural et ajoutez-les à votre liste de surveillance.</p>
+          <p data-i18n="action_affaires_desc">Suivez l'avancement des affaires en cours devant la Cour administrative.</p>
           <button class="btn btn-inverse" data-target="affaires" data-i18n="action_affaires_btn">Ouvrir</button>
         </div>
         <div class="action-card light">
@@ -1045,7 +1069,7 @@ table.analyse-tbl tbody tr:hover{background:var(--row-sep);}
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
           </div>
           <h3 data-i18n="action_agenda_title">Agenda judiciaire</h3>
-          <p data-i18n="action_agenda_desc">Consultez le calendrier des audiences de toutes les juridictions luxembourgeoises et exportez-le vers votre agenda.</p>
+          <p data-i18n="action_agenda_desc">Consultez les prochaines audiences et ajoutez-les à votre agenda.</p>
           <button class="btn btn-secondary" data-target="agenda" data-i18n="action_agenda_btn">Voir l'agenda</button>
         </div>
         <div class="action-card light">
@@ -1053,7 +1077,7 @@ table.analyse-tbl tbody tr:hover{background:var(--row-sep);}
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
           </div>
           <h3 data-i18n="action_search_title">Lancer une recherche</h3>
-          <p data-i18n="action_search_desc">Interrogez le texte intégral des décisions indexées et explorez les entités nommées qui en sont extraites.</p>
+          <p data-i18n="action_search_desc">Recherchez un mot, une société ou une référence dans le texte des décisions.</p>
           <button class="btn btn-secondary" data-target="recherche" data-i18n="action_search_btn">Ouvrir la recherche</button>
         </div>
         <div class="action-card dark">
@@ -1061,8 +1085,16 @@ table.analyse-tbl tbody tr:hover{background:var(--row-sep);}
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8a6 6 0 10-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 01-3.4 0"/></svg>
           </div>
           <h3 data-i18n="action_alert_title">Ouvrir le radar</h3>
-          <p data-i18n="action_alert_desc">Enregistrez un mot-clé, une société ou une juridiction. Les décisions correspondantes apparaîtront dans le Radar à chaque ouverture de l'outil.</p>
+          <p data-i18n="action_alert_desc">Enregistrez un mot-clé à surveiller : les nouvelles décisions correspondantes s'affichent ici automatiquement.</p>
           <button class="btn btn-inverse" data-target="veille" data-i18n="action_alert_btn">Ouvrir le radar</button>
+        </div>
+        <div class="action-card light">
+          <div class="action-icon r" aria-hidden="true">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="2"/><path d="M7 16c.5-1.5 1.7-2 2-2s1.5.5 2 2"/><path d="M14 9h4M14 13h3"/></svg>
+          </div>
+          <h3 data-i18n="action_rappr_title">Identifier une personne concernée</h3>
+          <p data-i18n="action_rappr_desc">Depuis une décision, vérifiez si elle concerne un professionnel identifiable — avec les garde-fous légaux intégrés.</p>
+          <button class="btn btn-secondary" data-target="recherche" data-i18n="action_rappr_btn">Voir les décisions</button>
         </div>
       </div>
 
@@ -1356,7 +1388,7 @@ table.analyse-tbl tbody tr:hover{background:var(--row-sep);}
       <h1 id="h-affaires" class="title">Affaires en cours</h1>
       <p class="intro">Fonctionnalités expérimentales dérivées des PDF de convocation de la Cour administrative et du Tribunal administratif (6 chambres). Source : audiences du 25 juin 2026 (W25). Ces fonctions utilisent des numéros de rôle, des matières, des noms d'avocats et de magistrats extraits des PDF.</p>
 
-      <div class="section-notice" style="margin-top:18px;">Risque élevé — noms d'avocats et données personnelles identifiables. L'agrégation multi-semaines crée des profils. Exception journalistique Art. 85 RGPD applicable sous conditions.</div>
+      <div class="section-notice info" style="margin-top:18px;">Noms d'avocats et données personnelles identifiables. L'agrégation multi-semaines crée des profils. Exception journalistique Art. 85 RGPD applicable sous conditions.</div>
 
       <!-- ── 1. Suivi de progression ── -->
       <div class="affaires-section">
@@ -1371,7 +1403,7 @@ table.analyse-tbl tbody tr:hover{background:var(--row-sep);}
         </div>
         <div class="affaires-summary" id="affaires-summary" aria-live="polite"></div>
         <div class="affaires-section-body">
-          <div class="section-notice" style="margin-bottom:14px;">Noms d'avocats présents dans les données — données personnelles identifiables. L'agrégation sur plusieurs semaines crée des profils d'activité professionnelle. Examen RGPD et CNPD requis avant usage éditorial.</div>
+          <div class="section-notice info" style="margin-bottom:14px;">Noms d'avocats présents dans les données — données personnelles identifiables. L'agrégation sur plusieurs semaines crée des profils d'activité professionnelle. Examen RGPD et CNPD requis avant usage éditorial.</div>
           <div style="overflow-x:auto;">
             <table class="affaires-table" role="grid">
               <thead>
@@ -1397,7 +1429,7 @@ table.analyse-tbl tbody tr:hover{background:var(--row-sep);}
           <p>Vérifier si une décision a été publiée sur jurad.public.lu pour un numéro de rôle donné. Permet de croiser les affaires en cours avec la base de décisions rendues.</p>
         </div>
         <div class="affaires-section-body">
-          <div class="section-notice">Accès manuel à jurad.public.lu autorisé. L'automatisation de la consultation nécessite une vérification du cadre d'utilisation acceptable auprès de l'Administration judiciaire.</div>
+          <div class="section-notice info">Accès manuel à jurad.public.lu autorisé. L'automatisation de la consultation nécessite une vérification du cadre d'utilisation acceptable auprès de l'Administration judiciaire.</div>
           <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
             <div class="searchbar" style="flex:1;max-width:320px;">
               <span class="ic"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg></span>
@@ -1416,7 +1448,7 @@ table.analyse-tbl tbody tr:hover{background:var(--row-sep);}
           <p>Surveiller des affaires spécifiques d'intérêt éditorial. Une notification peut être déclenchée lorsqu'une affaire change de stade ou qu'une décision est publiée.</p>
         </div>
         <div class="affaires-section-body">
-          <div class="section-notice">Le suivi nominatif d'affaires impliquant des avocats identifiés relève du traitement de données personnelles. La finalité journalistique doit être documentée formellement (registre de traitement, base légale Art. 6 RGPD).</div>
+          <div class="section-notice info">Le suivi nominatif d'affaires impliquant des avocats identifiés relève du traitement de données personnelles. La finalité journalistique doit être documentée formellement (registre de traitement, base légale Art. 6 RGPD).</div>
           <p style="font-size:12.5px;color:var(--text-muted);margin:0 0 14px;">Utilisez le bouton "Surveiller" dans le tableau ci-dessus pour ajouter des affaires à votre liste de suivi.</p>
           <div id="watchlist-container"></div>
           <div style="display:flex;gap:10px;margin-top:16px;flex-wrap:wrap;align-items:center;background:var(--card-bg);border:1px dashed var(--card-border);border-radius:var(--radius-lg);padding:14px 16px;">
@@ -1500,11 +1532,11 @@ const TRANSLATIONS = {
     nav_veille: "Radar décisions",
     brand_name: "Veille judiciaire",
     brand_sub: "des décisions prises ou en cours",
-    sidebar_footer: "Sources officielles : Administration judiciaire — data.public.lu · 96 jeux de données · Licence CC BY-ND 4.0. Les décisions affichées sont représentatives ; l'indexation complète requiert le traitement des PDF.",
+    sidebar_footer: "Sources officielles : Administration judiciaire — data.public.lu · Licence CC BY-ND 4.0. Nouvelles décisions indexées chaque semaine.",
     skip_link: "Aller au contenu principal",
     dashboard_eyebrow: "Vue d'ensemble",
     dashboard_title: "Bonjour",
-    dashboard_intro: "Accédez aux affaires en cours, au calendrier des audiences, à la recherche plein texte dans les décisions indexées et au radar de veille par mots-clés.",
+    dashboard_intro: "Explorez les décisions de justice luxembourgeoises et suivez les affaires en cours.",
     kpi_total: "Décisions indexées",
     kpi_total_foot: "28 sources · 96 datasets",
     kpi_new: "Nouvelles cette semaine",
@@ -1517,17 +1549,21 @@ const TRANSLATIONS = {
     kpi_affaires: "Affaires en cours",
     kpi_affaires_foot: "W25 · Cour administrative",
     action_affaires_title: "Affaires en cours",
-    action_affaires_desc: "Suivez les affaires au rôle de la Cour administrative, consultez leur stade procédural et ajoutez-les à votre liste de surveillance.",
+    action_affaires_desc: "Suivez l'avancement des affaires en cours devant la Cour administrative.",
     action_affaires_btn: "Ouvrir",
     action_agenda_title: "Agenda judiciaire",
-    action_agenda_desc: "Consultez le calendrier des audiences de toutes les juridictions luxembourgeoises et exportez-le vers votre agenda.",
+    action_agenda_desc: "Consultez les prochaines audiences et ajoutez-les à votre agenda.",
     action_agenda_btn: "Voir l'agenda",
     action_search_title: "Lancer une recherche",
-    action_search_desc: "Interrogez le texte intégral des décisions indexées et explorez les entités nommées qui en sont extraites.",
+    action_search_desc: "Recherchez un mot, une société ou une référence dans le texte des décisions.",
     action_search_btn: "Ouvrir la recherche",
     action_alert_title: "Ouvrir le radar",
-    action_alert_desc: "Enregistrez un mot-clé, une société ou une juridiction. Les décisions correspondantes apparaîtront dans le Radar à chaque ouverture de l'outil.",
+    action_alert_desc: "Enregistrez un mot-clé à surveiller : les nouvelles décisions correspondantes s'affichent ici automatiquement.",
     action_alert_btn: "Ouvrir le radar",
+    action_rappr_title: "Identifier une personne concernée",
+    action_rappr_desc: "Depuis une décision, vérifiez si elle concerne un professionnel identifiable — avec les garde-fous légaux intégrés.",
+    action_rappr_btn: "Voir les décisions",
+    rappr_eyebrow: "Piste d'identification — mode manuel assisté",
     legal_noshow: "Ne plus afficher au démarrage",
     legal_acknowledge: "J'ai pris connaissance",
     recent_activity: "Activité récente",
@@ -1724,11 +1760,11 @@ const TRANSLATIONS = {
     nav_veille: "Entscheidungsradar",
     brand_name: "Rechtsüberwachung",
     brand_sub: "Entscheidungen Luxemburg",
-    sidebar_footer: "Offizielle Quellen: Justizverwaltung — data.public.lu · 96 Datensätze · Lizenz CC BY-ND 4.0. Die angezeigten Entscheidungen sind repräsentativ; die vollständige Indizierung erfordert die PDF-Verarbeitung.",
+    sidebar_footer: "Offizielle Quellen: Justizverwaltung — data.public.lu · Lizenz CC BY-ND 4.0. Neue Entscheidungen werden wöchentlich indexiert.",
     skip_link: "Zum Hauptinhalt springen",
     dashboard_eyebrow: "Überblick",
     dashboard_title: "Willkommen",
-    dashboard_intro: "Zugang zu laufenden Verfahren, Gerichtssitzungskalender, Volltextsuche in indizierten Entscheidungen und Entscheidungsradar mit gespeicherten Stichwortsuchen.",
+    dashboard_intro: "Durchsuchen Sie luxemburgische Gerichtsentscheidungen und verfolgen Sie laufende Verfahren.",
     kpi_total: "Indizierte Entscheidungen",
     kpi_total_foot: "28 Quellen · 96 Datensätze",
     kpi_new: "Neu diese Woche",
@@ -1741,17 +1777,21 @@ const TRANSLATIONS = {
     kpi_affaires: "Laufende Verfahren",
     kpi_affaires_foot: "W25 · Verwaltungsgericht",
     action_affaires_title: "Laufende Verfahren",
-    action_affaires_desc: "Verfolgen Sie die Verfahren am Verwaltungsgericht, prüfen Sie deren Verfahrensstand und fügen Sie sie Ihrer Beobachtungsliste hinzu.",
+    action_affaires_desc: "Verfolgen Sie den Stand laufender Verfahren vor dem Verwaltungsgericht.",
     action_affaires_btn: "Öffnen",
     action_agenda_title: "Justizkalender",
-    action_agenda_desc: "Rufen Sie den Sitzungskalender aller luxemburgischen Gerichte auf und exportieren Sie ihn in Ihren Kalender.",
+    action_agenda_desc: "Sehen Sie die nächsten Gerichtstermine und übernehmen Sie sie in Ihren Kalender.",
     action_agenda_btn: "Kalender öffnen",
     action_search_title: "Suche starten",
-    action_search_desc: "Durchsuchen Sie den Volltext der indizierten Entscheidungen und erkunden Sie die automatisch extrahierten Entitäten.",
+    action_search_desc: "Suchen Sie nach einem Wort, einer Gesellschaft oder einem Aktenzeichen im Text der Entscheidungen.",
     action_search_btn: "Suche öffnen",
     action_alert_title: "Radar öffnen",
-    action_alert_desc: "Speichern Sie ein Stichwort, eine Gesellschaft oder ein Gericht. Passende Entscheidungen erscheinen beim nächsten Öffnen des Tools im Radar.",
+    action_alert_desc: "Speichern Sie ein zu überwachendes Stichwort: passende neue Entscheidungen erscheinen hier automatisch.",
     action_alert_btn: "Radar öffnen",
+    action_rappr_title: "Beteiligte Person identifizieren",
+    action_rappr_desc: "Prüfen Sie direkt bei einer Entscheidung, ob sie eine identifizierbare Fachperson betrifft — mit integrierten rechtlichen Schutzmaßnahmen.",
+    action_rappr_btn: "Entscheidungen ansehen",
+    rappr_eyebrow: "Beteiligte Person identifizieren — manuell unterstützter Modus",
     legal_noshow: "Beim Start nicht mehr anzeigen",
     legal_acknowledge: "Zur Kenntnis genommen",
     recent_activity: "Aktuelle Aktivität",
@@ -2181,11 +2221,12 @@ function _vjIDBPut(db, key, value){
 }
 
 /* ===================== STATE ===================== */
-let DECISIONS   = [...DEMO_DECISIONS]; /* pré-chargé avec exemples illustratifs */
+let DECISIONS   = DEMO_DECISIONS.map(d => ({...d, _demo:true})); /* pré-chargé avec exemples illustratifs */
 let ALERTS      = JSON.parse(localStorage.getItem('vj_alerts')||'[]');
 let uploadedFiles = [];
 let pipelineStatus = [];
 let selectedDecisionId = null;
+let _annotExpanded = false; /* panneau "Annotation journaliste" replié par défaut */
 let searchState = { q:'', jur:'', year:'', type:'' };
 let apiLastRefresh = null;
 let ANNOTATIONS = JSON.parse(localStorage.getItem('vj_annotations') || '{}');
@@ -2227,9 +2268,24 @@ function switchSubtab(tab){
 }
 
 /* ===================== DASHBOARD ===================== */
+function _greetFirstName(){
+  const email = _currentUser?.email;
+  if(!email) return '';
+  const local = email.split('@')[0];
+  const first = (local.split(/[._-]+/)[0] || '').trim();
+  if(!first) return '';
+  return first.charAt(0).toUpperCase() + first.slice(1).toLowerCase();
+}
+
 function renderDashboard(){
   const src2026 = REAL_SOURCES.filter(s => s.zip2026).length;
   const realCount = DECISIONS.filter(d => !d._demo).length;
+
+  const greetEl = $('#h-dashboard');
+  if(greetEl){
+    const first = _greetFirstName();
+    greetEl.textContent = first ? `${t('dashboard_title')}, ${first}` : t('dashboard_title');
+  }
 
   /* Strip de statut index */
   const dot   = $('#index-update-dot');
@@ -2563,8 +2619,8 @@ function populateFilters(){
   [...new Set(REAL_SOURCES.map(s => s.name.split('–')[1]||'').map(s=>s.trim()).filter(Boolean))].sort().forEach(tp => {
     const o=document.createElement('option'); o.value=tp; o.textContent=tp; typeSel.appendChild(o);
   });
-  /* Years from imported decisions */
-  [...new Set(DECISIONS.map(d=>d.date.slice(0,4)))].sort().reverse().forEach(y => {
+  /* Années réellement présentes dans les décisions récupérées (hors démo) */
+  [...new Set(DECISIONS.filter(d=>!d._demo && d.date).map(d=>d.date.slice(0,4)))].sort().reverse().forEach(y => {
     const o=document.createElement('option'); o.value=y; o.textContent=y; yearSel.appendChild(o);
   });
 }
@@ -2657,10 +2713,17 @@ function openReader(id){
     textZone.innerHTML = `
       <div class="detail-full-ref">${escHtml(d.ref)} — ${escHtml(d.type)}</div>
       <div class="detail-full-meta">${escHtml(d.jur)} · ${escHtml(d.date)}</div>
-      <button class="rappr-trigger-btn" onclick="openRapprochement('${escHtml(id)}')">
-        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
-        Piste d'identification (mode manuel assisté)
-      </button>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;">
+        <button class="rappr-trigger-btn" onclick="openRapprochement('${escHtml(id)}')">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="2"/><path d="M7 16c.5-1.5 1.7-2 2-2s1.5.5 2 2"/><path d="M14 9h4M14 13h3"/></svg>
+          ${isDE?'Beteiligte Person identifizieren':'Identifier la personne concernée'}
+          ${localStorage.getItem('vj_rappr_seen')!=='1' ? `<span class="rappr-new-badge">${isDE?'Neu':'Nouveau'}</span>` : ''}
+        </button>
+        <button class="btn btn-secondary" style="font-size:12.5px;padding:8px 14px;margin-top:10px;" onclick="openFulltextModal()">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 3H5a2 2 0 00-2 2v3m18-5h-3a2 2 0 00-2 2v3M3 16v3a2 2 0 002 2h3m11-5v3a2 2 0 01-2 2h-3"/></svg>
+          ${isDE?'Vollbild':'Plein écran'}
+        </button>
+      </div>
       <div class="reader-section-title" style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--text-faint);margin:14px 0 10px;">
         ${isDE?'Auszug aus dem Urteil':'Texte extrait du jugement'}
       </div>
@@ -2690,45 +2753,59 @@ function openReader(id){
       });
   }
 
-  /* ── Zone annotation (toujours visible) ── */
+  /* ── Zone annotation (repliée par défaut pour laisser toute la place à la lecture) ── */
+  const annotCount = ann.parties.length + ann.tags.length;
   annotZone.innerHTML = `
-    <div class="annot-section-label">
+    <div class="annot-section-label" role="button" tabindex="0" aria-expanded="${_annotExpanded}"
+      onclick="toggleAnnotPanel()" onkeydown="if(event.key==='Enter'||event.key===' '){toggleAnnotPanel();event.preventDefault();}">
       ${isDE?'Journalisten-Annotation':'Annotation journaliste'}
       <span>(${isDE?'durchsuchbar':'interrogeable via la recherche'})</span>
+      ${annotCount ? `<span class="annot-count-badge">${annotCount}</span>` : ''}
+      <svg class="annot-toggle-chevron${_annotExpanded?' open':''}" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
     </div>
-    <div class="annot-form">
-      <label>${isDE?'Echte Parteien':'Parties réelles'}</label>
-      <div style="display:flex;gap:8px;">
-        <input class="input" id="annot-party-input" placeholder="${isDE?'Z.B. Reporter S.A…':'Ex. Reporter S.A., Jean Dupont…'}" style="flex:1;"
-          onkeydown="if(event.key==='Enter'){addAnnotItem('${id}','party');event.preventDefault();}">
-        <button class="btn btn-secondary" onclick="addAnnotItem('${id}','party')" style="padding:0 14px;white-space:nowrap;">${isDE?'Hinzufügen':'Ajouter'}</button>
+    <div id="annot-form-wrap" style="display:${_annotExpanded?'block':'none'};">
+      <div style="font-size:11.5px;color:var(--text-faint);margin:-2px 0 12px;">
+        ${isDE?'Bleibt nur auf diesem Gerät gespeichert, nicht mit der Redaktion geteilt. Für eine geteilte, protokollierte Spur: Button „Beteiligte Person identifizieren" oben.'
+              :'Reste sur cet appareil uniquement, non partagé avec la rédaction. Pour une piste partagée et journalisée : bouton « Identifier la personne concernée » ci-dessus.'}
       </div>
-      <div class="annot-tags" id="annot-parties">${renderTagChips(ann.parties,'party')}</div>
-      <label>${isDE?'Freie Tags':'Tags libres'}</label>
-      <div style="display:flex;gap:8px;">
-        <input class="input" id="annot-tag-input" placeholder="${isDE?'Z.B. Presse, Berufung…':'Ex. presse, diffamation, appel…'}" style="flex:1;"
-          onkeydown="if(event.key==='Enter'){addAnnotItem('${id}','tag');event.preventDefault();}">
-        <button class="btn btn-secondary" onclick="addAnnotItem('${id}','tag')" style="padding:0 14px;white-space:nowrap;">${isDE?'Hinzufügen':'Ajouter'}</button>
-      </div>
-      <div class="annot-tags" id="annot-tags">${renderTagChips(ann.tags,'tag')}</div>
-      <div style="display:flex;gap:12px;margin-top:10px;">
-        <div style="flex:1;">
-          <label>${isDE?'Notizen':'Notes d\'enquête'}</label>
-          <textarea class="input" id="annot-notes" placeholder="${isDE?'Kontext, Verbindungen…':'Contexte, liens avec d\'autres affaires…'}" style="height:60px;resize:none;">${escHtml(ann.notes||'')}</textarea>
+      <div class="annot-form">
+        <label>${isDE?'Echte Parteien':'Parties réelles'}</label>
+        <div style="display:flex;gap:8px;">
+          <input class="input" id="annot-party-input" placeholder="${isDE?'Z.B. Reporter S.A…':'Ex. Reporter S.A., Jean Dupont…'}" style="flex:1;"
+            onkeydown="if(event.key==='Enter'){addAnnotItem('${id}','party');event.preventDefault();}">
+          <button class="btn btn-secondary" onclick="addAnnotItem('${id}','party')" style="padding:0 14px;white-space:nowrap;">${isDE?'Hinzufügen':'Ajouter'}</button>
         </div>
-        <div style="flex:0 0 160px;">
-          <label>${isDE?'Journalist':'Journaliste'}</label>
-          <input class="input" id="annot-journalist" placeholder="${isDE?'Ihr Name':'Votre nom'}" value="${escHtml(ann.journalist||'')}">
+        <div class="annot-tags" id="annot-parties">${renderTagChips(ann.parties,'party')}</div>
+        <label>${isDE?'Freie Tags':'Tags libres'}</label>
+        <div style="display:flex;gap:8px;">
+          <input class="input" id="annot-tag-input" placeholder="${isDE?'Z.B. Presse, Berufung…':'Ex. presse, diffamation, appel…'}" style="flex:1;"
+            onkeydown="if(event.key==='Enter'){addAnnotItem('${id}','tag');event.preventDefault();}">
+          <button class="btn btn-secondary" onclick="addAnnotItem('${id}','tag')" style="padding:0 14px;white-space:nowrap;">${isDE?'Hinzufügen':'Ajouter'}</button>
         </div>
-      </div>
-      <div style="display:flex;gap:10px;margin-top:12px;align-items:center;flex-wrap:wrap;">
-        <button class="btn" onclick="commitAnnotation('${id}')"
-          style="background:var(--accent-red);color:#fff;border-color:var(--accent-red);">${isDE?'Speichern':'Enregistrer'}</button>
-        ${hasAnnotation(id)?`<button class="btn btn-secondary" onclick="deleteAnnotation('${id}')">${isDE?'Annotation löschen':'Supprimer'}</button>`:''}
-        ${ann.updated?`<span style="font-size:11px;color:var(--text-faint);margin-left:4px;">${isDE?'Geändert':'Modifié'} ${new Date(ann.updated).toLocaleString(isDE?'de-LU':'fr-LU')}</span>`:''}
-        <span id="annot-autosave-msg" style="font-size:11px;color:var(--success-icon-bg);margin-left:4px;opacity:0;transition:opacity .4s;"></span>
+        <div class="annot-tags" id="annot-tags">${renderTagChips(ann.tags,'tag')}</div>
+        <div style="display:flex;gap:12px;margin-top:10px;">
+          <div style="flex:1;">
+            <label>${isDE?'Notizen':'Notes d\'enquête'}</label>
+            <textarea class="input" id="annot-notes" placeholder="${isDE?'Kontext, Verbindungen…':'Contexte, liens avec d\'autres affaires…'}" style="height:60px;resize:none;">${escHtml(ann.notes||'')}</textarea>
+          </div>
+          <div style="flex:0 0 160px;">
+            <label>${isDE?'Journalist':'Journaliste'}</label>
+            <input class="input" id="annot-journalist" placeholder="${isDE?'Ihr Name':'Votre nom'}" value="${escHtml(ann.journalist||'')}">
+          </div>
+        </div>
+        <div style="display:flex;gap:10px;margin-top:12px;align-items:center;flex-wrap:wrap;">
+          <button class="btn" onclick="commitAnnotation('${id}')"
+            style="background:var(--accent-red);color:#fff;border-color:var(--accent-red);">${isDE?'Speichern':'Enregistrer'}</button>
+          ${hasAnnotation(id)?`<button class="btn btn-secondary" onclick="deleteAnnotation('${id}')">${isDE?'Annotation löschen':'Supprimer'}</button>`:''}
+          ${ann.updated?`<span style="font-size:11px;color:var(--text-faint);margin-left:4px;">${isDE?'Geändert':'Modifié'} ${new Date(ann.updated).toLocaleString(isDE?'de-LU':'fr-LU')}</span>`:''}
+          <span id="annot-autosave-msg" style="font-size:11px;color:var(--success-icon-bg);margin-left:4px;opacity:0;transition:opacity .4s;"></span>
+        </div>
       </div>
     </div>`;
+  annotZone.classList.toggle('collapsed', !_annotExpanded);
+  annotZone.style.height = _annotExpanded ? (annotZone.dataset.lastHeight || '200') + 'px' : 'auto';
+  const _resizerEl = $('#detail-resizer');
+  if(_resizerEl) _resizerEl.style.display = _annotExpanded ? 'block' : 'none';
 
   /* Autosave sur frappe pour notes et journaliste */
   let _autoTimer;
@@ -2783,13 +2860,32 @@ function deleteAnnotation(id){
 
 function renderDetail(){ /* remplacé par openReader */ }
 
-/* ── Drag-to-resize : zone texte / zone annotation ── */
+function toggleAnnotPanel(){
+  _annotExpanded = !_annotExpanded;
+  const zone     = $('#detail-annot-zone');
+  const wrap     = $('#annot-form-wrap');
+  const resizer  = $('#detail-resizer');
+  const chevron  = zone?.querySelector('.annot-toggle-chevron');
+  const label    = zone?.querySelector('.annot-section-label');
+  if(wrap)    wrap.style.display = _annotExpanded ? 'block' : 'none';
+  if(chevron) chevron.classList.toggle('open', _annotExpanded);
+  if(label)   label.setAttribute('aria-expanded', String(_annotExpanded));
+  if(zone){
+    zone.classList.toggle('collapsed', !_annotExpanded);
+    zone.style.height = _annotExpanded ? (zone.dataset.lastHeight || '200') + 'px' : 'auto';
+  }
+  if(resizer) resizer.style.display = _annotExpanded ? 'block' : 'none';
+}
+
+/* ── Drag-to-resize : zone texte / zone annotation (repliée par défaut) ── */
 (function setupDetailResizer(){
   const resizer  = $('#detail-resizer');
   const annotZone = $('#detail-annot-zone');
   if(!resizer || !annotZone) return;
-  const DEFAULT_H = 200; // hauteur initiale de la zone annotation
-  annotZone.style.height = DEFAULT_H + 'px';
+  const DEFAULT_H = 200; // hauteur de la zone annotation une fois dépliée
+  annotZone.dataset.lastHeight = DEFAULT_H;
+  annotZone.style.height = 'auto';
+  resizer.style.display = 'none';
   let startY, startH;
   resizer.addEventListener('mousedown', e => {
     startY = e.clientY;
@@ -2800,6 +2896,7 @@ function renderDetail(){ /* remplacé par openReader */ }
       const delta = startY - e.clientY; // vers le haut = agrandir la zone annot
       const newH  = Math.max(80, Math.min(startH + delta, window.innerHeight * 0.65));
       annotZone.style.height = newH + 'px';
+      annotZone.dataset.lastHeight = newH;
     };
     const onUp = () => {
       resizer.classList.remove('dragging');
@@ -2966,6 +3063,8 @@ function renderAll(){
   renderStats();
   applyI18n();
   renderDashboard(); renderAlerts(); renderTimeline(); renderResults();
+  if(selectedDecisionId) openReader(selectedDecisionId);
+  if(_ragDecision) _ragRenderBody();
 }
 
 
@@ -3591,6 +3690,7 @@ async function loadDecisionsJSON(forceRefresh = false){
     }
     const data = { decisions: fresh };
     const existingIds = new Set(DECISIONS.filter(d => !d._demo).map(d => d.id));
+    const hadBaseline = existingIds.size > 0;
     const newDecisions = data.decisions.filter(d => !existingIds.has(d.id));
     const newCount = newDecisions.length;
 
@@ -3604,7 +3704,14 @@ async function loadDecisionsJSON(forceRefresh = false){
     ];
 
     localStorage.setItem(LAST_KEY, fetchedGenerated);
-    localStorage.setItem('vj_delta', newCount);
+    /* Sans base locale préexistante (premier chargement, cache vidé), toute
+       décision serveur paraîtrait "nouvelle" à tort — on n'affiche alors
+       aucune comparaison plutôt qu'un delta trompeur proche du total. */
+    if(hadBaseline){
+      localStorage.setItem('vj_delta', newCount);
+    } else {
+      localStorage.removeItem('vj_delta');
+    }
 
     /* Persister dans IndexedDB en arrière-plan pour les prochaines ouvertures */
     _vjOpenDB()
@@ -4550,13 +4657,27 @@ function saveWatchlist(){ localStorage.setItem("vj_watchlist", JSON.stringify(_w
 const RAPPR_RETENTION_MOIS = 6;
 
 const RAPPR_PROFESSIONS = [
-  {id:'avocats',   name:'Avocats',                         organe:"Ordre des avocats — Barreau de Luxembourg / Diekirch", url:'https://www.barreau.lu/votre-avocat/annuaire-des-avocats', statut:'blocked', note:"CGU lues intégralement : extraction/réutilisation systématique de l'annuaire interdite sans consentement écrit préalable du Barreau. Consultation ponctuelle uniquement."},
-  {id:'medecins',  name:'Médecins, dentistes, pharmaciens, psychothérapeutes', organe:'Collège médical', url:'https://collegemedical.lu/fr/professionals', statut:'unknown', note:"Aucune CGU sur la réutilisation localisée à ce jour — statut réel non confirmé. À vérifier directement auprès du Collège médical avant tout usage répété."},
-  {id:'notaires',  name:'Notaires',                         organe:'Chambre des notaires du Grand-Duché', url:'https://www.notariat.lu/trouver-notaire', statut:'unknown', note:"CGU non consultées (site non accessible à l'analyse automatique). À vérifier directement auprès de la Chambre des notaires."},
-  {id:'huissiers', name:'Huissiers de justice',             organe:'Chambre des huissiers de justice', url:'https://www.huissier.lu/find/luxembourg', statut:'unknown', note:"Aucune CGU sur la réutilisation localisée. À vérifier directement auprès de la Chambre."},
-  {id:'oai',       name:'Architectes, ingénieurs-conseils, urbanistes, paysagistes', organe:'OAI', url:'https://www.oai.lu', statut:'blocked', note:"CGU lues intégralement : reproduction totale ou partielle soumise à consentement écrit préalable de l'OAI."},
-  {id:'oec',       name:'Experts-comptables',                organe:'OEC', url:'https://oec.lu', statut:'unknown', note:"Notice légale repérée mais non lue intégralement (site en JS). À vérifier directement auprès de l'OEC."},
-  {id:'reviseurs', name:"Réviseurs d'entreprises (auditeurs)", organe:'CSSF (registre officiel) / IRE', url:'https://www.cssf.lu', statut:'blocked', note:"CGU lues intégralement : reproduction ou distribution des données du registre public uniquement sur consentement écrit préalable de la CSSF."},
+  {id:'avocats',   name:'Avocats', name_de:'Rechtsanwälte', organe:"Ordre des avocats — Barreau de Luxembourg / Diekirch", url:'https://www.barreau.lu/votre-avocat/annuaire-des-avocats', statut:'blocked',
+    note:"CGU lues intégralement : extraction/réutilisation systématique de l'annuaire interdite sans consentement écrit préalable du Barreau. Consultation ponctuelle uniquement.",
+    note_de:"AGB vollständig gelesen: die systematische Extraktion/Wiederverwendung des Verzeichnisses ist ohne vorherige schriftliche Zustimmung der Rechtsanwaltskammer untersagt. Nur punktuelle Konsultation."},
+  {id:'medecins',  name:'Médecins, dentistes, pharmaciens, psychothérapeutes', name_de:'Ärzte, Zahnärzte, Apotheker, Psychotherapeuten', organe:'Collège médical', url:'https://collegemedical.lu/fr/professionals', statut:'unknown',
+    note:"Aucune page CGU/mentions légales n'existe sur le site (confirmé — footer ne contient qu'une politique RGPD). Absence de cadre écrit ≠ autorisation : à clarifier directement avec le Collège médical avant tout usage répété.",
+    note_de:"Auf der Website existiert keine Seite mit Nutzungsbedingungen (bestätigt — die Fußzeile enthält nur eine Datenschutzrichtlinie). Fehlen eines schriftlichen Rahmens ≠ Erlaubnis: vor jeder wiederholten Nutzung direkt beim Collège médical klären."},
+  {id:'notaires',  name:'Notaires', name_de:'Notare', organe:'Chambre des notaires du Grand-Duché', url:'https://www.notariat.lu/trouver-notaire', statut:'unknown',
+    note:"Aucune page CGU/mentions légales n'existe sur le site (confirmé — footer ne contient qu'un copyright et un lien RGPD). Absence de cadre écrit ≠ autorisation : à clarifier directement avec la Chambre des notaires.",
+    note_de:"Auf der Website existiert keine Seite mit Nutzungsbedingungen (bestätigt — die Fußzeile enthält nur ein Copyright und einen DSGVO-Link). Fehlen eines schriftlichen Rahmens ≠ Erlaubnis: direkt bei der Notarkammer klären."},
+  {id:'huissiers', name:'Huissiers de justice', name_de:'Gerichtsvollzieher', organe:'Chambre des huissiers de justice', url:'https://www.huissier.lu/find/luxembourg', statut:'unknown',
+    note:"Aucune page CGU/mentions légales n'existe sur le site (confirmé — footer ne contient qu'un copyright et une politique de confidentialité). Absence de cadre écrit ≠ autorisation : à clarifier directement avec la Chambre.",
+    note_de:"Auf der Website existiert keine Seite mit Nutzungsbedingungen (bestätigt — die Fußzeile enthält nur ein Copyright und eine Datenschutzrichtlinie). Fehlen eines schriftlichen Rahmens ≠ Erlaubnis: direkt bei der Kammer klären."},
+  {id:'oai',       name:'Architectes, ingénieurs-conseils, urbanistes, paysagistes', name_de:'Architekten, Bauingenieure, Stadtplaner, Landschaftsarchitekten', organe:'OAI', url:'https://www.oai.lu', statut:'blocked',
+    note:"CGU lues intégralement : reproduction totale ou partielle soumise à consentement écrit préalable de l'OAI.",
+    note_de:"AGB vollständig gelesen: jede vollständige oder teilweise Reproduktion erfordert die vorherige schriftliche Zustimmung der OAI."},
+  {id:'oec',       name:'Experts-comptables', name_de:'Wirtschaftsprüfer (Experts-comptables)', organe:'OEC', url:'https://oec.lu', statut:'permissive',
+    note:"Notice légale lue intégralement : « la reproduction des informations est autorisée à condition que la source soit expressément mentionnée » — pas d'interdiction explicite de l'extraction systématique, contrairement aux autres ordres. Contenu présenté comme à usage personnel : garder le mode manuel pour l'instant, mais c'est le meilleur candidat pour une demande d'autorisation formelle.",
+    note_de:"Rechtlicher Hinweis vollständig gelesen: ‚die Reproduktion der Informationen ist erlaubt, sofern die Quelle ausdrücklich genannt wird' — kein ausdrückliches Verbot der systematischen Extraktion, anders als bei den übrigen Kammern. Inhalt als ‚persönliche Nutzung' deklariert: vorerst manueller Modus, aber bester Kandidat für eine formelle Anfrage."},
+  {id:'reviseurs', name:"Réviseurs d'entreprises (auditeurs)", name_de:"Wirtschaftsprüfer (Réviseurs d'entreprises)", organe:'CSSF (registre officiel) / IRE', url:'https://www.cssf.lu', statut:'blocked',
+    note:"CGU lues intégralement : reproduction ou distribution des données du registre public uniquement sur consentement écrit préalable de la CSSF.",
+    note_de:"AGB vollständig gelesen: Reproduktion oder Verbreitung der Daten des öffentlichen Registers nur mit vorheriger schriftlicher Zustimmung der CSSF."},
 ];
 
 let _ragDecision = null;
@@ -4575,6 +4696,7 @@ function openRapprochement(id){
   document.getElementById('rappr-modal-title').textContent = `${d.ref} — ${d.jur}`;
   document.body.style.overflow = 'hidden';
   document.getElementById('rappr-modal-overlay').style.display = 'flex';
+  localStorage.setItem('vj_rappr_seen', '1');
   _ragRenderBody();
   if(_sb) _ragLoadHistory();
 }
@@ -4585,13 +4707,42 @@ function closeRapprochement(){
   _ragDecision = null;
 }
 
+function openFulltextModal(){
+  const d = DECISIONS.find(x => x.id === selectedDecisionId);
+  if(!d) return;
+  const isDE = currentLang==='de';
+  document.getElementById('fulltext-modal-title').textContent = `${d.ref} — ${d.jur}`;
+  document.getElementById('fulltext-modal-body').textContent =
+    d.fulltext || d.excerpt || (isDE?'Text nicht verfügbar':'Texte non disponible pour cette décision');
+  document.getElementById('fulltext-modal-overlay').style.display = 'flex';
+  document.body.style.overflow = 'hidden';
+}
+
+function closeFulltextModal(){
+  document.getElementById('fulltext-modal-overlay').style.display = 'none';
+  document.body.style.overflow = '';
+}
+
 function _ragRenderBody(){
   const d = _ragDecision;
   const body = document.getElementById('rappr-modal-body');
   if(!d){ body.innerHTML=''; return; }
+  const isDE = currentLang==='de';
 
   if(!_ragGatePassed){
-    body.innerHTML = `
+    body.innerHTML = isDE ? `
+      <div class="rappr-gate">
+        <div class="rappr-gate-title">Strafrechtliche Entscheidung — Prüfung nach Art. 10 DSGVO vor jeder weiteren Spur erforderlich</div>
+        <p>Eine Re-Identifizierung bei einer strafrechtlichen Entscheidung ist nur vertretbar, wenn die Tatsachen mit einem öffentlichen Amt oder einem reglementierten Beruf zusammenhängen, von der betroffenen Person selbst öffentlich gemacht wurden, oder eine freiwillige Beteiligung dieser Person betreffen. In jedem Fall ausgeschlossen: Opfer, Zeugen, Angehörige, Minderjährige.</p>
+        <label class="chk"><input type="checkbox" id="rappr-crit-1"> Die Tatsachen stehen im Zusammenhang mit der Ausübung eines öffentlichen Amts oder eines reglementierten Berufs der betroffenen Person</label>
+        <label class="chk"><input type="checkbox" id="rappr-crit-2"> Die Tatsachen wurden von der Person selbst öffentlich gemacht</label>
+        <label class="chk"><input type="checkbox" id="rappr-crit-3"> Die Tatsachen betreffen eine freiwillige Beteiligung der Person (kein Opfer/Zeuge)</label>
+        <label class="chk"><input type="checkbox" id="rappr-excl"> <strong>Ich bestätige, dass kein Opfer, Zeuge, Angehöriger oder Minderjähriger von diesem Vorgang betroffen ist</strong></label>
+        <label style="font-size:12.5px;color:#7A2420;font-weight:600;display:block;margin-top:4px;">Begründung (Pflichtfeld, wird im Zugriffsprotokoll erfasst)</label>
+        <textarea id="rappr-justif" placeholder="Erklären Sie in einem Satz, warum das angekreuzte Kriterium auf diese Entscheidung zutrifft…"></textarea>
+        <div id="rappr-gate-error" style="display:none;color:#7A2420;font-size:12px;font-weight:600;margin-top:6px;">Kreuzen Sie mindestens ein Kriterium sowie die Ausschlussklausel an und geben Sie eine Begründung ein (mind. 20 Zeichen).</div>
+        <button class="btn btn-primary" onclick="_ragValidateGate()">Bestätigen und fortfahren</button>
+      </div>` : `
       <div class="rappr-gate">
         <div class="rappr-gate-title">Décision pénale — validation art. 10 RGPD requise avant toute piste</div>
         <p>Une réidentification sur une décision pénale n'est défendable que si les faits sont liés à une fonction publique ou une profession réglementée, ont été rendus publics par la personne elle-même, ou concernent des faits dans lesquels elle s'est volontairement impliquée. Sont exclus dans tous les cas : victimes, témoins, proches, mineurs.</p>
@@ -4607,33 +4758,37 @@ function _ragRenderBody(){
     return;
   }
 
-  const expiryTxt = `Par défaut, toute piste non confirmée est <strong>supprimée automatiquement au bout de ${RAPPR_RETENTION_MOIS} mois</strong>. Marquez une piste "confirmée" pour la conserver selon vos règles d'archivage rédactionnel habituelles.`;
+  const expiryTxt = isDE
+    ? `Standardmäßig wird jede unbestätigte Spur nach <strong>${RAPPR_RETENTION_MOIS} Monaten automatisch gelöscht</strong>. Markieren Sie eine Spur als "bestätigt", um sie gemäß Ihren üblichen redaktionellen Archivierungsregeln aufzubewahren.`
+    : `Par défaut, toute piste non confirmée est <strong>supprimée automatiquement au bout de ${RAPPR_RETENTION_MOIS} mois</strong>. Marquez une piste "confirmée" pour la conserver selon vos règles d'archivage rédactionnel habituelles.`;
+  const introTxt = isDE
+    ? 'Manuell unterstützter Modus: An diese Websites werden keine automatisierten Anfragen gesendet. Öffnen Sie den offiziellen Link, führen Sie die Prüfung selbst durch und tragen Sie das Ergebnis unten ein — der Vorgang wird mit Ihrer Kennung protokolliert. Im Unterschied zu den persönlichen Notizen der Entscheidungsseite wird das hier Erfasste mit der gesamten Redaktion geteilt.'
+    : "Mode manuel assisté : aucune requête automatisée n'est envoyée à ces sites. Ouvrez le lien officiel, effectuez la vérification vous-même, puis consignez le résultat ci-dessous — l'action est journalisée avec votre identifiant. Contrairement aux notes personnelles de la fiche décision, ce qui est enregistré ici est partagé avec toute la rédaction.";
+
   body.innerHTML = `
     <div class="rappr-retention-box">⏱ ${expiryTxt}</div>
-    <p style="font-size:12.5px;color:var(--text-muted);line-height:1.6;margin:0 0 14px;">
-      Mode manuel assisté : aucune requête automatisée n'est envoyée à ces sites. Ouvrez le lien officiel, effectuez la vérification vous-même, puis consignez le résultat ci-dessous — l'action est journalisée avec votre identifiant.
-    </p>
+    <p style="font-size:12.5px;color:var(--text-muted);line-height:1.6;margin:0 0 14px;">${introTxt}</p>
     <div class="rappr-professions">
       ${RAPPR_PROFESSIONS.map(p => `
         <div class="rappr-card">
           <div class="rappr-card-head">
             <div>
-              <div class="rappr-card-name">${escHtml(p.name)}</div>
+              <div class="rappr-card-name">${escHtml(isDE ? p.name_de : p.name)}</div>
               <div class="rappr-card-organe">${escHtml(p.organe)}</div>
             </div>
-            <span class="rappr-badge ${p.statut}">${p.statut==='blocked' ? '🔴 Autorisation écrite requise' : '🟡 Statut non confirmé'}</span>
+            <span class="rappr-badge ${p.statut}">${p.statut==='blocked' ? (isDE?'🔴 Schriftliche Genehmigung erforderlich':'🔴 Autorisation écrite requise') : p.statut==='permissive' ? (isDE?'🟢 Günstige AGB (Quellenangabe nötig)':'🟢 CGU favorables (attribution requise)') : (isDE?'🟡 Keine Nutzungsbedingungen gefunden':'🟡 Aucune CGU trouvée')}</span>
           </div>
-          <div class="rappr-card-note">${escHtml(p.note)}</div>
-          <a class="rappr-card-link" href="${p.url}" target="_blank" rel="noopener">Ouvrir le registre officiel →</a>
+          <div class="rappr-card-note">${escHtml(isDE ? p.note_de : p.note)}</div>
+          <a class="rappr-card-link" href="${p.url}" target="_blank" rel="noopener">${isDE?'Offizielles Register öffnen →':'Ouvrir le registre officiel →'}</a>
           <div class="rappr-card-form">
             <select id="rappr-statut-${p.id}">
-              <option value="a_verifier">À vérifier / en cours</option>
-              <option value="aucune">Aucune correspondance trouvée</option>
-              <option value="confirme">Candidat confirmé</option>
-              <option value="ecarte">Candidat écarté</option>
+              <option value="a_verifier">${isDE?'Zu prüfen / in Bearbeitung':'À vérifier / en cours'}</option>
+              <option value="aucune">${isDE?'Keine Übereinstimmung gefunden':'Aucune correspondance trouvée'}</option>
+              <option value="confirme">${isDE?'Kandidat bestätigt':'Candidat confirmé'}</option>
+              <option value="ecarte">${isDE?'Kandidat ausgeschlossen':'Candidat écarté'}</option>
             </select>
-            <input type="text" id="rappr-candidat-${p.id}" placeholder="Nom du candidat identifié (facultatif)…">
-            <button class="btn btn-secondary" style="font-size:12px;padding:6px 12px;" onclick="_ragSubmit('${p.id}')">Enregistrer la vérification</button>
+            <input type="text" id="rappr-candidat-${p.id}" placeholder="${isDE?'Name der identifizierten Person (optional)…':'Nom du candidat identifié (facultatif)…'}">
+            <button class="btn btn-secondary" style="font-size:12px;padding:6px 12px;" onclick="_ragSubmit('${p.id}')">${isDE?'Prüfung speichern':'Enregistrer la vérification'}</button>
           </div>
           <div class="rappr-history" id="rappr-history-${p.id}"></div>
         </div>
@@ -4695,6 +4850,7 @@ function _ragSubmit(professionId){
 
 function _ragLoadHistory(){
   if(!_sb || !_ragDecision) return;
+  const isDE = currentLang==='de';
   _sb.from('rapprochement').select('*').eq('decision_id', _ragDecision.id)
     .order('created_at', {ascending:false}).then(({data, error}) => {
       if(error || !data) return;
@@ -4705,10 +4861,10 @@ function _ragLoadHistory(){
         el.innerHTML = rows.map(r => `
           <div class="rappr-history-row">
             <span class="rappr-status-dot ${r.statut}"></span>
-            <span>${escHtml(r.candidat || '(aucun candidat renseigné)')}</span>
+            <span>${escHtml(r.candidat || (isDE?'(kein Kandidat angegeben)':'(aucun candidat renseigné)'))}</span>
             <span>· ${escHtml(r.journaliste_email||'—')}</span>
-            <span>· ${new Date(r.created_at).toLocaleDateString('fr-LU')}</span>
-            ${r.expires_at ? `<span>· expire le ${new Date(r.expires_at).toLocaleDateString('fr-LU')}</span>` : `<span>· conservation longue (suivi éditorial)</span>`}
+            <span>· ${new Date(r.created_at).toLocaleDateString(isDE?'de-LU':'fr-LU')}</span>
+            ${r.expires_at ? `<span>· ${isDE?'läuft ab am':'expire le'} ${new Date(r.expires_at).toLocaleDateString(isDE?'de-LU':'fr-LU')}</span>` : `<span>· ${isDE?'langfristige Aufbewahrung (redaktionelle Weiterverfolgung)':'conservation longue (suivi éditorial)'}</span>`}
           </div>`).join('');
       });
     });
