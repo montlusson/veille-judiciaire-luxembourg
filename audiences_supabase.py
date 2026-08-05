@@ -10,32 +10,6 @@ from lib.logutil import log
 from lib.supabase_client import get_supabase_credentials
 
 
-def upload_pdf_to_supabase(filename: str, content: bytes) -> bool:
-    """Upload (upsert) un PDF de convocation dans le bucket privé `archives`."""
-    env = get_supabase_credentials()
-    if not env:
-        return False
-    url, key = env
-    try:
-        r = requests.post(
-            f"{url}/storage/v1/object/archives/{filename}",
-            headers={
-                "apikey":        key,
-                "Authorization": f"Bearer {key}",
-                "Content-Type":  "application/pdf",
-                "x-upsert":      "true",
-            },
-            data=content,
-            timeout=60,
-        )
-        if r.status_code in (200, 201):
-            return True
-        log(f"    ✗ Storage {filename} : {r.status_code} — {r.text[:150]}")
-    except Exception as e:
-        log(f"    ✗ Storage {filename} : {e}")
-    return False
-
-
 def fetch_supabase_file(file_key: str):
     """Lit un blob de la table files (service_role, contourne RLS)."""
     env = get_supabase_credentials()
