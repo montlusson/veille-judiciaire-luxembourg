@@ -1383,8 +1383,8 @@ body.printing-decision #print-decision-area{display:block!important;color:#000;b
       <div id="agendapanel-deposit" style="display:none;margin-top:20px;">
         <div class="section-notice info" data-i18n="convoc_upload_notice">Dépôt volontaire : téléchargez vous-même le PDF de convocation depuis les liens ci-dessus (onglet Calendrier), puis déposez-le ici. Les numéros d'affaire, matières et avocats sont extraits automatiquement et partagés avec toute la rédaction (onglet « Affaires en cours »). Ces données restent à examiner avant tout usage éditorial (RGPD/CNPD).</div>
         <div class="upload-zone" id="convoc-drop-zone" tabindex="0" role="button" aria-label="Déposer un PDF de convocation">
-          <input type="file" id="convoc-file-input" accept="application/pdf" style="display:none;">
-          <p data-i18n="convoc_drop_cta">Glissez-déposez un PDF de convocation ici, ou cliquez pour parcourir</p>
+          <input type="file" id="convoc-file-input" accept="application/pdf,.zip" multiple style="display:none;">
+          <p data-i18n="convoc_drop_cta">Glissez-déposez un ou plusieurs PDF de convocation ici (ou un ZIP les contenant), ou cliquez pour parcourir</p>
         </div>
         <div style="display:flex;gap:10px;margin:14px 0;flex-wrap:wrap;align-items:center;">
           <label for="convoc-upload-jur" class="sr-only" data-i18n="convoc_jur_label">Juridiction</label>
@@ -1797,7 +1797,7 @@ const TRANSLATIONS = {
     agenda_tab_deposit: "Convocations déposées",
     agenda_tab_past: "Audiences passées",
     convoc_upload_notice: "Dépôt volontaire : téléchargez vous-même le PDF de convocation depuis les liens ci-dessus (onglet Calendrier), puis déposez-le ici. Les numéros d'affaire, matières et avocats sont extraits automatiquement et partagés avec toute la rédaction (onglet « Affaires en cours »). Ces données restent à examiner avant tout usage éditorial (RGPD/CNPD).",
-    convoc_drop_cta: "Glissez-déposez un PDF de convocation ici, ou cliquez pour parcourir",
+    convoc_drop_cta: "Glissez-déposez un ou plusieurs PDF de convocation ici (ou un ZIP les contenant), ou cliquez pour parcourir",
     convoc_jur_label: "Juridiction",
     convoc_chambre_label: "Chambre",
     agenda_filter_all: "Toutes les juridictions",
@@ -2038,7 +2038,7 @@ const TRANSLATIONS = {
     agenda_tab_deposit: "Hochgeladene Ladungen",
     agenda_tab_past: "Vergangene Sitzungen",
     convoc_upload_notice: "Freiwilliger Upload: Laden Sie die Ladungs-PDF selbst über die obigen Links (Tab Kalender) herunter und legen Sie sie hier ab. Aktenzeichen, Sachgebiete und Anwälte werden automatisch extrahiert und mit der gesamten Redaktion geteilt (Tab „Laufende Verfahren\"). Diese Daten müssen vor jeder redaktionellen Nutzung geprüft werden (DSGVO/CNPD).",
-    convoc_drop_cta: "Ladungs-PDF hier ablegen oder klicken, um zu durchsuchen",
+    convoc_drop_cta: "Ein oder mehrere Ladungs-PDFs hier ablegen (oder ein ZIP damit) oder klicken, um zu durchsuchen",
     convoc_jur_label: "Gericht",
     convoc_chambre_label: "Kammer",
     agenda_filter_all: "Alle Gerichte",
@@ -2792,14 +2792,14 @@ function viewUploadedFile(idx){
 
 const DIRECT_UPLOAD_EXTS = ['.pdf','.csv','.xlsx','.xls'];
 
-/* Extrait les PDF/CSV/XLSX d'une archive ZIP en File objects (JSZip, client-side) */
-async function extractZipFile(zipFile){
+/* Extrait les fichiers d'une archive ZIP en File objects (JSZip, client-side) */
+async function extractZipFile(zipFile, allowedExts = DIRECT_UPLOAD_EXTS){
   const out = [];
   const zip = await JSZip.loadAsync(zipFile);
   for(const [path, entry] of Object.entries(zip.files)){
     if(entry.dir) continue;
     const ext = '.' + path.split('.').pop().toLowerCase();
-    if(!DIRECT_UPLOAD_EXTS.includes(ext)) continue;
+    if(!allowedExts.includes(ext)) continue;
     const blob = await entry.async('blob');
     out.push(new File([blob], path.split('/').pop(), { type: blob.type }));
   }
@@ -3942,21 +3942,21 @@ convocJurSel?.addEventListener('change', () => {
 if(convocZone && convocInput){
   convocZone.addEventListener('click', () => convocInput.click());
   convocZone.addEventListener('keydown', e => { if(e.key==='Enter'||e.key===' ') convocInput.click(); });
-  convocInput.addEventListener('change', () => { if(convocInput.files[0]) handleConvocUpload(convocInput.files[0]); convocInput.value=''; });
+  convocInput.addEventListener('change', () => { if(convocInput.files.length) handleConvocUpload(Array.from(convocInput.files)); convocInput.value=''; });
   convocZone.addEventListener('dragover',  e => { e.preventDefault(); convocZone.classList.add('dragover'); });
   convocZone.addEventListener('dragleave', ()  => convocZone.classList.remove('dragover'));
   convocZone.addEventListener('drop', e => {
     e.preventDefault(); convocZone.classList.remove('dragover');
-    if(e.dataTransfer.files[0]) handleConvocUpload(e.dataTransfer.files[0]);
+    if(e.dataTransfer.files.length) handleConvocUpload(Array.from(e.dataTransfer.files));
   });
 }
 
-let _lastConvocUpload = null; /* { parsed, email, isDE, file } — pour rafraîchir l'état Suivi/Surveiller après toggleWatchlist et rouvrir le PDF déposé */
+let _lastConvocUpload = null; /* { parsed, email, isDE, files } — pour rafraîchir l'état Suivi/Surveiller après toggleWatchlist et rouvrir les PDF déposés */
 
 function renderConvocUploadResult(){
   const resultEl = $('#convoc-upload-result');
   if(!resultEl || !_lastConvocUpload) return;
-  const { parsed, email, isDE, file } = _lastConvocUpload;
+  const { parsed, email, isDE, files } = _lastConvocUpload;
   const affaireRows = parsed.map(a => {
     const inWL = _watchlist.includes(a.num);
     return `<div class="watchlist-item">
@@ -3969,20 +3969,20 @@ function renderConvocUploadResult(){
       </button>
     </div>`;
   }).join('');
-  const viewBtn = file ? `<button class="btn btn-secondary" style="font-size:12px;padding:5px 12px;margin-top:10px;" onclick="viewLastConvocUpload()">
-    ${isDE?'PDF ansehen':'Voir le PDF'}
-  </button>` : '';
+  const viewBtns = (files||[]).map((f,i) => `<button class="btn btn-secondary" style="font-size:12px;padding:5px 12px;margin:10px 6px 0 0;" onclick="viewConvocUploadFile(${i})">
+    ${isDE?'PDF ansehen':'Voir'} — ${escHtml(f.name)}
+  </button>`).join('');
   resultEl.innerHTML = `<div class="section-notice info" style="margin-top:14px;">
     ✓ ${parsed.length} ${isDE?'Verfahren erkannt und geteilt':'affaires reconnues et partagées'} — ${isDE?'hochgeladen von':'déposé par'} ${escHtml(email||'—')} · ${new Date().toLocaleDateString(isDE?'de-LU':'fr-LU')}
   </div>
-  ${viewBtn}
+  <div>${viewBtns}</div>
   <div style="margin-top:10px;">${affaireRows}</div>`;
 }
 
-function viewLastConvocUpload(){
-  const file = _lastConvocUpload?.file;
-  if(!file) return;
-  openPdfViewer(URL.createObjectURL(file), file.name);
+function viewConvocUploadFile(idx){
+  const f = _lastConvocUpload?.files?.[idx];
+  if(!f) return;
+  openPdfViewer(URL.createObjectURL(f), f.name);
 }
 
 function _isoWeekLabel(d){
@@ -3994,49 +3994,80 @@ function _isoWeekLabel(d){
   return `${date.getUTCFullYear()}-W${String(weekNo).padStart(2,'0')}`;
 }
 
-async function handleConvocUpload(file){
+/* Extrait le texte d'un PDF de convocation et le passe à parseConvocationText() */
+async function parseConvocPdf(file, jur, chambre){
+  if(typeof pdfjsLib === 'undefined') throw new Error('PDF.js non chargé');
+  const arrayBuffer = await file.arrayBuffer();
+  const pdf = await pdfjsLib.getDocument({ data: arrayBuffer, isEvalSupported: false }).promise;
+  const maxPages = Math.min(pdf.numPages, 10);
+  let text = '';
+  for(let p = 1; p <= maxPages; p++){
+    const page  = await pdf.getPage(p);
+    const lines = await extractPageLines(page);
+    text += lines.map(l => l.text).join('\n') + '\n';
+  }
+  return parseConvocationText(text, jur, chambre);
+}
+
+/* Accepte un fichier unique ou un tableau (PDF et/ou ZIP contenant des PDF).
+   Chaque PDF est analysé indépendamment ; un fichier illisible n'interrompt
+   pas le traitement des autres du même dépôt. */
+async function handleConvocUpload(fileOrFiles){
   const isDE = currentLang==='de';
   const resultEl = $('#convoc-upload-result');
   const jur = convocJurSel?.value || 'Cour administrative';
   const chambre = jur === 'Tribunal administratif' ? (convocChambreSel?.value || '') : '';
-  resultEl.innerHTML = `<p style="font-size:12.5px;color:var(--text-muted);">${isDE?'Analyse läuft…':'Analyse en cours…'}</p>`;
-  try {
-    if(typeof pdfjsLib === 'undefined') throw new Error('PDF.js non chargé');
-    const arrayBuffer = await file.arrayBuffer();
-    const pdf = await pdfjsLib.getDocument({ data: arrayBuffer, isEvalSupported: false }).promise;
-    const maxPages = Math.min(pdf.numPages, 10);
-    let text = '';
-    for(let p = 1; p <= maxPages; p++){
-      const page  = await pdf.getPage(p);
-      const lines = await extractPageLines(page);
-      text += lines.map(l => l.text).join('\n') + '\n';
-    }
-    const parsed = parseConvocationText(text, jur, chambre);
-    if(!parsed.length){
-      resultEl.innerHTML = `<p style="font-size:12.5px;color:var(--text-muted);">${isDE?'Keine Verfahren im PDF erkannt.':'Aucune affaire reconnue dans ce PDF.'}</p>`;
-      return;
-    }
-    const sourceWeek = _isoWeekLabel(new Date());
-    const email = _currentUser?.email || '';
-    const rows = parsed.map(a => ({ ...a, source_week: sourceWeek, uploaded_by: email, updated_at: new Date().toISOString() }));
 
-    /* Merge local immédiat (retour visuel avant confirmation Supabase) */
-    const byNum = new Map(AFFAIRES_DATA.map(a => [a.num, a]));
-    rows.forEach(r => byNum.set(r.num, r));
-    AFFAIRES_DATA = [...byNum.values()];
-    renderAffaires(); renderStats(); renderWatchlistPanel();
+  const incoming = Array.isArray(fileOrFiles) ? fileOrFiles : [fileOrFiles];
+  const zipFiles = incoming.filter(f => /\.zip$/i.test(f.name));
+  let pdfFiles = incoming.filter(f => !/\.zip$/i.test(f.name));
 
-    if(_sb && _currentUser){
-      const { error } = await _sb.from('affaires').upsert(rows);
-      if(error) throw error;
+  if(zipFiles.length){
+    resultEl.innerHTML = `<p style="font-size:12.5px;color:var(--text-muted);">${t('upload_zip_extracting')}</p>`;
+    for(const zf of zipFiles){
+      try { pdfFiles = pdfFiles.concat(await extractZipFile(zf, ['.pdf'])); }
+      catch(e){ console.warn('[convocations] ZIP illisible', zf.name, e); }
     }
-
-    _lastConvocUpload = { parsed, email, isDE, file };
-    renderConvocUploadResult();
-  } catch(e){
-    console.warn('[convocations] extraction échouée', e);
-    resultEl.innerHTML = `<p style="font-size:12.5px;color:var(--accent-red);">${isDE?'Extraktion fehlgeschlagen.':'Échec de l\'extraction.'} ${escHtml(String(e.message||e))}</p>`;
   }
+  if(!pdfFiles.length){
+    resultEl.innerHTML = `<p style="font-size:12.5px;color:var(--text-muted);">${isDE?'Kein PDF gefunden.':'Aucun PDF trouvé.'}</p>`;
+    return;
+  }
+
+  resultEl.innerHTML = `<p style="font-size:12.5px;color:var(--text-muted);">${isDE?'Analyse läuft…':'Analyse en cours…'}</p>`;
+  const allParsed = [];
+  const okFiles = [];
+  for(const file of pdfFiles){
+    try {
+      const parsed = await parseConvocPdf(file, jur, chambre);
+      if(parsed.length){ allParsed.push(...parsed); okFiles.push(file); }
+    } catch(e){
+      console.warn('[convocations] extraction échouée', file.name, e);
+    }
+  }
+
+  if(!allParsed.length){
+    resultEl.innerHTML = `<p style="font-size:12.5px;color:var(--accent-red);">${isDE?'Extraktion fehlgeschlagen oder keine Verfahren erkannt.':'Échec de l\'extraction ou aucune affaire reconnue.'}</p>`;
+    return;
+  }
+
+  const sourceWeek = _isoWeekLabel(new Date());
+  const email = _currentUser?.email || '';
+  const rows = allParsed.map(a => ({ ...a, source_week: sourceWeek, uploaded_by: email, updated_at: new Date().toISOString() }));
+
+  /* Merge local immédiat (retour visuel avant confirmation Supabase) */
+  const byNum = new Map(AFFAIRES_DATA.map(a => [a.num, a]));
+  rows.forEach(r => byNum.set(r.num, r));
+  AFFAIRES_DATA = [...byNum.values()];
+  renderAffaires(); renderStats(); renderWatchlistPanel();
+
+  if(_sb && _currentUser){
+    const { error } = await _sb.from('affaires').upsert(rows);
+    if(error) console.warn('[convocations] upsert Supabase échoué', error);
+  }
+
+  _lastConvocUpload = { parsed: allParsed, email, isDE, files: okFiles };
+  renderConvocUploadResult();
 }
 
 function clearAnalyse(){
