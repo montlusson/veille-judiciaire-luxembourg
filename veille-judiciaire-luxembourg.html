@@ -1255,10 +1255,12 @@ body.printing-decision #print-decision-area{display:block!important;color:#000;b
             <span class="fmt-badge fmt-pdf">PDF</span>
             <span class="fmt-badge fmt-csv">CSV</span>
             <span class="fmt-badge fmt-xlsx">XLSX</span>
+            <span class="fmt-badge fmt-pdf">ZIP</span>
           </div>
           <p style="font-size:12px;color:var(--text-faint);margin-top:10px;" data-i18n="upload_limit">Taille max par fichier : 50 Mo</p>
+          <p id="upload-zip-status" style="font-size:12px;color:var(--text-muted);margin-top:6px;display:none;"></p>
         </div>
-        <input type="file" id="file-input-hidden" multiple accept=".pdf,.csv,.xlsx,.xls">
+        <input type="file" id="file-input-hidden" multiple accept=".pdf,.csv,.xlsx,.xls,.zip">
 
         <div class="section-h" style="margin-top:28px;">
           <h2 data-i18n="imported_files_title">Fichiers importés</h2>
@@ -1614,6 +1616,8 @@ body.printing-decision #print-decision-area{display:block!important;color:#000;b
 </script>
 <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"
         integrity="sha384-EnyY0/GSHQGSxSgMwaIPzSESbqoOLSexfnSMN2AP+39Ckmn92stwABZynq1JyzdT" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"
+        integrity="sha384-+mbV2IY1Zk/X1p/nWllGySJSUN8uMs+gUAN10Or95UBH0fpj6GfKgPmgC5EXieXG" crossorigin="anonymous"></script>
 <script>
 'use strict';
 
@@ -1704,7 +1708,7 @@ const TRANSLATIONS = {
     freq_monthly: "Mensuelle",
     run_btn: "Mettre à jour l'index",
     import_title: "Importer vos propres fichiers",
-    import_intro: "Déposez des décisions en PDF, des exports CSV ou des classeurs XLSX pour les intégrer à votre base de recherche personnelle. Les fichiers sont analysés localement et leurs entités sont extraites automatiquement.",
+    import_intro: "Déposez des décisions en PDF, des exports CSV, des classeurs XLSX ou des archives ZIP (contenant plusieurs PDF) pour les intégrer à votre base de recherche personnelle. Les fichiers sont analysés localement et leurs entités sont extraites automatiquement.",
     upload_cta: "Glissez-déposez vos fichiers ici",
     upload_or: "ou cliquez pour parcourir",
     upload_limit: "Taille max par fichier : 50 Mo",
@@ -1776,6 +1780,8 @@ const TRANSLATIONS = {
     upload_search: "Rechercher dans ce fichier",
     upload_view: "Consulter le fichier",
     pdf_viewer_download: "Télécharger",
+    upload_zip_extracting: "Extraction des archives ZIP en cours…",
+    upload_zip_done: "{n} fichier(s) extrait(s) de {z} archive(s) ZIP.",
     file_type_pdf: "PDF",
     file_type_csv: "CSV",
     file_type_xlsx: "XLSX",
@@ -1943,7 +1949,7 @@ const TRANSLATIONS = {
     freq_monthly: "Monatlich",
     run_btn: "Index aktualisieren",
     import_title: "Eigene Dateien importieren",
-    import_intro: "Laden Sie Entscheidungen als PDF, CSV-Exporte oder XLSX-Arbeitsmappen hoch, um sie in Ihre persönliche Suchbasis zu integrieren. Die Dateien werden lokal analysiert und ihre Entitäten automatisch extrahiert.",
+    import_intro: "Laden Sie Entscheidungen als PDF, CSV-Exporte, XLSX-Arbeitsmappen oder ZIP-Archive (mit mehreren PDFs) hoch, um sie in Ihre persönliche Suchbasis zu integrieren. Die Dateien werden lokal analysiert und ihre Entitäten automatisch extrahiert.",
     upload_cta: "Dateien hier ablegen",
     upload_or: "oder klicken, um zu durchsuchen",
     upload_limit: "Max. Dateigröße: 50 MB",
@@ -2015,6 +2021,8 @@ const TRANSLATIONS = {
     upload_search: "In dieser Datei suchen",
     upload_view: "Datei ansehen",
     pdf_viewer_download: "Herunterladen",
+    upload_zip_extracting: "ZIP-Archive werden extrahiert…",
+    upload_zip_done: "{n} Datei(en) aus {z} ZIP-Archiv(en) extrahiert.",
     file_type_pdf: "PDF",
     file_type_csv: "CSV",
     file_type_xlsx: "XLSX",
@@ -2782,10 +2790,38 @@ function viewUploadedFile(idx){
   openPdfViewer(URL.createObjectURL(f), f.name);
 }
 
-function handleFiles(files){
-  Array.from(files).forEach(f => {
+const DIRECT_UPLOAD_EXTS = ['.pdf','.csv','.xlsx','.xls'];
+
+/* Extrait les PDF/CSV/XLSX d'une archive ZIP en File objects (JSZip, client-side) */
+async function extractZipFile(zipFile){
+  const out = [];
+  const zip = await JSZip.loadAsync(zipFile);
+  for(const [path, entry] of Object.entries(zip.files)){
+    if(entry.dir) continue;
+    const ext = '.' + path.split('.').pop().toLowerCase();
+    if(!DIRECT_UPLOAD_EXTS.includes(ext)) continue;
+    const blob = await entry.async('blob');
+    out.push(new File([blob], path.split('/').pop(), { type: blob.type }));
+  }
+  return out;
+}
+
+async function handleFiles(files){
+  const statusEl = $('#upload-zip-status');
+  const incoming = Array.from(files);
+  const zipFiles = incoming.filter(f => f.name.toLowerCase().endsWith('.zip'));
+  let extracted = [];
+  if(zipFiles.length){
+    if(statusEl){ statusEl.textContent = t('upload_zip_extracting'); statusEl.style.display = ''; }
+    for(const zf of zipFiles){
+      try { extracted = extracted.concat(await extractZipFile(zf)); }
+      catch(e){ console.warn('[import] ZIP illisible', zf.name, e); }
+    }
+    if(statusEl){ statusEl.textContent = t('upload_zip_done', { n: extracted.length, z: zipFiles.length }); }
+  }
+  incoming.concat(extracted).forEach(f => {
     const ext = '.'+f.name.split('.').pop().toLowerCase();
-    if(!['.pdf','.csv','.xlsx','.xls'].includes(ext)) return;
+    if(!DIRECT_UPLOAD_EXTS.includes(ext)) return;
     if(!uploadedFiles.find(u => u.name===f.name && u.size===f.size)) uploadedFiles.push(f);
   });
   renderUploadList(); renderDashboard();
