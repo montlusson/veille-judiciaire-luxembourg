@@ -22,7 +22,7 @@ from audiences_schedule import (
     generate_occurrences,
 )
 from audiences_ical import build_ical
-from audiences_pdf import download_pdf_archive, update_audiences_archive
+from audiences_pdf import update_audiences_archive
 from audiences_supabase import fetch_supabase_file, push_files_to_supabase
 
 
@@ -113,9 +113,12 @@ def main() -> None:
     log("\n── Archivage des audiences passées ──")
     update_audiences_archive(out_dir, old_events, today)
 
-    # ── Archives PDF convocations ──────────────────────────────
-    log("\n── Téléchargement des convocations PDF ──")
-    archive_records = download_pdf_archive(out_dir)
+    # NOTE : le téléchargement automatisé des PDF de convocation nominatifs
+    # a été retiré (risque juridique — disclaimer restreignant l'usage aux
+    # avocats des parties). Les convocations sont désormais déposées
+    # volontairement par les journalistes depuis l'app (onglet Audiences →
+    # "Convocations déposées"), qui alimente directement la table Supabase
+    # `affaires` — voir affaires-schema.sql.
 
     # ── Push Supabase (table files) — seule source de données en ligne ──
     log("\n── Push Supabase (table files) ──")
@@ -126,7 +129,6 @@ def main() -> None:
     push_files_to_supabase({
         "audiences":         output,
         "audiences_archive": archive_events,
-        "archives_index":    archive_records,
         "audiences_ics":     {"ics": ical},
     })
 
