@@ -1643,6 +1643,7 @@ const TRANSLATIONS = {
     step_active: "En cours",
     upload_delete: "Supprimer",
     upload_search: "Rechercher dans ce fichier",
+    upload_view: "Consulter le fichier",
     file_type_pdf: "PDF",
     file_type_csv: "CSV",
     file_type_xlsx: "XLSX",
@@ -1867,6 +1868,7 @@ const TRANSLATIONS = {
     step_active: "Läuft",
     upload_delete: "Löschen",
     upload_search: "In dieser Datei suchen",
+    upload_view: "Datei ansehen",
     file_type_pdf: "PDF",
     file_type_csv: "CSV",
     file_type_xlsx: "XLSX",
@@ -2541,6 +2543,9 @@ function renderUploadList(){
         <div class="upload-item-meta">${formatFileSize(f.size)} · <span class="badge badge-official">${t('file_indexed')}</span> · ${t('file_uploaded_on',{date:today})}</div>
       </div>
       <div class="upload-item-actions">
+        ${ftype === 'pdf' ? `<button class="btn-icon" title="${t('upload_view')}" onclick="viewUploadedFile(${i})" aria-label="${t('upload_view')} ${escHtml(f.name)}">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+        </button>` : ''}
         <button class="btn-icon" title="${t('upload_search')}" onclick="showScreen('recherche')" aria-label="${t('upload_search')}">
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
         </button>
@@ -2553,6 +2558,12 @@ function renderUploadList(){
 }
 
 function removeFile(idx){ uploadedFiles.splice(idx,1); renderUploadList(); renderDashboard(); }
+
+function viewUploadedFile(idx){
+  const f = uploadedFiles[idx];
+  if(!f) return;
+  openViewer(URL.createObjectURL(f), f.name);
+}
 
 function handleFiles(files){
   Array.from(files).forEach(f => {
@@ -3247,11 +3258,12 @@ $('#agenda-filter-semaine')?.addEventListener('change', renderAgenda);
 
 /* ── Viewer PDF inline ── */
 async function openViewer(url, title){
-  /* Garde-fou : uniquement des PDF d'archives relatifs ou des URLs https (bloque javascript: & co) */
+  /* Garde-fou : uniquement des PDF d'archives relatifs, des URLs https ou des blobs locaux (bloque javascript: & co) */
   url = String(url || '');
-  if(!/^(archives\/[\w\-.%]+\.pdf|https:\/\/[^\s"'<>]+)$/i.test(url)) return;
+  const isBlob = /^blob:/i.test(url);
+  if(!isBlob && !/^(archives\/[\w\-.%]+\.pdf|https:\/\/[^\s"'<>]+)$/i.test(url)) return;
   /* Chemin relatif : fichier local en mode LANCER.command, sinon URL signée du bucket */
-  if(!/^https:/i.test(url) && !PDF_FILES_LOCAL){
+  if(!isBlob && !/^https:/i.test(url) && !PDF_FILES_LOCAL){
     const signed = await _archiveSignedUrl(url);
     if(!signed){
       alert(currentLang==='de'
@@ -3269,14 +3281,18 @@ async function openViewer(url, title){
   titleEl.textContent = title;
   iframe.src = url;
   dlBtn.href = url;
-  dlBtn.download = title + '.pdf';
+  dlBtn.download = /\.pdf$/i.test(title) ? title : title + '.pdf';
+  if(_viewerBlobUrl) URL.revokeObjectURL(_viewerBlobUrl);
+  _viewerBlobUrl = isBlob ? url : null;
   panel.classList.add('open');
   backdrop.classList.add('open');
   document.body.style.overflow = 'hidden';
 }
+let _viewerBlobUrl = null;
 function closeViewer(){
   const panel = document.getElementById('viewer-panel');
   const backdrop = document.getElementById('viewer-backdrop');
+  if(_viewerBlobUrl){ URL.revokeObjectURL(_viewerBlobUrl); _viewerBlobUrl = null; }
   panel.classList.remove('open');
   backdrop.classList.remove('open');
   document.getElementById('viewer-iframe').src = '';
