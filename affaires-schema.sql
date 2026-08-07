@@ -30,7 +30,6 @@ CREATE TABLE IF NOT EXISTS affaires (
 
 CREATE INDEX IF NOT EXISTS affaires_juridiction_idx ON affaires (juridiction);
 CREATE INDEX IF NOT EXISTS affaires_week_idx        ON affaires (source_week);
-CREATE INDEX IF NOT EXISTS affaires_date_audience_idx ON affaires (date_audience);
 
 ALTER TABLE affaires ENABLE ROW LEVEL SECURITY;
 
