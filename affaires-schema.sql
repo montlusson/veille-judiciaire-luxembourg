@@ -24,11 +24,13 @@ CREATE TABLE IF NOT EXISTS affaires (
   stade        TEXT,       -- "Mise en état" / "Plaidoirie" / "Délibéré"
   source_week  TEXT,       -- semaine (YYYY-Www) de la convocation déposée
   uploaded_by  TEXT,
+  date_audience DATE,      -- date d'audience extraite du PDF (onglet "Audiences passées")
   updated_at   TIMESTAMPTZ DEFAULT NOW()
 );
 
 CREATE INDEX IF NOT EXISTS affaires_juridiction_idx ON affaires (juridiction);
 CREATE INDEX IF NOT EXISTS affaires_week_idx        ON affaires (source_week);
+CREATE INDEX IF NOT EXISTS affaires_date_audience_idx ON affaires (date_audience);
 
 ALTER TABLE affaires ENABLE ROW LEVEL SECURITY;
 
@@ -49,6 +51,15 @@ CREATE POLICY "Reporter update affaires"
 
 -- Pas de politique DELETE : les affaires sont remplacées par upsert
 -- (dépôt suivant), jamais supprimées manuellement depuis l'app.
+
+-- ═══════════════════════════════════════════════════════════════
+-- Ajout colonne date_audience (refonte onglet "Audiences & agenda") —
+-- à exécuter si la table `affaires` existe déjà (installation antérieure
+-- à cet ajout). Sans effet si la table vient d'être créée ci-dessus
+-- (colonne déjà présente). Supabase → SQL Editor → New query → Run.
+-- ═══════════════════════════════════════════════════════════════
+ALTER TABLE affaires ADD COLUMN IF NOT EXISTS date_audience DATE;
+CREATE INDEX IF NOT EXISTS affaires_date_audience_idx ON affaires (date_audience);
 
 -- ── Vérification ───────────────────────────────────────────────
 SELECT 'Schéma affaires créé avec succès ✓' AS status;

@@ -207,6 +207,7 @@ select,.input{border:1px solid var(--card-border);background:#fff;border-radius:
 }
 .subtab:hover{color:var(--text);}
 .subtab.active{color:var(--accent-red);border-bottom-color:var(--accent-red);}
+.subtab-agenda{padding:14px 26px;font-size:16px;}
 .subpanel{display:none;margin-top:22px;}
 .subpanel.active{display:block;}
 
@@ -512,6 +513,9 @@ details.alt-table th,details.alt-table td{border:1px solid var(--card-border);pa
   padding:10px 14px;font-size:12px;color:#6B4C0A;margin-top:12px;
   display:flex;gap:8px;align-items:flex-start;
 }
+.convoc-strip{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:8px 12px;background:#F0F4F9;border:1px solid #C0D0E4;border-radius:var(--radius-md);margin-bottom:0;font-size:12.5px;}
+.convoc-strip .convoc-link{padding:5px 10px;font-size:12px;}
+.convoc-strip-info-ic{cursor:help;color:var(--accent-blue);flex:0 0 auto;}
 
 /* ── Archives d'audience ── */
 .archive-week{margin-bottom:28px;}
@@ -1344,44 +1348,15 @@ body.printing-decision #print-decision-area{display:block!important;color:#000;b
         </div>
       </div>
 
-      <div style="display:flex;align-items:center;gap:10px;margin-bottom:20px;flex-wrap:wrap;">
-        <a id="ics-download" href="#" download="audiences-luxembourg.ics" class="ics-btn">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
-          <span data-i18n="agenda_ics_btn">Exporter vers mon agenda (.ics)</span>
-        </a>
-        <button class="btn btn-secondary" onclick="loadAudiencesJSON()" style="font-size:12px;padding:5px 13px;margin-left:auto;" data-i18n="agenda_refresh">↺ Actualiser</button>
-      </div>
-
       <div class="subtabs" style="margin-top:0;">
-        <button class="subtab active" id="subtab-agenda-cal" onclick="switchAgendaTab('cal')" data-i18n="agenda_tab_cal">Calendrier</button>
-        <button class="subtab" id="subtab-agenda-deposit" onclick="switchAgendaTab('deposit')" data-i18n="agenda_tab_deposit">Convocations déposées</button>
-        <button class="subtab" id="subtab-agenda-archives" onclick="switchAgendaTab('archives')" data-i18n="agenda_tab_past">Audiences passées</button>
+        <button class="subtab subtab-agenda active" id="subtab-agenda-deposit" onclick="switchAgendaTab('deposit')" data-i18n="agenda_tab_deposit">Déposer les convocations</button>
+        <button class="subtab subtab-agenda" id="subtab-agenda-cal" onclick="switchAgendaTab('cal')" data-i18n="agenda_tab_cal">Calendrier</button>
+        <button class="subtab subtab-agenda" id="subtab-agenda-archives" onclick="switchAgendaTab('archives')" data-i18n="agenda_tab_past">Audiences passées</button>
       </div>
 
-      <!-- Calendrier -->
-      <div id="agendapanel-cal" style="margin-top:20px;">
-        <div class="agenda-filter-bar">
-          <select id="agenda-filter-semaine">
-            <option value="0" data-i18n="agenda_week0">Cette semaine</option>
-            <option value="1" data-i18n="agenda_week1">Semaine +1</option>
-            <option value="2" data-i18n="agenda_week2">Semaine +2</option>
-            <option value="3" data-i18n="agenda_week3">Semaine +3</option>
-            <option value="4" data-i18n="agenda_week4">Semaine +4</option>
-          </select>
-        </div>
-        <div class="agenda-chips" id="agenda-chips"></div>
-        <div id="convoc-container"></div>
-        <div id="agenda-list">
-          <div class="empty-state" style="padding:48px 24px;background:var(--card-bg);border:1px solid var(--card-border);border-radius:var(--radius-lg);">
-            <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
-            <p style="margin-top:12px;" data-i18n="agenda_loading">Chargement des audiences en cours…</p>
-          </div>
-        </div>
-      </div>
-
-      <!-- Convocations déposées : dépôt volontaire par le journaliste (plus de scraping automatisé) -->
-      <div id="agendapanel-deposit" style="display:none;margin-top:20px;">
-        <div class="section-notice info" data-i18n="convoc_upload_notice">Dépôt volontaire : téléchargez vous-même le PDF de convocation depuis les liens ci-dessus (onglet Calendrier), puis déposez-le ici. Les numéros d'affaire, matières et avocats sont extraits automatiquement et partagés avec toute la rédaction (onglet « Affaires en cours »). Ces données restent à examiner avant tout usage éditorial (RGPD/CNPD).</div>
+      <!-- Déposer les convocations : dépôt volontaire par le journaliste, cœur du workflow de cette page -->
+      <div id="agendapanel-deposit" style="margin-top:20px;">
+        <div class="section-notice info" data-i18n="convoc_upload_notice">Dépôt volontaire : téléchargez vous-même le PDF de convocation depuis les liens ci-dessus (onglet Calendrier), puis déposez-le ici. Vous pouvez déposer plusieurs PDF et/ou des ZIP les contenant en une fois. Les numéros d'affaire, matières et avocats sont extraits automatiquement et partagés avec toute la rédaction (onglet « Affaires en cours »). Ces données restent à examiner avant tout usage éditorial (RGPD/CNPD).</div>
         <div class="upload-zone" id="convoc-drop-zone" tabindex="0" role="button" aria-label="Déposer un PDF de convocation">
           <input type="file" id="convoc-file-input" accept="application/pdf,.zip" multiple style="display:none;">
           <p data-i18n="convoc_drop_cta">Glissez-déposez un ou plusieurs PDF de convocation ici (ou un ZIP les contenant), ou cliquez pour parcourir</p>
@@ -1402,22 +1377,65 @@ body.printing-decision #print-decision-area{display:block!important;color:#000;b
             <option value="6e ch.">6e ch.</option>
           </select>
         </div>
-        <div id="convoc-upload-result"></div>
+        <p class="status-line" id="convoc-upload-status" role="status"></p>
+        <div class="recherche-split" style="height:calc(100vh - 380px);">
+          <div class="recherche-left" id="convoc-files-list">
+            <div class="empty-state" style="padding:32px 18px;">
+              <p data-i18n="convoc_files_empty" style="font-size:12.5px;">Les fichiers déposés apparaîtront ici.</p>
+            </div>
+          </div>
+          <div class="recherche-right">
+            <div class="detail-text-zone" id="convoc-detail-zone" style="padding:0;">
+              <div class="detail-placeholder">
+                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6"/><path d="M16 13H8M16 17H8M10 9H8"/></svg>
+                <p data-i18n="convoc_reader_placeholder">Sélectionnez un fichier déposé pour le consulter.</p>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
 
-      <!-- Audiences passées : historique des horaires récurrents (non nominatif), issu du scraping du dimanche -->
+      <!-- Calendrier -->
+      <div id="agendapanel-cal" style="display:none;margin-top:20px;">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;flex-wrap:wrap;">
+          <div id="convoc-container" style="flex:1;min-width:220px;"></div>
+          <a id="ics-download" href="#" download="audiences-luxembourg.ics" class="ics-btn">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+            <span data-i18n="agenda_ics_btn">Exporter vers mon agenda (.ics)</span>
+          </a>
+          <button class="btn btn-secondary" onclick="loadAudiencesJSON()" style="font-size:12px;padding:5px 13px;" data-i18n="agenda_refresh">↺ Actualiser</button>
+        </div>
+        <div class="agenda-filter-bar">
+          <select id="agenda-filter-semaine">
+            <option value="0" data-i18n="agenda_week0">Cette semaine</option>
+            <option value="1" data-i18n="agenda_week1">Semaine +1</option>
+            <option value="2" data-i18n="agenda_week2">Semaine +2</option>
+            <option value="3" data-i18n="agenda_week3">Semaine +3</option>
+            <option value="4" data-i18n="agenda_week4">Semaine +4</option>
+          </select>
+        </div>
+        <div class="agenda-chips" id="agenda-chips"></div>
+        <div id="agenda-list">
+          <div class="empty-state" style="padding:48px 24px;background:var(--card-bg);border:1px solid var(--card-border);border-radius:var(--radius-lg);">
+            <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+            <p style="margin-top:12px;" data-i18n="agenda_loading">Chargement des audiences en cours…</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Audiences passées : issues des convocations déposées volontairement, classées par date d'audience -->
       <div id="agendapanel-archives" style="display:none;margin-top:20px;">
-        <p class="intro" style="font-size:12.5px;margin-bottom:14px;" data-i18n="audiences_archive_intro">Audiences déjà tenues, retirées automatiquement du calendrier et conservées ici par le scraping hebdomadaire (horaires uniquement, aucune donnée nominative).</p>
+        <p class="intro" style="font-size:12.5px;margin-bottom:14px;" data-i18n="audiences_archive_intro">Audiences déjà tenues, reconstituées à partir des convocations déposées par la rédaction. Conservées un an, sauf affaire suivie (« Surveiller »).</p>
         <div class="archive-search-bar">
           <div class="searchbar" style="flex:1;">
             <span class="ic"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg></span>
-            <input class="input" id="audiences-archive-search" type="search" data-i18n-placeholder="audiences_archive_search_ph" placeholder="Juridiction, chambre, salle…" oninput="renderAudiencesArchive()">
+            <input class="input" id="audiences-archive-search" type="search" data-i18n-placeholder="audiences_archive_search_ph" placeholder="Numéro d'affaire, matière, avocat…" oninput="renderAudiencesArchive()">
           </div>
         </div>
         <div id="audiences-archive-list">
           <div class="empty-state" style="padding:48px 24px;background:var(--card-bg);border:1px solid var(--card-border);border-radius:var(--radius-lg);">
-            <p data-i18n="audiences_archive_empty_html">Les audiences passées apparaîtront ici, classées par semaine.<br>
-            Lancez <strong>scrape_audiences.py</strong> pour archiver le calendrier.</p>
+            <p data-i18n="audiences_archive_empty_html">Les audiences passées apparaîtront ici au fil des convocations déposées, classées par date d'audience.<br>
+            Déposez des convocations dans l'onglet <strong>« Déposer les convocations »</strong>.</p>
           </div>
         </div>
       </div>
@@ -1794,10 +1812,12 @@ const TRANSLATIONS = {
     agenda_ics_btn: "Exporter vers mon agenda (.ics)",
     agenda_refresh: "↺ Actualiser",
     agenda_tab_cal: "Calendrier",
-    agenda_tab_deposit: "Convocations déposées",
+    agenda_tab_deposit: "Déposer les convocations",
     agenda_tab_past: "Audiences passées",
-    convoc_upload_notice: "Dépôt volontaire : téléchargez vous-même le PDF de convocation depuis les liens ci-dessus (onglet Calendrier), puis déposez-le ici. Les numéros d'affaire, matières et avocats sont extraits automatiquement et partagés avec toute la rédaction (onglet « Affaires en cours »). Ces données restent à examiner avant tout usage éditorial (RGPD/CNPD).",
+    convoc_upload_notice: "Dépôt volontaire : téléchargez vous-même le PDF de convocation depuis les liens ci-dessus (onglet Calendrier), puis déposez-le ici. Vous pouvez déposer plusieurs PDF et/ou des ZIP les contenant en une fois. Les numéros d'affaire, matières et avocats sont extraits automatiquement et partagés avec toute la rédaction (onglet « Affaires en cours »). Ces données restent à examiner avant tout usage éditorial (RGPD/CNPD).",
     convoc_drop_cta: "Glissez-déposez un ou plusieurs PDF de convocation ici (ou un ZIP les contenant), ou cliquez pour parcourir",
+    convoc_files_empty: "Les fichiers déposés apparaîtront ici.",
+    convoc_reader_placeholder: "Sélectionnez un fichier déposé pour le consulter.",
     convoc_jur_label: "Juridiction",
     convoc_chambre_label: "Chambre",
     agenda_filter_all: "Toutes les juridictions",
@@ -1817,11 +1837,10 @@ const TRANSLATIONS = {
     archive_no_results: "Aucun résultat pour cette recherche.",
     archive_none: "Aucune archive. Lancez <strong>scrape_audiences.py</strong> pour télécharger les PDF.",
     audiences_archive_title: "Audiences passées",
-    audiences_archive_intro: "Audiences déjà tenues, retirées automatiquement du calendrier et conservées ici par scrape_audiences.py.",
-    audiences_archive_search_ph: "Juridiction, chambre, salle…",
-    audiences_archive_empty_html: "Les audiences passées apparaîtront ici, classées par semaine.<br>Lancez <strong>scrape_audiences.py</strong> pour archiver le calendrier.",
-    audiences_archive_none: "Aucune audience archivée pour l'instant.",
-    archive_week_label: "Semaine",
+    audiences_archive_intro: "Audiences déjà tenues, reconstituées à partir des convocations déposées par la rédaction. Conservées un an, sauf affaire suivie (« Surveiller »).",
+    audiences_archive_search_ph: "Numéro d'affaire, matière, avocat…",
+    audiences_archive_empty_html: "Les audiences passées apparaîtront ici au fil des convocations déposées, classées par date d'audience.<br>Déposez des convocations dans l'onglet « Déposer les convocations ».",
+    audiences_archive_none: "Aucune audience passée pour l'instant.",
     archive_downloaded: "Semaine {w} · Téléchargé le {d}",
     archive_open: "Ouvrir",
     nav_analyse: "Analyse documents",
@@ -2035,10 +2054,12 @@ const TRANSLATIONS = {
     agenda_ics_btn: "In Kalender exportieren (.ics)",
     agenda_refresh: "↺ Aktualisieren",
     agenda_tab_cal: "Kalender",
-    agenda_tab_deposit: "Hochgeladene Ladungen",
+    agenda_tab_deposit: "Ladungen hochladen",
     agenda_tab_past: "Vergangene Sitzungen",
-    convoc_upload_notice: "Freiwilliger Upload: Laden Sie die Ladungs-PDF selbst über die obigen Links (Tab Kalender) herunter und legen Sie sie hier ab. Aktenzeichen, Sachgebiete und Anwälte werden automatisch extrahiert und mit der gesamten Redaktion geteilt (Tab „Laufende Verfahren\"). Diese Daten müssen vor jeder redaktionellen Nutzung geprüft werden (DSGVO/CNPD).",
+    convoc_upload_notice: "Freiwilliger Upload: Laden Sie die Ladungs-PDF selbst über die obigen Links (Tab Kalender) herunter und legen Sie sie hier ab. Sie können mehrere PDFs und/oder ZIP-Archive damit auf einmal ablegen. Aktenzeichen, Sachgebiete und Anwälte werden automatisch extrahiert und mit der gesamten Redaktion geteilt (Tab „Laufende Verfahren\"). Diese Daten müssen vor jeder redaktionellen Nutzung geprüft werden (DSGVO/CNPD).",
     convoc_drop_cta: "Ein oder mehrere Ladungs-PDFs hier ablegen (oder ein ZIP damit) oder klicken, um zu durchsuchen",
+    convoc_files_empty: "Die abgelegten Dateien erscheinen hier.",
+    convoc_reader_placeholder: "Wählen Sie eine abgelegte Datei aus, um sie anzusehen.",
     convoc_jur_label: "Gericht",
     convoc_chambre_label: "Kammer",
     agenda_filter_all: "Alle Gerichte",
@@ -2058,11 +2079,10 @@ const TRANSLATIONS = {
     archive_no_results: "Kein Ergebnis für diese Suche.",
     archive_none: "Kein Archiv. Starten Sie <strong>scrape_audiences.py</strong>, um die PDF herunterzuladen.",
     audiences_archive_title: "Vergangene Sitzungen",
-    audiences_archive_intro: "Bereits stattgefundene Sitzungen, automatisch aus dem Kalender entfernt und hier von scrape_audiences.py aufbewahrt.",
-    audiences_archive_search_ph: "Gericht, Kammer, Saal…",
-    audiences_archive_empty_html: "Vergangene Sitzungen erscheinen hier, geordnet nach Woche.<br>Starten Sie <strong>scrape_audiences.py</strong>, um den Kalender zu archivieren.",
-    audiences_archive_none: "Noch keine archivierten Sitzungen.",
-    archive_week_label: "Woche",
+    audiences_archive_intro: "Bereits stattgefundene Sitzungen, rekonstruiert aus den von der Redaktion hochgeladenen Ladungen. Ein Jahr aufbewahrt, außer bei verfolgten Verfahren („Verfolgen“).",
+    audiences_archive_search_ph: "Aktenzeichen, Sachgebiet, Anwalt…",
+    audiences_archive_empty_html: "Vergangene Sitzungen erscheinen hier nach und nach anhand der hochgeladenen Ladungen, geordnet nach Sitzungsdatum.<br>Laden Sie Ladungen im Tab „Ladungen hochladen“ hoch.",
+    audiences_archive_none: "Noch keine vergangenen Sitzungen.",
     archive_downloaded: "Woche {w} · Heruntergeladen am {d}",
     archive_open: "Öffnen",
     nav_analyse: "Dokumente analysieren",
@@ -3098,8 +3118,6 @@ function _annotFormHtml(id){
 let _annotModalDecisionId = null;
 
 function openAnnotModal(id){
-  const d = DECISIONS.find(x => x.id===id);
-  if(!d) return;
   _annotModalDecisionId = id;
   const isDE = currentLang==='de';
   document.getElementById('annot-modal-title').textContent = isDE ? 'Annotation' : 'Annotation';
@@ -3385,21 +3403,15 @@ function renderConvocations(jurFilter){
     const linkHtml = links.map(function(l){
       return '<a class="convoc-link" href="' + l.url + '" target="_blank" rel="noopener">' + PDF_ICON + ' ' + l.label + '</a>';
     }).join('');
-    const cardTitle = isDE ? ('Ladungen — ' + court) : ('Convocations — ' + court);
-    const cardDesc  = isDE
-      ? 'PDF des Kanzleipersonals, vor jeder Sitzung aktualisiert. Enthält die auf der Rolle eingetragenen Verfahren — nützlich für den Abgleich mit den anonymisierten Entscheidungen.'
-      : 'PDF publié par le greffe, mis à jour avant chaque audience. Contient les affaires inscrites au rôle — utile pour croiser avec les décisions anonymisées.';
+    const stripLabel = isDE ? ('Ladungen — ' + court) : ('Convocations — ' + court);
     const noteText  = isDE
-      ? 'Diese PDF enthalten die <strong>Namen der Parteien vor der Anonymisierung</strong>. Anhand des Aktenzeichens können Sie die Entscheidung in der Datenbank wiederfinden und die Anonymisierung teilweise aufheben.'
-      : 'Ces PDF contiennent les <strong>noms des parties avant anonymisation</strong>. En relevant la référence d\'une affaire, vous pouvez la retrouver dans les décisions indexées et lever partiellement l\'anonymat.';
-    return '<div class="convoc-card">'
-      + '<div class="convoc-card-title">' + PDF_ICON + ' ' + cardTitle + '</div>'
-      + '<p>' + cardDesc + '</p>'
-      + '<div class="convoc-links">' + linkHtml + '</div>'
-      + '<div class="convoc-note">'
-      + '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex:0 0 14px;margin-top:1px;"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>'
-      + '<span>' + noteText + '</span>'
-      + '</div></div>';
+      ? 'Diese PDF enthalten die Namen der Parteien vor der Anonymisierung. Anhand des Aktenzeichens können Sie die Entscheidung in der Datenbank wiederfinden und die Anonymisierung teilweise aufheben.'
+      : 'Ces PDF contiennent les noms des parties avant anonymisation. En relevant la référence d\'une affaire, vous pouvez la retrouver dans les décisions indexées et lever partiellement l\'anonymat.';
+    return '<div class="convoc-strip">'
+      + '<span style="font-weight:700;color:var(--accent-blue);white-space:nowrap;">' + PDF_ICON + ' ' + stripLabel + '</span>'
+      + linkHtml
+      + '<svg class="convoc-strip-info-ic" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" title="' + noteText.replace(/"/g,'&quot;') + '"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>'
+      + '</div>';
   }).join('');
 }
 
@@ -3623,79 +3635,71 @@ function switchAgendaTab(tab){
   });
 }
 
-/* ── Audiences passées (déplacées automatiquement par scrape_audiences.py) ── */
-let AUDIENCES_ARCHIVE = [];
-
-async function loadAudiencesArchiveJSON(){
-  try {
-    const data = await _vjFetchFile('audiences_archive', 'audiences_archive.json');
-    AUDIENCES_ARCHIVE = data.events || [];
-    renderAudiencesArchive();
-  } catch {
-    /* Pas encore d'archive — message déjà en place dans le HTML */
-  }
-}
-
-function isoWeekLabel(dateStr){
-  const d = new Date(dateStr + 'T00:00:00');
-  const target = new Date(d.valueOf());
-  const dayNr = (d.getDay() + 6) % 7;
-  target.setDate(target.getDate() - dayNr + 3);
-  const firstThursday = new Date(target.getFullYear(), 0, 4);
-  const diff = target - firstThursday;
-  const week = 1 + Math.round(diff / (7 * 86400000));
-  return `${target.getFullYear()}-W${String(week).padStart(2,'0')}`;
-}
+/* ── Audiences passées : dérivées des convocations déposées volontairement
+   (table `affaires`, colonne date_audience), plus de fetch propre à cet
+   onglet. Conservation par défaut 1 an, sauf affaire suivie ("Surveiller"),
+   masquage à l'affichage uniquement (aucune suppression en base). ── */
+const AUDIENCES_RETENTION_MONTHS = 12;
 
 function renderAudiencesArchive(){
   const el = document.getElementById('audiences-archive-list');
   if(!el) return;
   const q = (document.getElementById('audiences-archive-search')?.value || '').toLowerCase().trim();
+  const todayStr = new Date().toISOString().slice(0,10);
+  const cutoff = new Date();
+  cutoff.setMonth(cutoff.getMonth() - AUDIENCES_RETENTION_MONTHS);
+  const cutoffStr = cutoff.toISOString().slice(0,10);
 
+  const past = (AFFAIRES_DATA || []).filter(a =>
+    a.date_audience && a.date_audience < todayStr
+    && (a.date_audience >= cutoffStr || _watchlist.includes(a.num))
+  );
   const filtered = q
-    ? AUDIENCES_ARCHIVE.filter(e =>
-        (e.juridiction || '').toLowerCase().includes(q)
-        || (e.chambre || '').toLowerCase().includes(q)
-        || (e.salle || '').toLowerCase().includes(q))
-    : AUDIENCES_ARCHIVE;
+    ? past.filter(a =>
+        (a.num || '').toLowerCase().includes(q)
+        || (a.matiere || '').toLowerCase().includes(q)
+        || (a.avocat || '').toLowerCase().includes(q))
+    : past;
 
   if(!filtered.length){
     el.innerHTML = '<div class="empty-state" style="padding:40px;background:var(--card-bg);border:1px solid var(--card-border);border-radius:var(--radius-lg);">'
-      + (AUDIENCES_ARCHIVE.length ? '<p>' + t('archive_no_results') + '</p>'
-        : '<p>' + t('audiences_archive_none') + '</p>')
+      + '<p>' + (past.length ? t('archive_no_results') : t('audiences_archive_none')) + '</p>'
       + '</div>';
     return;
   }
 
-  const byWeek = {};
-  filtered.forEach(e => {
-    const w = isoWeekLabel(e.date);
-    (byWeek[w] = byWeek[w] || []).push(e);
-  });
+  const byDate = {};
+  filtered.forEach(a => { (byDate[a.date_audience] = byDate[a.date_audience] || []).push(a); });
 
   const locale = currentLang === 'de' ? 'de-LU' : 'fr-LU';
 
-  el.innerHTML = Object.entries(byWeek).sort((a,b) => b[0].localeCompare(a[0])).map(([week, evts]) => {
-    const byDate = {};
-    evts.forEach(e => { (byDate[e.date] = byDate[e.date] || []).push(e); });
-    const days = Object.entries(byDate).sort((a,b) => b[0].localeCompare(a[0])).map(([dateStr, dayEvts]) => {
-      const d     = new Date(dateStr + 'T00:00:00');
-      const label = d.toLocaleDateString(locale, {weekday:'long', day:'numeric', month:'long', year:'numeric'});
-      const rows  = dayEvts.sort((a,b) => a.horaire.localeCompare(b.horaire)).map(e => {
-        const sep = `<span class="agenda-sep">·</span>`;
-        const chambreHtml = e.chambre ? `${sep}<span class="agenda-chambre-inline">${escHtml(e.chambre)}</span>` : '';
-        const salleHtml   = e.salle   ? `${sep}<span class="agenda-salle-inline">${escHtml(e.salle)}</span>`   : '';
-        return `<div class="agenda-row">
-          <span class="agenda-time">${escHtml(e.horaire)}</span>
-          <span class="agenda-inline">
-            <span class="agenda-jur-inline">${escHtml(e.juridiction)}</span>
-            ${chambreHtml}${salleHtml}
-          </span>
-        </div>`;
-      }).join('');
-      return `<div class="agenda-day"><div class="agenda-day-header"><span>${label}</span></div>${rows}</div>`;
-    }).join('');
-    return '<div class="archive-week"><div class="archive-week-header">' + t('archive_week_label') + ' ' + week + '</div>' + days + '</div>';
+  const isDE = currentLang === 'de';
+  const th = {
+    num:      isDE ? 'Aktenzeichen'            : 'N° d\'affaire',
+    jur:      isDE ? 'Gericht'                 : 'Juridiction',
+    matiere:  isDE ? 'Sachgebiet'              : 'Matière',
+    defendeur:isDE ? 'Beklagter / Ministerium' : 'Défendeur / Ministère',
+    stade:    isDE ? 'Stand'                   : 'Stade'
+  };
+
+  el.innerHTML = Object.entries(byDate).sort((a,b) => b[0].localeCompare(a[0])).map(([dateStr, affs]) => {
+    const d = new Date(dateStr + 'T00:00:00');
+    const label = d.toLocaleDateString(locale, {weekday:'long', day:'numeric', month:'long', year:'numeric'});
+    const rows = affs.map(a => renderAffaireRow(a, false)).join('');
+    return `<div class="archive-week">
+      <div class="archive-week-header">${escHtml(label)}</div>
+      <div style="overflow-x:auto;"><table class="affaires-table" role="grid">
+        <thead><tr>
+          <th style="width:100px;">${th.num}</th>
+          <th style="width:120px;">${th.jur}</th>
+          <th>${th.matiere}</th>
+          <th style="width:200px;">${th.defendeur}</th>
+          <th style="width:110px;">${th.stade}</th>
+          <th style="width:90px;"></th>
+        </tr></thead>
+        <tbody>${rows}</tbody>
+      </table></div>
+    </div>`;
   }).join('');
 }
 
@@ -3951,13 +3955,48 @@ if(convocZone && convocInput){
   });
 }
 
-let _lastConvocUpload = null; /* { parsed, email, isDE, files } — pour rafraîchir l'état Suivi/Surveiller après toggleWatchlist et rouvrir les PDF déposés */
+/* Fichiers déposés cette session (jamais uploadés ailleurs qu'en mémoire
+   navigateur — pas de persistance serveur du PDF lui-même) :
+   { file, jur, chambre, sourceWeek, dateAudience, parsed } — un élément par
+   fichier source, accumulé au fil des dépôts successifs. */
+let depositedConvocFiles = [];
+let _selectedConvocFileIdx = null;
+let _convocDetailBlobUrl = null;
 
-function renderConvocUploadResult(){
-  const resultEl = $('#convoc-upload-result');
-  if(!resultEl || !_lastConvocUpload) return;
-  const { parsed, email, isDE, files } = _lastConvocUpload;
-  const affaireRows = parsed.map(a => {
+function renderConvocFilesList(){
+  const el = $('#convoc-files-list');
+  if(!el) return;
+  if(!depositedConvocFiles.length){
+    el.innerHTML = `<div class="empty-state" style="padding:32px 18px;"><p data-i18n="convoc_files_empty" style="font-size:12.5px;">${t('convoc_files_empty')}</p></div>`;
+    return;
+  }
+  const isDE = currentLang==='de';
+  el.innerHTML = depositedConvocFiles.map((entry, i) => {
+    const sel = i === _selectedConvocFileIdx;
+    return `<div class="archive-pdf-row" style="cursor:pointer;${sel?'background:var(--row-sep);':''}" onclick="openConvocFileDetail(${i})">
+      <div class="archive-pdf-icon">PDF</div>
+      <div class="archive-pdf-main">
+        <div class="archive-pdf-name">${escHtml(entry.file.name)}</div>
+        <div class="archive-pdf-meta">${escHtml(entry.jur)}${entry.chambre?' · '+escHtml(entry.chambre):''} · ${entry.parsed.length} ${isDE?'Verfahren':'affaires'}</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function openConvocFileDetail(idx){
+  const entry = depositedConvocFiles[idx];
+  if(!entry) return;
+  _selectedConvocFileIdx = idx;
+  renderConvocFilesList();
+
+  const isDE = currentLang==='de';
+  const zone = $('#convoc-detail-zone');
+  if(_convocDetailBlobUrl) URL.revokeObjectURL(_convocDetailBlobUrl);
+  const blobUrl = URL.createObjectURL(entry.file);
+  _convocDetailBlobUrl = blobUrl;
+
+  const annotId = 'convoc:' + entry.file.name;
+  const affaireRows = entry.parsed.map(a => {
     const inWL = _watchlist.includes(a.num);
     return `<div class="watchlist-item">
       <div>
@@ -3969,20 +4008,33 @@ function renderConvocUploadResult(){
       </button>
     </div>`;
   }).join('');
-  const viewBtns = (files||[]).map((f,i) => `<button class="btn btn-secondary" style="font-size:12px;padding:5px 12px;margin:10px 6px 0 0;" onclick="viewConvocUploadFile(${i})">
-    ${isDE?'PDF ansehen':'Voir'} — ${escHtml(f.name)}
-  </button>`).join('');
-  resultEl.innerHTML = `<div class="section-notice info" style="margin-top:14px;">
-    ✓ ${parsed.length} ${isDE?'Verfahren erkannt und geteilt':'affaires reconnues et partagées'} — ${isDE?'hochgeladen von':'déposé par'} ${escHtml(email||'—')} · ${new Date().toLocaleDateString(isDE?'de-LU':'fr-LU')}
-  </div>
-  <div>${viewBtns}</div>
-  <div style="margin-top:10px;">${affaireRows}</div>`;
+
+  zone.innerHTML = `
+    <div style="padding:16px 20px 0;">
+      <div style="font-weight:700;font-size:14px;margin-bottom:2px;">${escHtml(entry.file.name)}</div>
+      <div style="font-size:12px;color:var(--text-muted);margin-bottom:10px;">${escHtml(entry.jur)}${entry.chambre?' · '+escHtml(entry.chambre):''}${entry.dateAudience?' · '+new Date(entry.dateAudience+'T00:00:00').toLocaleDateString(isDE?'de-LU':'fr-LU'):''}</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;">
+        <button class="btn btn-secondary" style="font-size:12.5px;padding:7px 13px;" onclick="${escHtml(`openPdfViewer(${JSON.stringify(blobUrl)}, ${JSON.stringify(entry.file.name)})`)}">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 3H5a2 2 0 00-2 2v3m18-5h-3a2 2 0 00-2 2v3M3 16v3a2 2 0 002 2h3m11-5v3a2 2 0 01-2 2h-3"/></svg>
+          ${isDE?'Vollbild':'Plein écran'}
+        </button>
+        <button class="btn btn-secondary" style="font-size:12.5px;padding:7px 13px;" onclick="printConvocIframe()">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9V2h12v7M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2"/><path d="M6 14h12v8H6z"/></svg>
+          ${isDE?'Drucken':'Imprimer'}
+        </button>
+        <button class="btn btn-secondary" style="font-size:12.5px;padding:7px 13px;" onclick="${escHtml(`openAnnotModal(${JSON.stringify(annotId)})`)}">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+          ${isDE?'Persönliche Notiz':'Annotation personnelle'}
+        </button>
+      </div>
+      ${entry.parsed.length ? `<div style="margin-bottom:12px;">${affaireRows}</div>` : ''}
+    </div>
+    <iframe id="convoc-detail-iframe" class="viewer-iframe" style="height:60vh;" title="${escHtml(entry.file.name)}" src="${blobUrl}"></iframe>`;
 }
 
-function viewConvocUploadFile(idx){
-  const f = _lastConvocUpload?.files?.[idx];
-  if(!f) return;
-  openPdfViewer(URL.createObjectURL(f), f.name);
+function printConvocIframe(){
+  const iframe = document.getElementById('convoc-detail-iframe');
+  if(iframe && iframe.contentWindow) iframe.contentWindow.print();
 }
 
 function _isoWeekLabel(d){
@@ -3994,7 +4046,25 @@ function _isoWeekLabel(d){
   return `${date.getUTCFullYear()}-W${String(weekNo).padStart(2,'0')}`;
 }
 
-/* Extrait le texte d'un PDF de convocation et le passe à parseConvocationText() */
+/* Repère la date d'audience dans le texte extrait, en cherchant après
+   "audience publique" (une date d'émission antérieure — "Luxembourg, le
+   19 juin 2026" — apparaît plus haut dans le texte et serait capturée à
+   tort par une recherche de date sur l'ensemble du document). PDF officiels
+   toujours en français, quel que soit la langue de l'interface. */
+const _MOIS_FR = {janvier:0,février:1,fevrier:1,mars:2,avril:3,mai:4,juin:5,juillet:6,août:7,aout:7,septembre:8,octobre:9,novembre:10,décembre:11,decembre:11};
+function _extractDateAudience(text){
+  const idx = text.search(/audience publique/i);
+  const zone = idx >= 0 ? text.slice(idx, idx + 300) : text.slice(0, 500);
+  const m = zone.match(/(\d{1,2})\s+(janvier|février|fevrier|mars|avril|mai|juin|juillet|août|aout|septembre|octobre|novembre|décembre|decembre)\s+(\d{4})/i);
+  if(!m) return null;
+  const month = _MOIS_FR[m[2].toLowerCase()];
+  if(month === undefined) return null;
+  const d = new Date(Date.UTC(parseInt(m[3],10), month, parseInt(m[1],10)));
+  return d.toISOString().slice(0,10);
+}
+
+/* Extrait le texte d'un PDF de convocation, le passe à parseConvocationText()
+   et repère la date d'audience commune à toutes les affaires du PDF. */
 async function parseConvocPdf(file, jur, chambre){
   if(typeof pdfjsLib === 'undefined') throw new Error('PDF.js non chargé');
   const arrayBuffer = await file.arrayBuffer();
@@ -4006,15 +4076,19 @@ async function parseConvocPdf(file, jur, chambre){
     const lines = await extractPageLines(page);
     text += lines.map(l => l.text).join('\n') + '\n';
   }
-  return parseConvocationText(text, jur, chambre);
+  const dateAudience = _extractDateAudience(text);
+  const entries = parseConvocationText(text, jur, chambre);
+  entries.forEach(e => { e.date_audience = dateAudience; });
+  return { entries, dateAudience };
 }
 
 /* Accepte un fichier unique ou un tableau (PDF et/ou ZIP contenant des PDF).
-   Chaque PDF est analysé indépendamment ; un fichier illisible n'interrompt
-   pas le traitement des autres du même dépôt. */
+   Chaque PDF est analysé indépendamment et devient une entrée de
+   depositedConvocFiles ; un fichier illisible n'interrompt pas le
+   traitement des autres du même dépôt. */
 async function handleConvocUpload(fileOrFiles){
   const isDE = currentLang==='de';
-  const resultEl = $('#convoc-upload-result');
+  const statusEl = $('#convoc-upload-status');
   const jur = convocJurSel?.value || 'Cour administrative';
   const chambre = jur === 'Tribunal administratif' ? (convocChambreSel?.value || '') : '';
 
@@ -4023,36 +4097,41 @@ async function handleConvocUpload(fileOrFiles){
   let pdfFiles = incoming.filter(f => !/\.zip$/i.test(f.name));
 
   if(zipFiles.length){
-    resultEl.innerHTML = `<p style="font-size:12.5px;color:var(--text-muted);">${t('upload_zip_extracting')}</p>`;
+    statusEl.textContent = t('upload_zip_extracting');
     for(const zf of zipFiles){
       try { pdfFiles = pdfFiles.concat(await extractZipFile(zf, ['.pdf'])); }
       catch(e){ console.warn('[convocations] ZIP illisible', zf.name, e); }
     }
   }
   if(!pdfFiles.length){
-    resultEl.innerHTML = `<p style="font-size:12.5px;color:var(--text-muted);">${isDE?'Kein PDF gefunden.':'Aucun PDF trouvé.'}</p>`;
+    statusEl.textContent = isDE?'Kein PDF gefunden.':'Aucun PDF trouvé.';
     return;
   }
 
-  resultEl.innerHTML = `<p style="font-size:12.5px;color:var(--text-muted);">${isDE?'Analyse läuft…':'Analyse en cours…'}</p>`;
+  statusEl.textContent = isDE?'Analyse läuft…':'Analyse en cours…';
+  const sourceWeek = _isoWeekLabel(new Date());
+  const email = _currentUser?.email || '';
   const allParsed = [];
-  const okFiles = [];
+  let firstNewIdx = null;
   for(const file of pdfFiles){
     try {
-      const parsed = await parseConvocPdf(file, jur, chambre);
-      if(parsed.length){ allParsed.push(...parsed); okFiles.push(file); }
+      const { entries, dateAudience } = await parseConvocPdf(file, jur, chambre);
+      depositedConvocFiles.push({ file, jur, chambre, sourceWeek, dateAudience, parsed: entries });
+      if(firstNewIdx === null) firstNewIdx = depositedConvocFiles.length - 1;
+      if(entries.length) allParsed.push(...entries);
     } catch(e){
       console.warn('[convocations] extraction échouée', file.name, e);
     }
   }
+  renderConvocFilesList();
+  if(firstNewIdx !== null) openConvocFileDetail(firstNewIdx);
 
   if(!allParsed.length){
-    resultEl.innerHTML = `<p style="font-size:12.5px;color:var(--accent-red);">${isDE?'Extraktion fehlgeschlagen oder keine Verfahren erkannt.':'Échec de l\'extraction ou aucune affaire reconnue.'}</p>`;
+    statusEl.textContent = isDE?'Extraktion fehlgeschlagen oder keine Verfahren erkannt.':'Échec de l\'extraction ou aucune affaire reconnue.';
     return;
   }
+  statusEl.textContent = `✓ ${allParsed.length} ${isDE?'Verfahren erkannt und geteilt':'affaires reconnues et partagées'} — ${isDE?'hochgeladen von':'déposé par'} ${email||'—'}`;
 
-  const sourceWeek = _isoWeekLabel(new Date());
-  const email = _currentUser?.email || '';
   const rows = allParsed.map(a => ({ ...a, source_week: sourceWeek, uploaded_by: email, updated_at: new Date().toISOString() }));
 
   /* Merge local immédiat (retour visuel avant confirmation Supabase) */
@@ -4065,9 +4144,6 @@ async function handleConvocUpload(fileOrFiles){
     const { error } = await _sb.from('affaires').upsert(rows);
     if(error) console.warn('[convocations] upsert Supabase échoué', error);
   }
-
-  _lastConvocUpload = { parsed: allParsed, email, isDE, files: okFiles };
-  renderConvocUploadResult();
 }
 
 function clearAnalyse(){
@@ -4801,8 +4877,8 @@ async function authOnSession(session){
   renderAll();
   loadDecisionsFromSupabase();
   loadAudiencesJSON();
-  loadAudiencesArchiveJSON();
   loadAffairesFromSupabase();
+  loadWatchlistFromSupabase();
   loadAnnotationsFromSupabase();
   _logConnexion();
 }
@@ -4833,7 +4909,6 @@ async function initAuth(){
     renderAll();
     loadDecisionsFromSupabase();
     loadAudiencesJSON();
-    loadAudiencesArchiveJSON();
     return;
   }
 
@@ -4926,6 +5001,22 @@ async function loadAffairesFromSupabase(){
     renderStats();
     renderWatchlistPanel();
   } catch(e){ console.warn('[affaires] chargement échoué', e); }
+}
+
+/* Watchlist partagée (table `watchlist`) — remplace le localStorage
+   comme source de vérité une fois Supabase disponible ; le localStorage
+   reste un repli pour le rendu initial et le mode hors-ligne. */
+async function loadWatchlistFromSupabase(){
+  if(!_sb) return;
+  try {
+    const { data, error } = await _sb.from('watchlist').select('num');
+    if(error || !data) return;
+    _watchlist = data.map(r => r.num);
+    saveWatchlist();
+    renderAffaires();
+    renderWatchlistPanel();
+    renderAudiencesArchive();
+  } catch(e){ console.warn('[watchlist] chargement échoué', e); }
 }
 
 const DEMO_AFFAIRES_DATA = [
@@ -5341,13 +5432,22 @@ function renderAffaires(){
   }
 }
 
-function toggleWatchlist(num){
+async function toggleWatchlist(num){
   const idx = _watchlist.indexOf(num);
-  if(idx === -1) _watchlist.push(num); else _watchlist.splice(idx, 1);
+  const adding = idx === -1;
+  if(adding) _watchlist.push(num); else _watchlist.splice(idx, 1);
   saveWatchlist();
   renderAffaires();
   renderWatchlistPanel();
-  renderConvocUploadResult();
+  renderAudiencesArchive();
+  if(_selectedConvocFileIdx !== null) openConvocFileDetail(_selectedConvocFileIdx);
+
+  if(_sb && _currentUser){
+    try {
+      if(adding) await _sb.from('watchlist').insert({ num, added_by: _currentUser.email });
+      else await _sb.from('watchlist').delete().eq('num', num);
+    } catch(e){ console.warn('[watchlist] synchronisation échouée', e); }
+  }
 }
 
 function addToWatchlistManual(){
