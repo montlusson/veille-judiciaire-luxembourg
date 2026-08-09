@@ -3766,8 +3766,12 @@ async function _sbFetchAllDecisions(){
   return [...seen.values()];
 }
 
-/* Vérification silencieuse en arrière-plan — rechargement si nouvelle extraction */
+/* Vérification en arrière-plan — rechargement si nouvelle extraction.
+   En cas d'échec de la vérification elle-même (pas juste "rien de neuf"),
+   le voyant du tableau de bord passe en erreur au lieu de rester muet,
+   pour ne pas laisser croire que l'index affiché est à jour. */
 async function _checkStaticUpdate(){
+  const dot = $('#index-update-dot');
   try {
     const stored = localStorage.getItem('vj_last_generated');
     let latest = await _sbLastGenerated();
@@ -3777,9 +3781,15 @@ async function _checkStaticUpdate(){
         if(metaR.ok) latest = (await metaR.json()).generated_at || null;
       } catch(e){}
     }
-    if(!latest || (stored && latest <= stored)) return;
+    if(!latest){
+      if(dot) dot.className = 'index-update-dot error';
+      return;
+    }
+    if(stored && latest <= stored) return;
     await loadDecisionsJSON(false);
-  } catch(e){ /* silencieux */ }
+  } catch(e){
+    if(dot) dot.className = 'index-update-dot error';
+  }
 }
 
 /* Fonction unifiée appelée par les boutons "Mettre à jour l'index" */
