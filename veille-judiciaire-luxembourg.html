@@ -56,7 +56,7 @@ a{color:var(--accent-blue);}
   width:264px;flex:0 0 264px;background:var(--sidebar-bg);color:var(--sidebar-text);
   display:flex;flex-direction:column;position:sticky;top:0;height:100dvh;padding:22px 16px;
 }
-.brand{display:flex;align-items:center;gap:10px;padding:4px 8px 22px;}
+.brand{display:flex;align-items:center;gap:10px;padding:4px 10px 22px;}
 .brand-badge{width:34px;height:34px;border-radius:8px;overflow:hidden;flex:0 0 34px;display:flex;align-items:center;justify-content:center;}
 .brand-badge img{width:100%;height:100%;object-fit:cover;}
 .brand-name{font-family:'Roboto Condensed','Arial Narrow',sans-serif;font-weight:700;font-size:16px;color:var(--sidebar-text);line-height:1.2;}
@@ -73,7 +73,7 @@ nav.navlist{display:flex;flex-direction:column;gap:2px;margin-top:6px;}
 .navbtn .ic{flex:0 0 18px;width:18px;height:18px;}
 
 /* Language toggle */
-.lang-toggle{display:flex;gap:4px;padding:10px 8px 0;margin-top:auto;}
+.lang-toggle{display:flex;gap:6px;padding:0 10px;margin:auto 0 22px;}
 .lang-btn{
   flex:1;padding:6px 0;border:1px solid var(--sidebar-hover-bg);background:transparent;
   color:var(--sidebar-text-faint);border-radius:var(--radius-sm);cursor:pointer;
@@ -82,7 +82,7 @@ nav.navlist{display:flex;flex-direction:column;gap:2px;margin-top:6px;}
 .lang-btn.active{background:var(--accent-blue);border-color:var(--accent-blue);color:#fff;}
 .lang-btn:hover:not(.active){background:var(--sidebar-hover-bg);color:var(--sidebar-text);}
 
-.sidebar-footer{padding:10px 10px 4px;border-top:1px solid var(--sidebar-hover-bg);color:var(--sidebar-text-faint);font-size:11.5px;line-height:1.5;}
+.sidebar-footer{margin-top:auto;padding:14px 10px 0;color:var(--sidebar-text-faint);font-size:11.5px;line-height:1.5;}
 
 main{flex:1;min-width:0;padding:36px 40px 56px;max-width:1180px;}
 .screen{display:none;}
@@ -121,10 +121,12 @@ h1.title{font-size:28px;}
 .kpi-card:hover .kpi-arrow,.kpi-card:focus-visible .kpi-arrow{opacity:1;transform:translateX(0);}
 
 .action-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:18px;}
-/* Tuiles de navigation simplifiées : gros pictogramme + nom, description en infobulle (title) */
+/* Tuiles de navigation simplifiées : gros pictogramme + nom, description en infobulle (title).
+   Hauteur fixe (166px), identique à .action-card, pour une grille visuellement cohérente
+   quelle que soit la ligne où tombe la carte "Mon compte" (plus de contenu que les autres). */
 .action-tile{
-  border:1px solid var(--card-border);border-radius:var(--radius-lg);background:var(--card-bg);
-  padding:30px 18px;display:flex;flex-direction:column;align-items:center;text-align:center;gap:12px;
+  height:166px;border:1px solid var(--card-border);border-radius:var(--radius-lg);background:var(--card-bg);
+  padding:20px 18px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:12px;
   cursor:pointer;transition:border-color .2s,transform .25s cubic-bezier(0.16,1,0.3,1);
 }
 .action-tile:hover{border-color:var(--accent-blue);transform:translateY(-2px);}
@@ -132,7 +134,7 @@ h1.title{font-size:28px;}
 .action-tile h3{font-family:'Roboto Condensed','Arial Narrow',sans-serif;font-weight:700;font-size:14.5px;text-transform:uppercase;letter-spacing:.02em;color:var(--text);}
 /* Carte "Mon compte" : reste une carte détaillée (contrôles réels, pas une simple navigation) */
 .action-card{
-  border-radius:var(--radius-lg);padding:16px 18px;display:flex;flex-direction:column;gap:6px;min-height:112px;
+  height:166px;border-radius:var(--radius-lg);padding:16px 18px;display:flex;flex-direction:column;gap:6px;justify-content:center;
   background:var(--card-bg);border:1px solid var(--card-border);
 }
 .action-icon{width:30px;height:30px;border-radius:7px;display:flex;align-items:center;justify-content:center;background:#EAEEF5;color:var(--accent-blue);}
@@ -658,8 +660,7 @@ table.analyse-tbl tbody tr:hover{background:var(--row-sep);}
 .auth-lang button.active{background:rgba(255,255,255,.15);border-color:#fff;color:#fff;}
 .auth-domain-badge{display:flex;align-items:center;gap:6px;font-size:11.5px;color:#6B7399;background:#F0F4F9;border:1px solid #C0D0E4;border-radius:6px;padding:6px 10px;margin-bottom:14px;}
 .auth-domain-badge svg{flex-shrink:0;color:#2B4280;}
-.sidebar-user{padding:10px 20px;border-top:1px solid rgba(255,255,255,.1);}
-.sidebar-user-email{font-size:11px;color:rgba(255,255,255,.6);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:6px;}
+.sidebar-user{padding:22px 10px 16px;border-top:1px solid rgba(255,255,255,.1);}
 .sidebar-user-btn{width:100%;background:transparent;border:1px solid rgba(255,255,255,.25);color:rgba(255,255,255,.75);border-radius:6px;padding:5px 10px;font-size:11.5px;font-weight:700;cursor:pointer;font-family:inherit;transition:background .15s;}
 .sidebar-user-btn:hover{background:rgba(255,255,255,.1);}
 /* ── Bannière juridique globale ── */
@@ -961,20 +962,20 @@ body.printing-decision #print-decision-area{display:block!important;color:#000;b
         <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/></svg>
         <span data-i18n="nav_dashboard">Tableau de bord</span>
       </button>
+      <button class="navbtn" data-target="affaires">
+        <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 7a2 2 0 012-2h4l2 2h8a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2V7z"/></svg>
+        <span data-i18n="nav_affaires">Affaires en cours</span>
+      </button>
       <button class="navbtn" data-target="agenda">
         <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
         <span data-i18n="nav_agenda">Audiences</span>
-      </button>
-      <button class="navbtn" data-target="affaires">
-        <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/><path d="M9 12h6M9 16h4"/></svg>
-        <span data-i18n="nav_affaires">Affaires en cours</span>
       </button>
       <button class="navbtn" data-target="recherche">
         <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
         <span data-i18n="nav_recherche">Recherche &amp; entités</span>
       </button>
       <button class="navbtn" data-target="veille">
-        <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M18 8a6 6 0 10-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 01-3.4 0"/></svg>
+        <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5.5"/><circle cx="12" cy="12" r="1.4" fill="currentColor" stroke="none"/><path d="M12 12L18 6"/><circle cx="16.6" cy="8.4" r="1" fill="currentColor" stroke="none"/></svg>
         <span data-i18n="nav_veille">Radar décisions</span>
       </button>
       <button class="navbtn" data-target="collecte">
@@ -986,13 +987,16 @@ body.printing-decision #print-decision-area{display:block!important;color:#000;b
       <button class="lang-btn active" id="lang-fr" onclick="setLang('fr')">FR</button>
       <button class="lang-btn" id="lang-de" onclick="setLang('de')">DE</button>
     </div>
+    <div class="sidebar-user" id="sidebar-user" style="display:none;">
+      <div style="font-size:11px;color:rgba(255,255,255,.5);margin-bottom:14px;display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+        <span data-i18n="connexions_count_label">Connexions enregistrées :</span> <strong id="dashboard-connexions-count" style="color:rgba(255,255,255,.75);">—</strong>
+        <button id="dashboard-connexions-detail-btn" class="sidebar-user-btn" style="display:none;width:auto;font-size:10.5px;padding:2px 8px;" onclick="openConnexionsModal()" data-i18n="connexions_detail_btn">Voir le détail</button>
+      </div>
+      <button class="sidebar-user-btn" onclick="authSetPassword()" id="sidebar-setpw-btn" data-i18n="auth_set_password" style="margin-bottom:8px;">Définir un mot de passe</button>
+      <button class="sidebar-user-btn" onclick="authSignOut()" id="sidebar-logout-btn" data-i18n="auth_logout">Se déconnecter</button>
+    </div>
     <div class="sidebar-footer" id="sidebar-footer-el">
       Sources officielles : Administration judiciaire — data.public.lu · Licence CC BY-ND 4.0. Nouvelles décisions indexées chaque semaine.
-    </div>
-    <div class="sidebar-user" id="sidebar-user" style="display:none;">
-      <div class="sidebar-user-email" id="sidebar-user-email"></div>
-      <button class="sidebar-user-btn" onclick="authSetPassword()" id="sidebar-setpw-btn" data-i18n="auth_set_password" style="margin-bottom:6px;">Définir un mot de passe</button>
-      <button class="sidebar-user-btn" onclick="authSignOut()" id="sidebar-logout-btn" data-i18n="auth_logout">Se déconnecter</button>
     </div>
   </aside>
 
@@ -1196,10 +1200,6 @@ body.printing-decision #print-decision-area{display:block!important;color:#000;b
               <button class="dash-lang-btn" id="dash-lang-de" onclick="setLang('de')">DE</button>
             </div>
             <button class="btn btn-secondary" style="font-size:12px;padding:6px 12px;" onclick="authSetPassword()" data-i18n="auth_set_password">Définir un mot de passe</button>
-          </div>
-          <div style="font-size:11.5px;color:var(--text-faint);margin-top:8px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
-            <span data-i18n="connexions_count_label">Connexions enregistrées :</span> <strong id="dashboard-connexions-count">—</strong>
-            <button id="dashboard-connexions-detail-btn" class="btn btn-secondary" style="display:none;font-size:11px;padding:3px 10px;" onclick="openConnexionsModal()" data-i18n="connexions_detail_btn">Voir le détail</button>
           </div>
         </div>
       </div>
@@ -4994,8 +4994,6 @@ async function authOnSession(session){
     document.documentElement.lang = savedLang;
   }
 
-  /* Email dans la sidebar */
-  $('#sidebar-user-email').textContent = _currentUser.email || '';
   $('#sidebar-user').style.display = 'block';
 
   hideAuthOverlay();
