@@ -5244,7 +5244,7 @@ let _ragGatePassed = false;
 
 function _ragIsPenal(d){
   const s = ((d.type||'') + ' ' + (d.group||'')).toLowerCase();
-  return /p[ée]nal|chambre du conseil|application des peines|jeunesse/.test(s);
+  return /p[ée]nal|chambre du conseil|jeunesse/.test(s);
 }
 
 function openRapprochement(id){
