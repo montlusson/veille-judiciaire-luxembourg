@@ -1142,8 +1142,16 @@ body.printing-decision #print-decision-area{display:block!important;color:#000;b
 
     <!-- DASHBOARD -->
     <section class="screen active" data-screen="dashboard" aria-labelledby="h-dashboard">
-      <div class="eyebrow" data-i18n="dashboard_eyebrow">Vue d'ensemble</div>
-      <h1 id="h-dashboard" class="title" data-i18n="dashboard_title">Bonjour</h1>
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:16px;flex-wrap:wrap;">
+        <div style="min-width:0;">
+          <div class="eyebrow" data-i18n="dashboard_eyebrow">Vue d'ensemble</div>
+          <h1 id="h-dashboard" class="title" data-i18n="dashboard_title">Bonjour</h1>
+        </div>
+        <button class="btn btn-primary" onclick="openFaqModal()" data-i18n-title="action_faq_desc" title="Comprendre d'où viennent les données (open data anonymisé vs PDF déposés) et comment utiliser les outils d'investigation." style="flex:0 0 auto;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M9.5 9a2.5 2.5 0 015 0c0 1.5-2.5 2-2.5 3.5"/><circle cx="12" cy="16.7" r="0.2" fill="currentColor"/></svg>
+          <span data-i18n="action_faq_title">FAQ</span>
+        </button>
+      </div>
       <p class="intro" data-i18n="dashboard_intro">Explorez les décisions de justice luxembourgeoises et suivez les affaires en cours.</p>
 
       <!-- Strip statut index — informatif uniquement, la mise à jour est automatique (pipeline hebdomadaire) -->
@@ -1212,10 +1220,6 @@ body.printing-decision #print-decision-area{display:block!important;color:#000;b
         <div class="action-tile" data-target="recherche" data-i18n-title="action_rappr_desc" title="Depuis une décision, vérifiez si elle concerne un professionnel identifiable, avec les garde-fous légaux intégrés.">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><g stroke-width="1.3" transform="scale(0.6)"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></g><g stroke-width="2.4"><circle cx="18" cy="18" r="4.3"/><path d="M21.3 21.3L23.5 23.5"/></g></svg>
           <h3 data-i18n="action_rappr_title">Qui est concerné ?</h3>
-        </div>
-        <div class="action-tile" onclick="openFaqModal()" data-i18n-title="action_faq_desc" title="Comprendre d'où viennent les données (open data anonymisé vs PDF déposés) et comment utiliser les outils d'investigation.">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M9.5 9a2.5 2.5 0 015 0c0 1.5-2.5 2-2.5 3.5"/><circle cx="12" cy="16.7" r="0.2" fill="currentColor"/></svg>
-          <h3 data-i18n="action_faq_title">FAQ</h3>
         </div>
         <div class="action-card">
           <div class="action-icon" aria-hidden="true">
@@ -2526,6 +2530,13 @@ function showScreen(target){
     const active = b.dataset.target === target;
     active ? b.setAttribute('aria-current','page') : b.removeAttribute('aria-current');
   });
+  // En quittant la recherche, on oublie la décision ouverte — sinon renderAll() la
+  // rouvre à chaque cycle (via selectedDecisionId) et re-timbre #decision= dans l'URL,
+  // ce qui ferait revenir un simple rafraîchissement sur cette décision au lieu du dashboard.
+  if(target !== 'recherche' && selectedDecisionId){
+    selectedDecisionId = null;
+    if(/^#decision=/.test(window.location.hash)) history.replaceState(null,'',window.location.pathname+window.location.search);
+  }
 }
 $all('[data-target]').forEach(el => el.addEventListener('click', () => showScreen(el.dataset.target)));
 
@@ -3102,7 +3113,12 @@ function applyDecisionHashRoute(){
   const m = /^#decision=(.+)$/.exec(window.location.hash);
   if(!m) return;
   const d = DECISIONS.find(x => x.id===decodeURIComponent(m[1]) && !x._demo);
-  if(d){ showScreen('recherche'); openReader(d.id); }
+  if(d){
+    showScreen('recherche'); openReader(d.id);
+    // Lien consommé une fois : on nettoie l'URL pour qu'un simple rafraîchissement de la
+    // page ne rejoue pas indéfiniment la même décision au lieu du dashboard par défaut.
+    history.replaceState(null,'',window.location.pathname+window.location.search);
+  }
 }
 
 function addAnnotItem(id, type){
