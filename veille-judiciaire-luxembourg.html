@@ -519,8 +519,16 @@ details.alt-table th,details.alt-table td{border:1px solid var(--card-border);pa
 .convoc-strip-info-ic{cursor:help;color:var(--accent-blue);flex:0 0 auto;}
 
 /* ── Archives d'audience ── */
-.archive-week{margin-bottom:28px;}
+.archive-week{margin-bottom:32px;}
 .archive-week-header{
+  font-family:'Roboto Condensed','Arial Narrow',sans-serif;font-weight:700;font-size:13.5px;
+  color:var(--text-body);background:#F0F4F9;border:1px solid #C0D0E4;
+  padding:9px 14px;border-radius:var(--radius-md);margin-bottom:14px;
+  display:flex;align-items:center;gap:10px;
+}
+.archive-day{margin-bottom:18px;}
+.archive-day:last-child{margin-bottom:0;}
+.archive-day-header{
   font-family:'Roboto Condensed','Arial Narrow',sans-serif;font-weight:700;font-size:12px;
   text-transform:uppercase;letter-spacing:.06em;color:var(--text-faint);
   padding:8px 0 8px;border-bottom:2px solid var(--card-border);margin-bottom:10px;
@@ -3683,23 +3691,42 @@ function renderAudiencesArchive(){
     stade:    isDE ? 'Stand'                   : 'Stade'
   };
 
-  el.innerHTML = Object.entries(byDate).sort((a,b) => b[0].localeCompare(a[0])).map(([dateStr, affs]) => {
-    const d = new Date(dateStr + 'T00:00:00');
-    const label = d.toLocaleDateString(locale, {weekday:'long', day:'numeric', month:'long', year:'numeric'});
-    const rows = affs.map(a => renderAffaireRow(a, false)).join('');
+  /* Regroupement par semaine ISO (bloc visible en priorité), puis par jour
+     à l'intérieur — le dépôt PDF se fait par semaine (source_week) donc ce
+     niveau de bloc rend les données ainsi chargées faciles à repérer. */
+  const byWeek = {};
+  Object.keys(byDate).forEach(dateStr => {
+    const wk = _isoWeekLabel(new Date(dateStr + 'T00:00:00'));
+    (byWeek[wk] = byWeek[wk] || []).push(dateStr);
+  });
+
+  const theadHtml = `<thead><tr>
+    <th style="width:100px;">${th.num}</th>
+    <th style="width:120px;">${th.jur}</th>
+    <th>${th.matiere}</th>
+    <th style="width:200px;">${th.defendeur}</th>
+    <th style="width:110px;">${th.stade}</th>
+    <th style="width:90px;"></th>
+  </tr></thead>`;
+
+  el.innerHTML = Object.keys(byWeek).sort((a,b) => b.localeCompare(a)).map(wk => {
+    const dateStrs = byWeek[wk].sort((a,b) => b.localeCompare(a));
+    const weekLabel = _weekRangeLabel(_mondayOf(dateStrs[0]));
+    const daysHtml = dateStrs.map(dateStr => {
+      const d = new Date(dateStr + 'T00:00:00');
+      const dayLabel = d.toLocaleDateString(locale, {weekday:'long', day:'numeric', month:'long', year:'numeric'});
+      const rows = byDate[dateStr].map(a => renderAffaireRow(a, false)).join('');
+      return `<div class="archive-day">
+        <div class="archive-day-header">${escHtml(dayLabel)}</div>
+        <div style="overflow-x:auto;"><table class="affaires-table" role="grid">
+          ${theadHtml}
+          <tbody>${rows}</tbody>
+        </table></div>
+      </div>`;
+    }).join('');
     return `<div class="archive-week">
-      <div class="archive-week-header">${escHtml(label)}</div>
-      <div style="overflow-x:auto;"><table class="affaires-table" role="grid">
-        <thead><tr>
-          <th style="width:100px;">${th.num}</th>
-          <th style="width:120px;">${th.jur}</th>
-          <th>${th.matiere}</th>
-          <th style="width:200px;">${th.defendeur}</th>
-          <th style="width:110px;">${th.stade}</th>
-          <th style="width:90px;"></th>
-        </tr></thead>
-        <tbody>${rows}</tbody>
-      </table></div>
+      <div class="archive-week-header">${escHtml(weekLabel)}</div>
+      ${daysHtml}
     </div>`;
   }).join('');
 }
@@ -4055,6 +4082,27 @@ function _isoWeekLabel(d){
   const yearStart = new Date(Date.UTC(date.getUTCFullYear(),0,1));
   const weekNo = Math.ceil((((date - yearStart) / 86400000) + 1)/7);
   return `${date.getUTCFullYear()}-W${String(weekNo).padStart(2,'0')}`;
+}
+
+/* Lundi de la semaine ISO contenant dateStr (YYYY-MM-DD) */
+function _mondayOf(dateStr){
+  const d = new Date(dateStr + 'T00:00:00');
+  const day = d.getDay() || 7; // 1=lundi … 7=dimanche
+  d.setDate(d.getDate() - (day - 1));
+  return d;
+}
+
+/* Libellé "Semaine du X au Y [mois] Y" (mois répété si à cheval sur deux mois) */
+function _weekRangeLabel(monday){
+  const sunday = new Date(monday);
+  sunday.setDate(monday.getDate() + 6);
+  const isDE = currentLang === 'de';
+  const locale = isDE ? 'de-LU' : 'fr-LU';
+  const sameMonth = monday.getMonth() === sunday.getMonth();
+  const startStr = monday.toLocaleDateString(locale, sameMonth ? {day:'numeric'} : {day:'numeric', month:'long'});
+  const endStr = sunday.toLocaleDateString(locale, {day:'numeric', month:'long'});
+  const year = sunday.getFullYear();
+  return isDE ? `Woche vom ${startStr}. bis ${endStr} ${year}` : `Semaine du ${startStr} au ${endStr} ${year}`;
 }
 
 /* Repère la date d'audience dans le texte extrait, en cherchant après
@@ -5011,6 +5059,7 @@ async function loadAffairesFromSupabase(){
     renderAffaires();
     renderStats();
     renderWatchlistPanel();
+    renderAudiencesArchive();
   } catch(e){ console.warn('[affaires] chargement échoué', e); }
 }
 
