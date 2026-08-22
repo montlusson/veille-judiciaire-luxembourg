@@ -3004,6 +3004,7 @@ function openReader(id){
   const d = DECISIONS.find(x => x.id===id);
   if(!d) return;
   selectedDecisionId = id;
+  history.replaceState(null,'','#decision='+encodeURIComponent(id));
 
   /* Marquer la ligne sélectionnée */
   $all('#results-body tr').forEach(r => r.classList.toggle('selected', r.dataset.id===id));
@@ -3076,6 +3077,17 @@ function openReader(id){
 
 function closeReader(){
   /* conservé pour compatibilité (Escape, etc.) — ne fait rien en mode split */
+}
+
+/* Lien profond vers une décision précise (ex. depuis le bouton "Lier dans whoswho-lu",
+   pour que addcase_url pointe quelque part de réel) : #decision=<id>. Ne se déclenche
+   que sur une vraie décision (jamais les DEMO_DECISIONS de pré-chargement) ; ne "renonce"
+   jamais, se recontrôle à chaque renderAll() jusqu'à ce que la vraie donnée arrive. */
+function applyDecisionHashRoute(){
+  const m = /^#decision=(.+)$/.exec(window.location.hash);
+  if(!m) return;
+  const d = DECISIONS.find(x => x.id===decodeURIComponent(m[1]) && !x._demo);
+  if(d){ showScreen('recherche'); openReader(d.id); }
 }
 
 function addAnnotItem(id, type){
@@ -3392,6 +3404,7 @@ function renderAll(){
   applyI18n();
   renderDashboard(); renderAlerts(); renderTimeline(); renderResults();
   if(selectedDecisionId) openReader(selectedDecisionId);
+  else applyDecisionHashRoute();
   if(_ragDecision) _ragRenderBody();
 }
 
@@ -5203,9 +5216,14 @@ const RAPPR_RETENTION_MOIS = 6;
    (médecins / dentistes / pharmaciens) pour préserver ce lien 1:1, whoswho-lu
    n'ayant pas de sous-catégorie combinée. */
 const WHOSWHOLU_URL = 'https://whoswho-lu.pages.dev';
-function whoswholuLink(whoswhoSub, searchName){
+function whoswholuLink(whoswhoSub, searchName, addCase){
   const params = new URLSearchParams({ cat: 'Professions réglementées', sub: whoswhoSub });
   if(searchName) params.set('q', searchName);
+  if(addCase){
+    if(addCase.title) params.set('addcase_title', addCase.title);
+    if(addCase.reference) params.set('addcase_ref', addCase.reference);
+    if(addCase.url) params.set('addcase_url', addCase.url);
+  }
   return `${WHOSWHOLU_URL}/?${params.toString()}`;
 }
 
@@ -5467,9 +5485,25 @@ function _ragLoadHistory(){
             <span>· ${escHtml(r.journaliste_email||'—')}</span>
             <span>· ${new Date(r.created_at).toLocaleDateString(isDE?'de-LU':'fr-LU')}</span>
             ${r.expires_at ? `<span>· ${isDE?'läuft ab am':'expire le'} ${new Date(r.expires_at).toLocaleDateString(isDE?'de-LU':'fr-LU')}</span>` : `<span>· ${isDE?'langfristige Aufbewahrung (redaktionelle Weiterverfolgung)':'conservation longue (suivi éditorial)'}</span>`}
+            ${(r.statut==='confirme' && r.candidat) ? `<button type="button" class="btn btn-secondary" style="font-size:11px;padding:4px 10px;" onclick="${escHtml(`_ragLinkWhoswho(${JSON.stringify(p.id)},${JSON.stringify(r.candidat)})`)}">${isDE?'In whoswho-lu verknüpfen →':'Lier dans whoswho-lu →'}</button>` : ''}
           </div>`).join('');
       });
     });
+}
+
+/* "Lier dans whoswho-lu" depuis une piste confirmée — 1 clic = 1 décision. La protection
+   anti-doublon (une même affaire ne peut pas être ajoutée deux fois sur une fiche) est
+   côté whoswho-lu (seul endroit qui sait ce qui est déjà lié à la personne visée). */
+function _ragLinkWhoswho(professionId, candidat){
+  const p = RAPPR_PROFESSIONS.find(x => x.id===professionId);
+  const d = _ragDecision;
+  if(!p || !d) return;
+  const addCase = {
+    title: d.ref,
+    reference: `${d.jur} · ${d.date}`,
+    url: window.location.origin + window.location.pathname + '#decision=' + encodeURIComponent(d.id)
+  };
+  window.open(whoswholuLink(p.whoswho_sub, candidat, addCase), '_blank', 'noopener');
 }
 
 let _affairesFilter = 'all';
