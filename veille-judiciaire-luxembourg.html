@@ -10,22 +10,23 @@
 <link href="https://fonts.googleapis.com/css2?family=Roboto+Condensed:wght@700&family=Roboto:wght@400;500;600;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
 <style>
 :root{
-  --bg:#F7F4EC;
-  --sidebar-bg:#1C1B19;
-  --sidebar-text:#EDE8DB;
-  --sidebar-text-muted:#CFCABD;
-  --sidebar-text-faint:#8C887C;
-  --sidebar-active-bg:#2E2C27;
-  --sidebar-hover-bg:#2A2824;
-  --accent-red:#B23A2E;
-  --accent-red-hover:#9A2F24;
-  --accent-red-tint:#FBE9E6;
-  --accent-gold:#C28A2B;
-  --accent-blue:#2B4C6F;
-  --reporter-brand:#5e71a1;
+  --bg:#FFFFFF;
+  --sidebar-bg:#0D0E12;
+  --sidebar-text:#FFFFFF;
+  --sidebar-text-muted:#A7A7AC;
+  --sidebar-text-faint:#75757A;
+  --sidebar-active-bg:#202126;
+  --sidebar-hover-bg:#18191D;
+  --accent-red:#C8202F;
+  --accent-red-hover:#A01824;
+  --accent-red-tint:#FBE9EA;
+  --accent-gold:#C6861A;
+  --accent-blue:#5E71A1;
+  --accent-blue-hover:#48588A;
+  --reporter-brand:#5E71A1;
   --success-bg:#EAF1EC;--success-border:#CFE0D4;--success-fg:#3F6B4E;--success-icon-bg:#4A7C59;
-  --card-bg:#FFFFFF;--card-border:#E8E3D6;--row-sep:#F0ECE2;
-  --text:#1C1B19;--text-muted:#6B6862;--text-faint:#8E8A7C;--text-placeholder:#A8A294;
+  --card-bg:#FFFFFF;--card-border:#E4E4E1;--row-sep:#F3F3F1;
+  --text:#101114;--text-muted:#6B6B6E;--text-faint:#8B8B88;--text-placeholder:#A8A8A5;
   --radius-sm:6px;--radius-md:10px;--radius-lg:14px;
 }
 *{box-sizing:border-box;}
@@ -68,7 +69,7 @@ nav.navlist{display:flex;flex-direction:column;gap:2px;margin-top:6px;}
   transition:background .18s cubic-bezier(0.16,1,0.3,1),color .18s cubic-bezier(0.16,1,0.3,1);
 }
 .navbtn:hover{background:var(--sidebar-hover-bg);color:var(--sidebar-text);}
-.navbtn[aria-current="page"]{background:var(--sidebar-active-bg);color:var(--sidebar-text);border-left-color:var(--accent-red);font-weight:700;}
+.navbtn[aria-current="page"]{background:var(--sidebar-active-bg);color:var(--sidebar-text);border-left-color:var(--accent-blue);font-weight:700;}
 .navbtn .ic{flex:0 0 18px;width:18px;height:18px;}
 
 /* Language toggle */
@@ -78,7 +79,7 @@ nav.navlist{display:flex;flex-direction:column;gap:2px;margin-top:6px;}
   color:var(--sidebar-text-faint);border-radius:var(--radius-sm);cursor:pointer;
   font-size:12px;font-weight:700;letter-spacing:.04em;transition:all .15s;
 }
-.lang-btn.active{background:var(--accent-red);border-color:var(--accent-red);color:#fff;}
+.lang-btn.active{background:var(--accent-blue);border-color:var(--accent-blue);color:#fff;}
 .lang-btn:hover:not(.active){background:var(--sidebar-hover-bg);color:var(--sidebar-text);}
 
 .sidebar-footer{padding:10px 10px 4px;border-top:1px solid var(--sidebar-hover-bg);color:var(--sidebar-text-faint);font-size:11.5px;line-height:1.5;}
@@ -86,7 +87,7 @@ nav.navlist{display:flex;flex-direction:column;gap:2px;margin-top:6px;}
 main{flex:1;min-width:0;padding:36px 40px 56px;max-width:1180px;}
 .screen{display:none;}
 .screen.active{display:block;}
-.eyebrow{font-size:12.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--accent-red);font-weight:700;margin-bottom:8px;}
+.eyebrow{font-size:12.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--text-faint);font-weight:400;margin-bottom:8px;}
 .intro{color:var(--text-muted);max-width:680px;margin-top:10px;margin-bottom:16px;}
 h1.title{font-size:28px;}
 
@@ -120,30 +121,30 @@ h1.title{font-size:28px;}
 .kpi-card:hover .kpi-arrow,.kpi-card:focus-visible .kpi-arrow{opacity:1;transform:translateX(0);}
 
 .action-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:18px;}
+/* Tuiles de navigation simplifiées : gros pictogramme + nom, description en infobulle (title) */
+.action-tile{
+  border:1px solid var(--card-border);border-radius:var(--radius-lg);background:var(--card-bg);
+  padding:30px 18px;display:flex;flex-direction:column;align-items:center;text-align:center;gap:12px;
+  cursor:pointer;transition:border-color .2s,transform .25s cubic-bezier(0.16,1,0.3,1);
+}
+.action-tile:hover{border-color:var(--accent-blue);transform:translateY(-2px);}
+.action-tile svg{width:40px;height:40px;stroke:var(--text);}
+.action-tile h3{font-family:'Roboto Condensed','Arial Narrow',sans-serif;font-weight:700;font-size:14.5px;text-transform:uppercase;letter-spacing:.02em;color:var(--text);}
+/* Carte "Mon compte" : reste une carte détaillée (contrôles réels, pas une simple navigation) */
 .action-card{
   border-radius:var(--radius-lg);padding:16px 18px;display:flex;flex-direction:column;gap:6px;min-height:112px;
-  transition:transform .25s cubic-bezier(0.16,1,0.3,1),box-shadow .25s cubic-bezier(0.16,1,0.3,1);
+  background:var(--card-bg);border:1px solid var(--card-border);
 }
-.action-card:hover{transform:translateY(-2px);}
-.action-card.light{background:var(--card-bg);border:1px solid var(--card-border);}
-.action-card.dark{background:var(--sidebar-bg);color:var(--sidebar-text);}
-.action-card.green{background:var(--success-bg);border:1px solid var(--success-border);}
-.action-icon{width:30px;height:30px;border-radius:7px;display:flex;align-items:center;justify-content:center;}
-.action-icon.r{background:var(--accent-red-tint);color:var(--accent-red);}
-.action-icon.g{background:var(--accent-red);color:#fff;}
-.action-icon.grn{background:var(--success-icon-bg);color:#fff;}
+.action-icon{width:30px;height:30px;border-radius:7px;display:flex;align-items:center;justify-content:center;background:#EAEEF5;color:var(--accent-blue);}
 .action-card h3{font-size:14.5px;margin-bottom:2px;}
-.action-card.dark h3{color:var(--sidebar-text);}
 .action-card p{color:var(--text-muted);font-size:12.5px;line-height:1.4;}
 .dash-lang-btn{padding:5px 11px;border:1px solid var(--card-border);background:var(--card-bg);color:var(--text-muted);border-radius:var(--radius-sm);cursor:pointer;font-size:11.5px;font-weight:700;letter-spacing:.03em;}
-.dash-lang-btn.active{background:var(--accent-red);border-color:var(--accent-red);color:#fff;}
-.action-card.dark p{color:var(--sidebar-text-muted);}
-.action-card.green p{color:var(--success-fg);}
+.dash-lang-btn.active{background:var(--accent-blue);border-color:var(--accent-blue);color:#fff;}
 .action-card button{margin-top:auto;align-self:flex-start;}
 
 .btn{display:inline-flex;align-items:center;gap:8px;border-radius:var(--radius-sm);padding:9px 16px;min-height:40px;font-weight:700;font-size:13.5px;cursor:pointer;border:1px solid transparent;}
-.btn-primary{background:var(--accent-red);color:#fff;}
-.btn-primary:hover{background:var(--accent-red-hover);}
+.btn-primary{background:var(--accent-blue);color:#fff;}
+.btn-primary:hover{background:var(--accent-blue-hover);}
 .btn-secondary{background:transparent;border-color:var(--card-border);color:var(--text);}
 .btn-secondary:hover{background:var(--row-sep);}
 .btn-inverse{background:#fff;color:var(--sidebar-bg);}
@@ -208,7 +209,7 @@ select,.input{border:1px solid var(--card-border);background:#fff;border-radius:
   display:flex;align-items:center;gap:8px;
 }
 .subtab:hover{color:var(--text);}
-.subtab.active{color:var(--accent-red);border-bottom-color:var(--accent-red);}
+.subtab.active{color:var(--accent-blue);border-bottom-color:var(--accent-blue);}
 .subtab-agenda{padding:14px 26px;font-size:16px;}
 .subpanel{display:none;margin-top:22px;}
 .subpanel.active{display:block;}
@@ -283,7 +284,7 @@ table.results th{text-align:left;color:var(--text-faint);font-size:11px;text-tra
 table.results td{padding:9px 8px;border-bottom:1px solid var(--row-sep);vertical-align:top;}
 table.results tbody tr{cursor:pointer;}
 table.results tbody tr:hover{background:var(--row-sep);}
-table.results tbody tr.selected{background:#FBE9E6;border-left:3px solid var(--accent-red);}
+table.results tbody tr.selected{background:#EAEEF5;border-left:3px solid var(--accent-blue);}
 .ref-cell{font-weight:700;}
 .ref-sub{color:var(--text-muted);font-size:11.5px;margin-top:2px;}
 
@@ -393,7 +394,7 @@ details.alt-table th,details.alt-table td{border:1px solid var(--card-border);pa
   background:var(--bg);z-index:2;
 }
 .agenda-day-header .today-badge{
-  background:var(--accent-red);color:#fff;border-radius:6px;
+  background:var(--accent-blue);color:#fff;border-radius:6px;
   padding:2px 8px;font-size:11px;
 }
 .agenda-row{
@@ -405,7 +406,7 @@ details.alt-table th,details.alt-table td{border:1px solid var(--card-border);pa
 .agenda-row:hover{background:var(--card-bg);}
 .agenda-day .agenda-row:first-of-type{border-top:1px solid var(--row-sep);}
 .agenda-time{
-  font-weight:700;font-size:12.5px;color:var(--accent-red);
+  font-weight:700;font-size:12.5px;color:var(--accent-blue);
   flex:0 0 52px;
 }
 .agenda-inline{flex:1;min-width:0;font-size:12.5px;display:flex;align-items:center;flex-wrap:wrap;gap:0;}
@@ -429,7 +430,7 @@ details.alt-table th,details.alt-table td{border:1px solid var(--card-border);pa
 }
 .agenda-day-card:hover{border-color:var(--accent-blue);transform:translateY(-1px);}
 .agenda-day-card:active{transform:scale(0.98) translateY(0);}
-.agenda-day-card.is-today{border-color:var(--accent-red);}
+.agenda-day-card.is-today{border-color:var(--accent-blue);}
 .agenda-day-card-dow{font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--text-faint);font-weight:700;}
 .agenda-day-card-num{font-family:'Roboto Condensed','Arial Narrow',sans-serif;font-weight:700;font-size:30px;line-height:1.15;color:var(--text-main);}
 .agenda-day-card-month{font-size:11.5px;color:var(--text-muted);margin-bottom:8px;}
@@ -444,8 +445,8 @@ details.alt-table th,details.alt-table td{border:1px solid var(--card-border);pa
   border:1.5px solid var(--card-border);background:var(--card-bg);
   color:var(--text-muted);transition:all .15s;white-space:nowrap;
 }
-.agenda-chip:hover{border-color:var(--accent-red);color:var(--accent-red);}
-.agenda-chip.active{background:var(--accent-red);border-color:var(--accent-red);color:#fff;}
+.agenda-chip:hover{border-color:var(--accent-blue);color:var(--accent-blue);}
+.agenda-chip.active{background:var(--accent-blue);border-color:var(--accent-blue);color:#fff;}
 .agenda-filter-bar{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:8px;align-items:center;}
 .agenda-filter-bar select{min-width:160px;}
 .week-nav{display:flex;align-items:center;gap:12px;margin-bottom:24px;}
@@ -711,13 +712,13 @@ table.analyse-tbl tbody tr:hover{background:var(--row-sep);}
 .affaires-table tr:hover td{background:var(--row-sep);}
 .num-cell{font-family:'Roboto Condensed','Arial Narrow',sans-serif;font-weight:700;font-size:13.5px;white-space:nowrap;}
 .watchlist-toggle{background:none;border:1px solid var(--card-border);border-radius:5px;padding:3px 9px;font-size:11px;cursor:pointer;color:var(--text-muted);font-family:inherit;transition:all .15s;white-space:nowrap;}
-.watchlist-toggle.watching{background:var(--accent-red);border-color:var(--accent-red);color:#fff;}
+.watchlist-toggle.watching{background:var(--accent-blue);border-color:var(--accent-blue);color:#fff;}
 .watchlist-toggle:hover:not(.watching){background:var(--row-sep);}
 /* ── Affaires tabs & grouping ── */
 .affaires-tabs{display:flex;gap:0;padding:0 20px;border-bottom:1px solid var(--card-border);background:var(--row-sep);}
 .affaires-tab{padding:10px 16px;font-size:12px;font-weight:600;letter-spacing:.03em;color:var(--text-muted);cursor:pointer;border:none;background:none;border-bottom:2px solid transparent;margin-bottom:-1px;transition:color .15s,border-color .15s;border-radius:0;font-family:inherit;white-space:nowrap;}
 .affaires-tab:hover{color:var(--text-main);}
-.affaires-tab.active{color:var(--accent-red);border-bottom-color:var(--accent-red);}
+.affaires-tab.active{color:var(--accent-blue);border-bottom-color:var(--accent-blue);}
 .affaires-tab .tab-count{font-size:10.5px;font-weight:500;margin-left:5px;color:inherit;opacity:.7;}
 /* Onglets Toutes/Cour adm./Tribunal adm. — premier niveau, agrandis */
 .affaires-tabs-lg{padding:0;border-bottom:2px solid var(--card-border);background:none;margin-top:22px;gap:4px;}
@@ -726,7 +727,7 @@ table.analyse-tbl tbody tr:hover{background:var(--row-sep);}
 .affaires-subtabs{display:flex;flex-wrap:wrap;gap:8px;margin-top:4px;}
 .affaires-subtab{padding:6px 14px;border-radius:20px;font-size:12.5px;font-weight:600;cursor:pointer;border:1.5px solid var(--card-border);background:var(--card-bg);color:var(--text-muted);font-family:inherit;transition:all .15s;white-space:nowrap;}
 .affaires-subtab:hover{color:var(--text-main);}
-.affaires-subtab.active{background:var(--accent-red);border-color:var(--accent-red);color:#fff;}
+.affaires-subtab.active{background:var(--accent-blue);border-color:var(--accent-blue);color:#fff;}
 .affaires-subtab .tab-count{opacity:.8;font-weight:500;margin-left:3px;}
 .affaires-summary{display:flex;align-items:center;gap:18px;padding:8px 20px;background:var(--card-bg);border-bottom:1px solid var(--row-sep);flex-wrap:wrap;}
 .affaires-summary-item{display:flex;align-items:center;gap:5px;font-size:11.5px;color:var(--text-faint);}
@@ -807,7 +808,7 @@ table.analyse-tbl tbody tr:hover{background:var(--row-sep);}
 .rappr-trigger-btn{display:inline-flex;align-items:center;gap:7px;background:#E8EDF5;color:var(--accent-blue);border:1px solid #C8D4E3;border-radius:var(--radius-sm);padding:8px 14px;font-size:12.5px;font-weight:700;cursor:pointer;margin-top:10px;min-height:36px;}
 .rappr-trigger-btn:hover{background:#D0E2F5;border-color:var(--accent-blue);}
 .rappr-new-badge{display:inline-flex;align-items:center;background:var(--accent-red);color:#fff;font-size:9.5px;font-weight:800;text-transform:uppercase;letter-spacing:.04em;padding:1px 6px;border-radius:20px;margin-left:2px;}
-.section-notice.info{border-left:3px solid var(--accent-blue);background:#F0F4F9;border-radius:0 5px 5px 0;padding:7px 13px;margin-bottom:16px;font-size:12px;color:#2B4C6F;line-height:1.45;}
+.section-notice.info{border-left:3px solid var(--accent-blue);background:#F0F4F9;border-radius:0 5px 5px 0;padding:7px 13px;margin-bottom:16px;font-size:12px;color:var(--accent-blue-hover);line-height:1.45;}
 .rappr-gate{border:1.5px solid var(--accent-red);border-radius:var(--radius-md);padding:16px 18px;margin-bottom:18px;background:var(--accent-red-tint);}
 .rappr-gate-title{font-weight:700;font-size:13px;color:#7A2420;margin-bottom:8px;}
 .rappr-gate p{font-size:12.5px;color:#7A2420;line-height:1.6;margin:0 0 12px;}
@@ -874,7 +875,8 @@ table.analyse-tbl tbody tr:hover{background:var(--row-sep);}
 .update-action-body{flex:1;min-width:180px;}
 .update-action-title{font-family:'Roboto Condensed','Arial Narrow',sans-serif;font-weight:700;font-size:16px;color:#fff;margin-bottom:4px;}
 .update-action-desc{font-size:12.5px;color:var(--sidebar-text-muted);line-height:1.5;}
-.btn-update{background:var(--accent-red);color:#fff;border:none;border-radius:var(--radius-sm);padding:10px 20px;font-weight:700;font-size:14px;cursor:pointer;display:inline-flex;align-items:center;gap:8px;white-space:nowrap;font-family:inherit;transition:background .15s;}
+.btn-update{background:var(--accent-blue);color:#fff;border:none;border-radius:var(--radius-sm);padding:10px 20px;font-weight:700;font-size:14px;cursor:pointer;display:inline-flex;align-items:center;gap:8px;white-space:nowrap;font-family:inherit;transition:background .15s;}
+.btn-update:hover{background:var(--accent-blue-hover);}
 .btn-update:hover{background:var(--accent-red-hover);}
 .btn-update:disabled{opacity:.55;cursor:not-allowed;}
 
@@ -1162,49 +1164,29 @@ body.printing-decision #print-decision-area{display:block!important;color:#000;b
       </div>
 
       <div class="action-grid">
-        <div class="action-card dark">
-          <div class="action-icon g" aria-hidden="true">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/><path d="M9 12h6M9 16h4"/></svg>
-          </div>
+        <div class="action-tile" data-target="affaires" data-i18n-title="action_affaires_desc" title="Suivez l'avancement des affaires en cours devant la Cour administrative.">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path stroke-width="1.5" transform="translate(3,-3) scale(0.86)" d="M3 7a2 2 0 012-2h4l2 2h8a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2V7z"/><path stroke-width="2" fill="var(--card-bg,#fff)" d="M3 7a2 2 0 012-2h4l2 2h8a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2V7z"/></svg>
           <h3 data-i18n="action_affaires_title">Affaires en cours</h3>
-          <p data-i18n="action_affaires_desc">Suivez l'avancement des affaires en cours devant la Cour administrative.</p>
-          <button class="btn btn-inverse" data-target="affaires" data-i18n="action_affaires_btn">Ouvrir</button>
         </div>
-        <div class="action-card light">
-          <div class="action-icon r" aria-hidden="true">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
-          </div>
+        <div class="action-tile" data-target="agenda" data-i18n-title="action_agenda_desc" title="Consultez les prochaines audiences et ajoutez-les à votre agenda.">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
           <h3 data-i18n="action_agenda_title">Agenda judiciaire</h3>
-          <p data-i18n="action_agenda_desc">Consultez les prochaines audiences et ajoutez-les à votre agenda.</p>
-          <button class="btn btn-secondary" data-target="agenda" data-i18n="action_agenda_btn">Accéder</button>
         </div>
-        <div class="action-card dark">
-          <div class="action-icon g" aria-hidden="true">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
-          </div>
+        <div class="action-tile" data-target="recherche" data-i18n-title="action_search_desc" title="Recherchez un mot, une société ou une référence dans le texte des décisions.">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
           <h3 data-i18n="action_search_title">Lancer une recherche</h3>
-          <p data-i18n="action_search_desc">Recherchez un mot, une société ou une référence dans le texte des décisions.</p>
-          <button class="btn btn-inverse" data-target="recherche" data-i18n="action_search_btn">Rechercher</button>
         </div>
-        <div class="action-card light">
-          <div class="action-icon r" aria-hidden="true">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8a6 6 0 10-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 01-3.4 0"/></svg>
-          </div>
+        <div class="action-tile" data-target="veille" data-i18n-title="action_alert_desc" title="Enregistrez un mot-clé à surveiller : les nouvelles décisions correspondantes s'affichent ici automatiquement.">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5.5"/><circle cx="12" cy="12" r="1.4" fill="currentColor" stroke="none"/><path d="M12 12L18 6"/><circle cx="16.6" cy="8.4" r="1" fill="currentColor" stroke="none"/></svg>
           <h3 data-i18n="action_alert_title">Ouvrir le radar</h3>
-          <p data-i18n="action_alert_desc">Enregistrez un mot-clé à surveiller : les nouvelles décisions correspondantes s'affichent ici automatiquement.</p>
-          <button class="btn btn-secondary" data-target="veille" data-i18n="action_alert_btn">Explorer</button>
         </div>
-        <div class="action-card dark">
-          <div class="action-icon g" aria-hidden="true">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="2"/><path d="M7 16c.5-1.5 1.7-2 2-2s1.5.5 2 2"/><path d="M14 9h4M14 13h3"/></svg>
-          </div>
+        <div class="action-tile" data-target="recherche" data-i18n-title="action_rappr_desc" title="Depuis une décision, vérifiez si elle concerne un professionnel identifiable, avec les garde-fous légaux intégrés.">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><g stroke-width="1.3" transform="scale(0.6)"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></g><g stroke-width="2.4"><circle cx="18" cy="18" r="4.3"/><path d="M21.3 21.3L23.5 23.5"/></g></svg>
           <h3 data-i18n="action_rappr_title">Qui est concerné ?</h3>
-          <p data-i18n="action_rappr_desc">Depuis une décision, vérifiez si elle concerne un professionnel identifiable, avec les garde-fous légaux intégrés.</p>
-          <button class="btn btn-inverse" data-target="recherche" data-i18n="action_rappr_btn">Découvrir</button>
         </div>
-        <div class="action-card light">
-          <div class="action-icon r" aria-hidden="true">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 11-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 11-2.83-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 112.83-2.83l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 112.83 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+        <div class="action-card">
+          <div class="action-icon" aria-hidden="true">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 00-4-4H9a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
           </div>
           <h3 data-i18n="action_account_title">Mon compte</h3>
           <p id="dashboard-account-email">—</p>
@@ -3169,7 +3151,7 @@ function _annotFormHtml(id){
       <textarea class="input" id="annot-notes" placeholder="${isDE?'Kontext, Verbindungen…':'Contexte, liens avec d\'autres affaires…'}" style="height:60px;resize:none;width:100%;">${escHtml(ann.notes||'')}</textarea>
       <div style="display:flex;gap:10px;margin-top:12px;align-items:center;flex-wrap:wrap;">
         <button class="btn" onclick="commitAnnotation('${id}')"
-          style="background:var(--accent-red);color:#fff;border-color:var(--accent-red);">${isDE?'Speichern':'Enregistrer'}</button>
+          style="background:var(--accent-blue);color:#fff;border-color:var(--accent-blue);">${isDE?'Speichern':'Enregistrer'}</button>
         ${hasAnnotation(id)?`<button class="btn btn-secondary" onclick="deleteAnnotation('${id}')">${isDE?'Annotation löschen':'Supprimer'}</button>`:''}
         ${attribution?`<span style="font-size:11px;color:var(--text-faint);margin-left:4px;">${attribution}</span>`:''}
         <span id="annot-autosave-msg" style="font-size:11px;color:var(--success-icon-bg);margin-left:4px;opacity:0;transition:opacity .4s;"></span>
