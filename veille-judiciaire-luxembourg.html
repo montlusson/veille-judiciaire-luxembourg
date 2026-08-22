@@ -22,6 +22,7 @@
   --accent-red-tint:#FBE9E6;
   --accent-gold:#C28A2B;
   --accent-blue:#2B4C6F;
+  --reporter-brand:#5e71a1;
   --success-bg:#EAF1EC;--success-border:#CFE0D4;--success-fg:#3F6B4E;--success-icon-bg:#4A7C59;
   --card-bg:#FFFFFF;--card-border:#E8E3D6;--row-sep:#F0ECE2;
   --text:#1C1B19;--text-muted:#6B6862;--text-faint:#8E8A7C;--text-placeholder:#A8A294;
@@ -519,13 +520,18 @@ details.alt-table th,details.alt-table td{border:1px solid var(--card-border);pa
 .convoc-strip-info-ic{cursor:help;color:var(--accent-blue);flex:0 0 auto;}
 
 /* ── Archives d'audience ── */
-.archive-week{margin-bottom:32px;}
+.archive-week{margin-bottom:12px;}
 .archive-week-header{
   font-family:'Roboto Condensed','Arial Narrow',sans-serif;font-weight:700;font-size:13.5px;
   color:var(--text-body);background:#F0F4F9;border:1px solid #C0D0E4;
   padding:9px 14px;border-radius:var(--radius-md);margin-bottom:14px;
   display:flex;align-items:center;gap:10px;
+  cursor:pointer;list-style:none;user-select:none;
 }
+.archive-week-header::-webkit-details-marker{display:none;}
+.archive-week-header::before{content:'▸';display:inline-block;transition:transform .15s ease;}
+.archive-week[open] .archive-week-header::before{transform:rotate(90deg);}
+.archive-week > *:not(.archive-week-header){padding-left:14px;border-left:2px solid #C0D0E4;margin-left:2px;}
 .archive-day{margin-bottom:18px;}
 .archive-day:last-child{margin-bottom:0;}
 .archive-day-header{
@@ -810,18 +816,23 @@ table.analyse-tbl tbody tr:hover{background:var(--row-sep);}
 .rappr-gate textarea{width:100%;border:1.5px solid #F5C5BF;border-radius:6px;padding:8px 10px;font-size:12.5px;font-family:inherit;resize:vertical;min-height:60px;margin-top:6px;}
 .rappr-gate .btn{margin-top:10px;}
 .rappr-retention-box{border-left:3px solid #C6861A;background:#FBF1DC;border-radius:0 6px 6px 0;padding:9px 13px;margin-bottom:18px;font-size:12px;color:#8A6418;line-height:1.55;}
-.rappr-professions{display:flex;flex-direction:column;gap:12px;}
-.rappr-card{border:1px solid var(--card-border);border-radius:var(--radius-md);padding:14px 16px;background:var(--card-bg);}
-.rappr-card-head{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;}
-.rappr-card-name{font-weight:700;font-size:13.5px;color:var(--text-main);}
-.rappr-card-organe{font-size:11.5px;color:var(--text-muted);margin-top:1px;}
-.rappr-badge{font-size:10.5px;font-weight:700;padding:2px 8px;border-radius:20px;white-space:nowrap;}
-.rappr-badge.blocked{background:var(--accent-red-tint);color:#7A2420;}
-.rappr-badge.unknown{background:#FBF1DC;color:#8A6418;}
-.rappr-badge.permissive{background:#E8F4EC;color:#2B6B3C;}
-.rappr-card-note{font-size:12px;color:var(--text-muted);line-height:1.55;margin:8px 0;}
-.rappr-card-link{font-size:12px;font-weight:600;color:var(--accent-blue);text-decoration:underline;}
-.rappr-card-form{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;padding-top:10px;border-top:1px dashed var(--card-border);}
+.rappr-professions{display:flex;flex-direction:column;gap:14px;}
+.rappr-card{border:1px solid var(--card-border);border-radius:var(--radius-md);padding:16px 18px;background:var(--card-bg);}
+.rappr-card-name{font-weight:700;font-size:14px;color:var(--text-main);letter-spacing:-.005em;}
+.rappr-card-organe{font-size:12px;color:var(--text-muted);margin-top:2px;}
+.rappr-card-actions{display:flex;gap:10px;flex-wrap:wrap;margin:12px 0 2px;}
+.rappr-btn{font-size:12.5px;font-weight:600;padding:7px 14px;border-radius:20px;text-decoration:none;white-space:nowrap;}
+.rappr-btn-primary{background:var(--reporter-brand);color:#fff;}
+.rappr-btn-primary:hover{opacity:.9;}
+.rappr-btn-secondary{background:transparent;color:var(--text-muted);border:1px solid var(--card-border);}
+.rappr-btn-secondary:hover{background:var(--row-sep);}
+.rappr-card-note{margin-top:8px;font-size:11.5px;color:var(--text-faint);}
+.rappr-card-note summary{cursor:pointer;font-weight:600;list-style:none;}
+.rappr-card-note summary::-webkit-details-marker{display:none;}
+.rappr-card-note summary::before{content:'▸';display:inline-block;margin-right:5px;transition:transform .15s ease;}
+.rappr-card-note[open] summary::before{transform:rotate(90deg);}
+.rappr-card-note p{margin:6px 0 0;line-height:1.5;}
+.rappr-card-form{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px;padding-top:12px;border-top:1px solid var(--card-border);}
 .rappr-card-form select,.rappr-card-form input[type=text]{border:1px solid var(--card-border);border-radius:6px;padding:6px 9px;font-size:12px;font-family:inherit;}
 .rappr-card-form input[type=text]{flex:1;min-width:140px;}
 .rappr-history{margin-top:6px;}
@@ -1001,6 +1012,26 @@ body.printing-decision #print-decision-area{display:block!important;color:#000;b
     <div class="reader-body" id="reader-body"></div>
   </aside>
   <main id="main-content">
+
+    <!-- MODAL RGPD — alerte unique, affichée au premier chargement (localStorage) -->
+    <div class="legal-modal-overlay" id="rgpd-alert-overlay">
+      <div class="legal-modal" style="max-width:560px;" role="dialog" aria-modal="true" aria-labelledby="rgpd-alert-title">
+        <div class="legal-modal-head">
+          <div>
+            <div style="font-family:'Roboto Condensed','Arial Narrow',sans-serif;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--text-faint);margin-bottom:6px;" data-i18n="rgpd_alert_eyebrow">Avant d'utiliser cet outil</div>
+            <div class="legal-modal-title" id="rgpd-alert-title" data-i18n="rgpd_alert_title">Risques RGPD &amp; licence des sources</div>
+          </div>
+        </div>
+        <div class="legal-modal-body">
+          <div data-i18n="rgpd_alert_body"></div>
+          <label class="chk" style="display:flex;align-items:flex-start;gap:8px;font-size:12.5px;color:var(--text-muted);line-height:1.5;margin:18px 0 4px;cursor:pointer;">
+            <input type="checkbox" id="rgpd-alert-dismiss" style="margin-top:2px;flex-shrink:0;">
+            <span data-i18n="rgpd_alert_dismiss">Ne plus afficher ce message</span>
+          </label>
+          <button class="btn btn-primary" style="margin-top:14px;" onclick="closeRgpdAlert()" data-i18n="rgpd_alert_close">J'ai compris</button>
+        </div>
+      </div>
+    </div>
 
     <!-- MODAL RAPPROCHEMENT D'IDENTITÉ (mode manuel assisté) -->
     <div class="legal-modal-overlay" id="rappr-modal-overlay" onclick="if(event.target===this)closeRapprochement()">
@@ -1199,8 +1230,6 @@ body.printing-decision #print-decision-area{display:block!important;color:#000;b
       <h1 id="h-collecte" class="title" data-i18n="collecte_title">Collecte des données</h1>
       <p class="intro" data-i18n="collecte_intro">Les archives hebdomadaires publiées par chaque juridiction sur data.public.lu sont téléchargées, dézippées, et leur contenu est extrait puis indexé sans intervention manuelle.</p>
 
-      <div class="section-notice moderate">Risque modéré — licence CC BY-ND 4.0 (sans modification). L'indexation et la recherche plein texte pourraient constituer une transformation au sens de la licence. Décisions pseudonymisées par l'Administration judiciaire.</div>
-
       <div class="subtabs" role="tablist">
         <button class="subtab active" id="subtab-sources" role="tab" aria-selected="true" aria-controls="subpanel-sources" onclick="switchSubtab('sources')">
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 3v12"/><path d="M7 11l5 5 5-5"/><path d="M4 19h16"/></svg>
@@ -1365,7 +1394,7 @@ body.printing-decision #print-decision-area{display:block!important;color:#000;b
 
       <!-- Déposer les convocations : dépôt volontaire par le journaliste, cœur du workflow de cette page -->
       <div id="agendapanel-deposit" style="margin-top:20px;">
-        <div class="section-notice info" data-i18n="convoc_upload_notice">Dépôt volontaire : téléchargez vous-même le PDF de convocation depuis les liens ci-dessus (onglet Calendrier), puis déposez-le ici. Vous pouvez déposer plusieurs PDF et/ou des ZIP les contenant en une fois. Les numéros d'affaire, matières et avocats sont extraits automatiquement et partagés avec toute la rédaction (onglet « Affaires en cours »). Ces données restent à examiner avant tout usage éditorial (RGPD/CNPD).</div>
+        <div class="section-notice info" data-i18n="convoc_upload_notice">Dépôt volontaire : téléchargez vous-même le PDF de convocation depuis les liens ci-dessus (onglet Calendrier), puis déposez-le ici. Vous pouvez déposer plusieurs PDF et/ou des ZIP les contenant en une fois. Les numéros d'affaire, matières et avocats sont extraits automatiquement et partagés avec toute la rédaction (onglet « Affaires en cours »).</div>
         <div class="upload-zone" id="convoc-drop-zone" tabindex="0" role="button" aria-label="Déposer un PDF de convocation">
           <input type="file" id="convoc-file-input" accept="application/pdf,.zip" multiple style="display:none;">
           <p data-i18n="convoc_drop_cta">Glissez-déposez un ou plusieurs PDF de convocation ici (ou un ZIP les contenant), ou cliquez pour parcourir</p>
@@ -1506,8 +1535,6 @@ body.printing-decision #print-decision-area{display:block!important;color:#000;b
       <h1 id="h-affaires" class="title">Affaires en cours</h1>
       <p class="intro">Suivi des affaires devant la Cour administrative et le Tribunal administratif (6 chambres), à partir des convocations déposées volontairement par la rédaction (onglet Audiences → « Convocations déposées »). Numéros de rôle, matières, avocats et stades extraits des PDF.</p>
 
-      <div class="section-notice info" style="margin-top:18px;">Noms d'avocats et données personnelles identifiables. L'agrégation multi-semaines crée des profils. Exception journalistique Art. 85 RGPD applicable sous conditions.</div>
-
       <div class="affaires-tabs affaires-tabs-lg" role="tablist" aria-label="Vue des affaires">
         <button class="affaires-tab active" role="tab" aria-selected="true"  data-filter="all"      onclick="setAffairesFilter('all')">Toutes <span class="tab-count" id="tab-count-all"></span></button>
         <button class="affaires-tab"        role="tab" aria-selected="false" data-filter="cour"     onclick="setAffairesFilter('cour')">Cour adm. <span class="tab-count" id="tab-count-cour"></span></button>
@@ -1549,7 +1576,6 @@ body.printing-decision #print-decision-area{display:block!important;color:#000;b
             <p>Surveiller des affaires spécifiques d'intérêt éditorial. Une notification peut être déclenchée lorsqu'une affaire change de stade ou qu'une décision est publiée.</p>
           </div>
           <div class="affaires-section-body">
-            <div class="section-notice info">Le suivi nominatif d'affaires impliquant des avocats identifiés relève du traitement de données personnelles. La finalité journalistique doit être documentée formellement (registre de traitement, base légale Art. 6 RGPD).</div>
             <p style="font-size:12.5px;color:var(--text-muted);margin:0 0 14px;">Utilisez le bouton "Surveiller" dans les tableaux Cour adm. / Tribunal adm. pour ajouter des affaires à votre liste de suivi.</p>
             <div id="watchlist-container"></div>
             <div style="display:flex;gap:10px;margin-top:16px;flex-wrap:wrap;align-items:center;background:var(--card-bg);border:1px dashed var(--card-border);border-radius:var(--radius-lg);padding:14px 16px;">
@@ -1569,7 +1595,6 @@ body.printing-decision #print-decision-area{display:block!important;color:#000;b
             <p>Répartition des affaires au rôle par ministère défendeur, matière et stade procédural.</p>
           </div>
           <div class="affaires-section-body">
-            <div class="section-notice moderate">Les statistiques agrégées sans données nominatives présentent un risque limité. Le traitement reste soumis à une base légale Art. 6 RGPD documentée (intérêt légitime ou intérêt public journalistique).</div>
             <div class="stats-grid">
               <div>
                 <div style="font-family:'Roboto Condensed','Arial Narrow',sans-serif;font-weight:700;font-size:13px;text-transform:uppercase;letter-spacing:.04em;color:var(--text-faint);margin-bottom:12px;">Défendeur / Ministère</div>
@@ -1591,7 +1616,6 @@ body.printing-decision #print-decision-area{display:block!important;color:#000;b
       <!-- ── VUE "COUR ADM." : liste simple ── -->
       <div id="affaires-view-cour" style="display:none;margin-top:20px;">
         <div class="affaires-summary" id="affaires-summary-cour" aria-live="polite"></div>
-        <div class="section-notice info" style="margin:14px 0;">Noms d'avocats présents dans les données — données personnelles identifiables. Examen RGPD et CNPD requis avant usage éditorial.</div>
         <div style="overflow-x:auto;">
           <table class="affaires-table" role="grid">
             <thead>
@@ -1611,7 +1635,6 @@ body.printing-decision #print-decision-area{display:block!important;color:#000;b
       <!-- ── VUE "TRIBUNAL ADM." : sous-onglets par chambre ── -->
       <div id="affaires-view-tribunal" style="display:none;margin-top:20px;">
         <div class="affaires-subtabs" id="tribunal-chambre-tabs" role="tablist" aria-label="Chambres du Tribunal administratif"></div>
-        <div class="section-notice info" style="margin:14px 0;">Noms d'avocats présents dans les données — données personnelles identifiables. Examen RGPD et CNPD requis avant usage éditorial.</div>
         <div style="overflow-x:auto;">
           <table class="affaires-table" role="grid">
             <thead>
@@ -1815,6 +1838,15 @@ const TRANSLATIONS = {
     file_indexed: "Indexé",
     file_size: "{size}",
     file_uploaded_on: "Importé le {date}",
+    rgpd_alert_eyebrow: "Avant d'utiliser cet outil",
+    rgpd_alert_title: "Risques RGPD &amp; licence des sources",
+    rgpd_alert_body: "<ul style=\"margin:0;padding-left:20px;display:flex;flex-direction:column;gap:10px;\">"
+      + "<li>Les décisions sont publiées sous licence <strong>CC BY-ND 4.0</strong> (sans modification) — l'indexation et la recherche plein texte peuvent constituer une transformation au sens de la licence.</li>"
+      + "<li>Les noms d'avocats et autres données identifiables présents dans les décisions et les convocations sont des <strong>données personnelles</strong> : leur traitement doit reposer sur une base légale documentée (Art. 6 RGPD), l'exception journalistique (Art. 85 RGPD) s'appliquant sous conditions.</li>"
+      + "<li>Toute tentative de ré-identification sur une <strong>décision pénale</strong> reste encadrée séparément par une validation obligatoire (Art. 10 RGPD) dans l'outil « Piste d'identification ».</li>"
+      + "<li>En cas de doute, consultez la rédaction en chef ou la CNPD avant tout usage éditorial.</li></ul>",
+    rgpd_alert_dismiss: "Ne plus afficher ce message",
+    rgpd_alert_close: "J'ai compris",
     agenda_eyebrow: "Calendrier judiciaire",
     agenda_title: "Audiences & agenda",
     agenda_intro: "Séances hebdomadaires récurrentes de toutes les juridictions luxembourgeoises. Données issues de <strong>justice.public.lu</strong>. Exportez vers votre agenda ou filtrez par juridiction.",
@@ -1823,7 +1855,7 @@ const TRANSLATIONS = {
     agenda_tab_cal: "Calendrier",
     agenda_tab_deposit: "Déposer les convocations",
     agenda_tab_past: "Audiences passées",
-    convoc_upload_notice: "Dépôt volontaire : téléchargez vous-même le PDF de convocation depuis les liens ci-dessus (onglet Calendrier), puis déposez-le ici. Vous pouvez déposer plusieurs PDF et/ou des ZIP les contenant en une fois. Les numéros d'affaire, matières et avocats sont extraits automatiquement et partagés avec toute la rédaction (onglet « Affaires en cours »). Ces données restent à examiner avant tout usage éditorial (RGPD/CNPD).",
+    convoc_upload_notice: "Dépôt volontaire : téléchargez vous-même le PDF de convocation depuis les liens ci-dessus (onglet Calendrier), puis déposez-le ici. Vous pouvez déposer plusieurs PDF et/ou des ZIP les contenant en une fois. Les numéros d'affaire, matières et avocats sont extraits automatiquement et partagés avec toute la rédaction (onglet « Affaires en cours »).",
     convoc_drop_cta: "Glissez-déposez un ou plusieurs PDF de convocation ici (ou un ZIP les contenant), ou cliquez pour parcourir",
     convoc_files_empty: "Les fichiers déposés apparaîtront ici.",
     convoc_reader_placeholder: "Sélectionnez un fichier déposé pour le consulter.",
@@ -2057,6 +2089,15 @@ const TRANSLATIONS = {
     file_indexed: "Indiziert",
     file_size: "{size}",
     file_uploaded_on: "Importiert am {date}",
+    rgpd_alert_eyebrow: "Vor der Nutzung dieses Tools",
+    rgpd_alert_title: "DSGVO-Risiken &amp; Quellenlizenz",
+    rgpd_alert_body: "<ul style=\"margin:0;padding-left:20px;display:flex;flex-direction:column;gap:10px;\">"
+      + "<li>Die Entscheidungen werden unter der Lizenz <strong>CC BY-ND 4.0</strong> (keine Bearbeitung) veröffentlicht — die Indexierung und Volltextsuche könnten eine Bearbeitung im Sinne der Lizenz darstellen.</li>"
+      + "<li>Namen von Anwälten und andere identifizierbare Daten in Entscheidungen und Ladungen sind <strong>personenbezogene Daten</strong>: ihre Verarbeitung muss auf einer dokumentierten Rechtsgrundlage beruhen (Art. 6 DSGVO), die journalistische Ausnahme (Art. 85 DSGVO) gilt unter Bedingungen.</li>"
+      + "<li>Jeder Versuch einer Re-Identifizierung bei einer <strong>strafrechtlichen Entscheidung</strong> wird gesondert durch eine verpflichtende Prüfung (Art. 10 DSGVO) im Tool „Piste d'identification\" geregelt.</li>"
+      + "<li>Im Zweifelsfall wenden Sie sich vor jeder redaktionellen Nutzung an die Chefredaktion oder die CNPD.</li></ul>",
+    rgpd_alert_dismiss: "Diese Meldung nicht mehr anzeigen",
+    rgpd_alert_close: "Verstanden",
     agenda_eyebrow: "Gerichtskalender",
     agenda_title: "Sitzungen & Terminkalender",
     agenda_intro: "Wöchentlich wiederkehrende Sitzungen aller luxemburgischen Gerichte. Daten von <strong>justice.public.lu</strong>. Exportieren Sie in Ihren Kalender oder filtern Sie nach Gericht.",
@@ -2065,7 +2106,7 @@ const TRANSLATIONS = {
     agenda_tab_cal: "Kalender",
     agenda_tab_deposit: "Ladungen hochladen",
     agenda_tab_past: "Vergangene Sitzungen",
-    convoc_upload_notice: "Freiwilliger Upload: Laden Sie die Ladungs-PDF selbst über die obigen Links (Tab Kalender) herunter und legen Sie sie hier ab. Sie können mehrere PDFs und/oder ZIP-Archive damit auf einmal ablegen. Aktenzeichen, Sachgebiete und Anwälte werden automatisch extrahiert und mit der gesamten Redaktion geteilt (Tab „Laufende Verfahren\"). Diese Daten müssen vor jeder redaktionellen Nutzung geprüft werden (DSGVO/CNPD).",
+    convoc_upload_notice: "Freiwilliger Upload: Laden Sie die Ladungs-PDF selbst über die obigen Links (Tab Kalender) herunter und legen Sie sie hier ab. Sie können mehrere PDFs und/oder ZIP-Archive damit auf einmal ablegen. Aktenzeichen, Sachgebiete und Anwälte werden automatisch extrahiert und mit der gesamten Redaktion geteilt (Tab „Laufende Verfahren\").",
     convoc_drop_cta: "Ein oder mehrere Ladungs-PDFs hier ablegen (oder ein ZIP damit) oder klicken, um zu durchsuchen",
     convoc_files_empty: "Die abgelegten Dateien erscheinen hier.",
     convoc_reader_placeholder: "Wählen Sie eine abgelegte Datei aus, um sie anzusehen.",
@@ -3658,11 +3699,18 @@ function renderAudiencesArchive(){
   const cutoff = new Date();
   cutoff.setMonth(cutoff.getMonth() - AUDIENCES_RETENTION_MONTHS);
   const cutoffStr = cutoff.toISOString().slice(0,10);
+  const currentWeek = _isoWeekLabel(new Date());
+  const cutoffWeek = _isoWeekLabel(cutoff);
 
-  const past = (AFFAIRES_DATA || []).filter(a =>
-    a.date_audience && a.date_audience < todayStr
-    && (a.date_audience >= cutoffStr || _watchlist.includes(a.num))
-  );
+  /* Les affaires déposées avant l'ajout de la colonne date_audience n'ont
+     pas cette date extraite du PDF (NULL en base) — sans ce repli sur
+     source_week (présent depuis le tout premier schéma), elles restaient
+     invisibles ici alors qu'elles existent bien dans « Affaires en cours ». */
+  const past = (AFFAIRES_DATA || []).filter(a => {
+    if(a.date_audience) return a.date_audience < todayStr && (a.date_audience >= cutoffStr || _watchlist.includes(a.num));
+    if(!a.source_week) return false;
+    return a.source_week < currentWeek && (a.source_week >= cutoffWeek || _watchlist.includes(a.num));
+  });
   const filtered = q
     ? past.filter(a =>
         (a.num || '').toLowerCase().includes(q)
@@ -3677,11 +3725,7 @@ function renderAudiencesArchive(){
     return;
   }
 
-  const byDate = {};
-  filtered.forEach(a => { (byDate[a.date_audience] = byDate[a.date_audience] || []).push(a); });
-
   const locale = currentLang === 'de' ? 'de-LU' : 'fr-LU';
-
   const isDE = currentLang === 'de';
   const th = {
     num:      isDE ? 'Aktenzeichen'            : 'N° d\'affaire',
@@ -3693,11 +3737,13 @@ function renderAudiencesArchive(){
 
   /* Regroupement par semaine ISO (bloc visible en priorité), puis par jour
      à l'intérieur — le dépôt PDF se fait par semaine (source_week) donc ce
-     niveau de bloc rend les données ainsi chargées faciles à repérer. */
+     niveau de bloc rend les données ainsi chargées faciles à repérer.
+     Semaine = celle de la date d'audience si connue, sinon celle du dépôt
+     (source_week) pour les affaires sans date_audience extraite. */
   const byWeek = {};
-  Object.keys(byDate).forEach(dateStr => {
-    const wk = _isoWeekLabel(new Date(dateStr + 'T00:00:00'));
-    (byWeek[wk] = byWeek[wk] || []).push(dateStr);
+  filtered.forEach(a => {
+    const wk = a.date_audience ? _isoWeekLabel(new Date(a.date_audience + 'T00:00:00')) : a.source_week;
+    (byWeek[wk] = byWeek[wk] || []).push(a);
   });
 
   const theadHtml = `<thead><tr>
@@ -3709,25 +3755,42 @@ function renderAudiencesArchive(){
     <th style="width:90px;"></th>
   </tr></thead>`;
 
+  function renderDayGroup(label, affs){
+    const rows = affs.map(a => renderAffaireRow(a, false)).join('');
+    return `<div class="archive-day">
+      <div class="archive-day-header">${escHtml(label)}</div>
+      <div style="overflow-x:auto;"><table class="affaires-table" role="grid">
+        ${theadHtml}
+        <tbody>${rows}</tbody>
+      </table></div>
+    </div>`;
+  }
+
   el.innerHTML = Object.keys(byWeek).sort((a,b) => b.localeCompare(a)).map(wk => {
-    const dateStrs = byWeek[wk].sort((a,b) => b.localeCompare(a));
-    const weekLabel = _weekRangeLabel(_mondayOf(dateStrs[0]));
-    const daysHtml = dateStrs.map(dateStr => {
+    const affs = byWeek[wk];
+    const withDate = affs.filter(a => a.date_audience);
+    const withoutDate = affs.filter(a => !a.date_audience);
+    const monday = withDate.length ? _mondayOf(withDate[0].date_audience) : _mondayFromIsoWeek(wk);
+    const weekLabel = _weekRangeLabel(monday);
+
+    const byDate = {};
+    withDate.forEach(a => { (byDate[a.date_audience] = byDate[a.date_audience] || []).push(a); });
+    const daysHtml = Object.keys(byDate).sort((a,b) => b.localeCompare(a)).map(dateStr => {
       const d = new Date(dateStr + 'T00:00:00');
       const dayLabel = d.toLocaleDateString(locale, {weekday:'long', day:'numeric', month:'long', year:'numeric'});
-      const rows = byDate[dateStr].map(a => renderAffaireRow(a, false)).join('');
-      return `<div class="archive-day">
-        <div class="archive-day-header">${escHtml(dayLabel)}</div>
-        <div style="overflow-x:auto;"><table class="affaires-table" role="grid">
-          ${theadHtml}
-          <tbody>${rows}</tbody>
-        </table></div>
-      </div>`;
+      return renderDayGroup(dayLabel, byDate[dateStr]);
     }).join('');
-    return `<div class="archive-week">
-      <div class="archive-week-header">${escHtml(weekLabel)}</div>
-      ${daysHtml}
-    </div>`;
+    const noDateHtml = withoutDate.length
+      ? renderDayGroup(isDE ? 'Datum nicht erkannt (älterer Upload)' : 'Date d\'audience non détectée (dépôt antérieur)', withoutDate)
+      : '';
+
+    /* Repliée par défaut (une liste de plusieurs semaines devient vite illisible
+       ouverte d'un coup) — dépliée automatiquement pendant une recherche pour
+       que les résultats filtrés restent visibles sans clic supplémentaire. */
+    return `<details class="archive-week"${q ? ' open' : ''}>
+      <summary class="archive-week-header">${escHtml(weekLabel)}</summary>
+      ${daysHtml}${noDateHtml}
+    </details>`;
   }).join('');
 }
 
@@ -4090,6 +4153,15 @@ function _mondayOf(dateStr){
   const day = d.getDay() || 7; // 1=lundi … 7=dimanche
   d.setDate(d.getDate() - (day - 1));
   return d;
+}
+
+/* Lundi de la semaine ISO "YYYY-Www" (ex. source_week déposé avec le PDF, sans date_audience connue) */
+function _mondayFromIsoWeek(weekStr){
+  const [y, w] = weekStr.split('-W').map(Number);
+  const simple = new Date(Date.UTC(y, 0, 1 + (w - 1) * 7));
+  const dow = simple.getUTCDay() || 7;
+  simple.setUTCDate(simple.getUTCDate() + (dow <= 4 ? 1 - dow : 8 - dow));
+  return simple;
 }
 
 /* Libellé "Semaine du X au Y [mois] Y" (mois répété si à cheval sur deux mois) */
@@ -4934,6 +5006,7 @@ async function authOnSession(session){
   hideAuthOverlay();
   applyI18n();
   renderAll();
+  maybeShowRgpdAlert();
   loadDecisionsFromSupabase();
   loadAudiencesJSON();
   loadAffairesFromSupabase();
@@ -4966,6 +5039,7 @@ async function initAuth(){
     /* Bypass actif : accès direct sans auth (développement) */
     hideAuthOverlay();
     renderAll();
+    maybeShowRgpdAlert();
     loadDecisionsFromSupabase();
     loadAudiencesJSON();
     return;
@@ -5120,26 +5194,47 @@ function saveWatchlist(){ localStorage.setItem("vj_watchlist", JSON.stringify(_w
    ═══════════════════════════════════════════════════════════════ */
 const RAPPR_RETENTION_MOIS = 6;
 
+/* Recherche par profession déportée vers whoswho-lu (répertoire interne de la
+   rédaction), qui couvre déjà ces professions réglementées avec des données
+   pré-chargées — évite de solliciter les registres externes des ordres
+   professionnels pour une recherche par nom. whoswho_sub = sous-catégorie
+   whoswho-lu ciblée en un lien direct et spécifique (catégorie "Professions
+   réglementées" toujours). Le Collège médical est éclaté en 3 cartes
+   (médecins / dentistes / pharmaciens) pour préserver ce lien 1:1, whoswho-lu
+   n'ayant pas de sous-catégorie combinée. */
+const WHOSWHOLU_URL = 'https://whoswho-lu.pages.dev';
+function whoswholuLink(whoswhoSub, searchName){
+  const params = new URLSearchParams({ cat: 'Professions réglementées', sub: whoswhoSub });
+  if(searchName) params.set('q', searchName);
+  return `${WHOSWHOLU_URL}/?${params.toString()}`;
+}
+
 const RAPPR_PROFESSIONS = [
-  {id:'avocats',   name:'Avocats', name_de:'Rechtsanwälte', organe:"Ordre des avocats — Barreau de Luxembourg / Diekirch", url:'https://www.barreau.lu/votre-avocat/annuaire-des-avocats', statut:'blocked',
+  {id:'avocats',   name:'Avocats', name_de:'Rechtsanwälte', organe:"Ordre des avocats — Barreau de Luxembourg / Diekirch", url:'https://www.barreau.lu/votre-avocat/annuaire-des-avocats', whoswho_sub:'Avocats',
     note:"CGU lues intégralement : extraction/réutilisation systématique de l'annuaire interdite sans consentement écrit préalable du Barreau. Consultation ponctuelle uniquement.",
     note_de:"AGB vollständig gelesen: die systematische Extraktion/Wiederverwendung des Verzeichnisses ist ohne vorherige schriftliche Zustimmung der Rechtsanwaltskammer untersagt. Nur punktuelle Konsultation."},
-  {id:'medecins',  name:'Médecins, dentistes, pharmaciens, psychothérapeutes', name_de:'Ärzte, Zahnärzte, Apotheker, Psychotherapeuten', organe:'Collège médical', url:'https://collegemedical.lu/fr/professionals', statut:'unknown',
+  {id:'medecins',   name:'Médecins', name_de:'Ärzte', organe:'Collège médical', url:'https://collegemedical.lu/fr/professionals', whoswho_sub:'Médecins',
     note:"Aucune page CGU/mentions légales n'existe sur le site (confirmé — footer ne contient qu'une politique RGPD). Absence de cadre écrit ≠ autorisation : à clarifier directement avec le Collège médical avant tout usage répété.",
     note_de:"Auf der Website existiert keine Seite mit Nutzungsbedingungen (bestätigt — die Fußzeile enthält nur eine Datenschutzrichtlinie). Fehlen eines schriftlichen Rahmens ≠ Erlaubnis: vor jeder wiederholten Nutzung direkt beim Collège médical klären."},
-  {id:'notaires',  name:'Notaires', name_de:'Notare', organe:'Chambre des notaires du Grand-Duché', url:'https://www.notariat.lu/trouver-notaire', statut:'unknown',
+  {id:'dentistes',  name:'Médecins-dentistes', name_de:'Zahnärzte', organe:'Collège médical', url:'https://collegemedical.lu/fr/professionals', whoswho_sub:'Médecins-dentistes',
+    note:"Aucune page CGU/mentions légales n'existe sur le site (confirmé — footer ne contient qu'une politique RGPD). Absence de cadre écrit ≠ autorisation : à clarifier directement avec le Collège médical avant tout usage répété.",
+    note_de:"Auf der Website existiert keine Seite mit Nutzungsbedingungen (bestätigt — die Fußzeile enthält nur eine Datenschutzrichtlinie). Fehlen eines schriftlichen Rahmens ≠ Erlaubnis: vor jeder wiederholten Nutzung direkt beim Collège médical klären."},
+  {id:'pharmaciens', name:'Pharmaciens, psychothérapeutes', name_de:'Apotheker, Psychotherapeuten', organe:'Collège médical', url:'https://collegemedical.lu/fr/professionals', whoswho_sub:'Pharmaciens',
+    note:"Aucune page CGU/mentions légales n'existe sur le site (confirmé — footer ne contient qu'une politique RGPD). Absence de cadre écrit ≠ autorisation : à clarifier directement avec le Collège médical avant tout usage répété. Psychothérapeutes non couverts par whoswho-lu : passer directement par le registre officiel.",
+    note_de:"Auf der Website existiert keine Seite mit Nutzungsbedingungen (bestätigt — die Fußzeile enthält nur eine Datenschutzrichtlinie). Fehlen eines schriftlichen Rahmens ≠ Erlaubnis: vor jeder wiederholten Nutzung direkt beim Collège médical klären. Psychotherapeuten sind in whoswho-lu nicht erfasst: direkt über das offizielle Register suchen."},
+  {id:'notaires',  name:'Notaires', name_de:'Notare', organe:'Chambre des notaires du Grand-Duché', url:'https://www.notariat.lu/trouver-notaire', whoswho_sub:'Notaires',
     note:"Aucune page CGU/mentions légales n'existe sur le site (confirmé — footer ne contient qu'un copyright et un lien RGPD). Absence de cadre écrit ≠ autorisation : à clarifier directement avec la Chambre des notaires.",
     note_de:"Auf der Website existiert keine Seite mit Nutzungsbedingungen (bestätigt — die Fußzeile enthält nur ein Copyright und einen DSGVO-Link). Fehlen eines schriftlichen Rahmens ≠ Erlaubnis: direkt bei der Notarkammer klären."},
-  {id:'huissiers', name:'Huissiers de justice', name_de:'Gerichtsvollzieher', organe:'Chambre des huissiers de justice', url:'https://www.huissier.lu/find/luxembourg', statut:'unknown',
+  {id:'huissiers', name:'Huissiers de justice', name_de:'Gerichtsvollzieher', organe:'Chambre des huissiers de justice', url:'https://www.huissier.lu/find/luxembourg', whoswho_sub:'Huissiers de justice',
     note:"Aucune page CGU/mentions légales n'existe sur le site (confirmé — footer ne contient qu'un copyright et une politique de confidentialité). Absence de cadre écrit ≠ autorisation : à clarifier directement avec la Chambre.",
     note_de:"Auf der Website existiert keine Seite mit Nutzungsbedingungen (bestätigt — die Fußzeile enthält nur ein Copyright und eine Datenschutzrichtlinie). Fehlen eines schriftlichen Rahmens ≠ Erlaubnis: direkt bei der Kammer klären."},
-  {id:'oai',       name:'Architectes, ingénieurs-conseils, urbanistes, paysagistes', name_de:'Architekten, Bauingenieure, Stadtplaner, Landschaftsarchitekten', organe:'OAI', url:'https://www.oai.lu', statut:'blocked',
+  {id:'oai',       name:'Architectes, ingénieurs-conseils, urbanistes, paysagistes', name_de:'Architekten, Bauingenieure, Stadtplaner, Landschaftsarchitekten', organe:'OAI', url:'https://www.oai.lu', whoswho_sub:'Architectes/Ingénieurs-conseils',
     note:"CGU lues intégralement : reproduction totale ou partielle soumise à consentement écrit préalable de l'OAI.",
     note_de:"AGB vollständig gelesen: jede vollständige oder teilweise Reproduktion erfordert die vorherige schriftliche Zustimmung der OAI."},
-  {id:'oec',       name:'Experts-comptables', name_de:'Wirtschaftsprüfer (Experts-comptables)', organe:'OEC', url:'https://oec.lu', statut:'permissive',
+  {id:'oec',       name:'Experts-comptables', name_de:'Wirtschaftsprüfer (Experts-comptables)', organe:'OEC', url:'https://oec.lu', whoswho_sub:'Experts-comptables',
     note:"Notice légale lue intégralement : « la reproduction des informations est autorisée à condition que la source soit expressément mentionnée » — pas d'interdiction explicite de l'extraction systématique, contrairement aux autres ordres. Contenu présenté comme à usage personnel : garder le mode manuel pour l'instant, mais c'est le meilleur candidat pour une demande d'autorisation formelle.",
     note_de:"Rechtlicher Hinweis vollständig gelesen: ‚die Reproduktion der Informationen ist erlaubt, sofern die Quelle ausdrücklich genannt wird' — kein ausdrückliches Verbot der systematischen Extraktion, anders als bei den übrigen Kammern. Inhalt als ‚persönliche Nutzung' deklariert: vorerst manueller Modus, aber bester Kandidat für eine formelle Anfrage."},
-  {id:'reviseurs', name:"Réviseurs d'entreprises (auditeurs)", name_de:"Wirtschaftsprüfer (Réviseurs d'entreprises)", organe:'CSSF (registre officiel) / IRE', url:'https://www.cssf.lu', statut:'blocked',
+  {id:'reviseurs', name:"Réviseurs d'entreprises (auditeurs)", name_de:"Wirtschaftsprüfer (Réviseurs d'entreprises)", organe:'CSSF (registre officiel) / IRE', url:'https://www.cssf.lu', whoswho_sub:"Réviseurs d'entreprises agréés",
     note:"CGU lues intégralement : reproduction ou distribution des données du registre public uniquement sur consentement écrit préalable de la CSSF.",
     note_de:"AGB vollständig gelesen: Reproduktion oder Verbreitung der Daten des öffentlichen Registers nur mit vorheriger schriftlicher Zustimmung der CSSF."},
 ];
@@ -5163,6 +5258,26 @@ function openRapprochement(id){
   localStorage.setItem('vj_rappr_seen', '1');
   _ragRenderBody();
   if(_sb) _ragLoadHistory();
+}
+
+/* Alerte RGPD unique — affichée une fois au premier chargement de l'app,
+   consolide les notices RGPD/CC BY-ND autrefois dispersées sur plusieurs
+   écrans. Ne remplace PAS le gate art. 10 RGPD (piste d'identification sur
+   décision pénale), qui reste une validation par action, pas une notice. */
+const RGPD_ALERT_KEY = 'vj_rgpd_alert_dismissed';
+
+function maybeShowRgpdAlert(){
+  if(localStorage.getItem(RGPD_ALERT_KEY)) return;
+  document.getElementById('rgpd-alert-overlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeRgpdAlert(){
+  if(document.getElementById('rgpd-alert-dismiss').checked){
+    localStorage.setItem(RGPD_ALERT_KEY, '1');
+  }
+  document.getElementById('rgpd-alert-overlay').classList.remove('open');
+  document.body.style.overflow = '';
 }
 
 function closeRapprochement(){
@@ -5248,8 +5363,8 @@ function _ragRenderBody(){
     ? `Standardmäßig wird jede unbestätigte Spur nach <strong>${RAPPR_RETENTION_MOIS} Monaten automatisch gelöscht</strong>. Markieren Sie eine Spur als "bestätigt", um sie gemäß Ihren üblichen redaktionellen Archivierungsregeln aufzubewahren.`
     : `Par défaut, toute piste non confirmée est <strong>supprimée automatiquement au bout de ${RAPPR_RETENTION_MOIS} mois</strong>. Marquez une piste "confirmée" pour la conserver selon vos règles d'archivage rédactionnel habituelles.`;
   const introTxt = isDE
-    ? 'Manuell unterstützter Modus: An diese Websites werden keine automatisierten Anfragen gesendet. Öffnen Sie den offiziellen Link, führen Sie die Prüfung selbst durch und tragen Sie das Ergebnis unten ein — der Vorgang wird mit Ihrer Kennung protokolliert. Im Unterschied zu den persönlichen Notizen der Entscheidungsseite wird das hier Erfasste mit der gesamten Redaktion geteilt.'
-    : "Mode manuel assisté : aucune requête automatisée n'est envoyée à ces sites. Ouvrez le lien officiel, effectuez la vérification vous-même, puis consignez le résultat ci-dessous — l'action est journalisée avec votre identifiant. Contrairement aux notes personnelles de la fiche décision, ce qui est enregistré ici est partagé avec toute la rédaction.";
+    ? `Suchen Sie zuerst in whoswho-lu (internes Redaktionsverzeichnis) — es deckt bereits diese ${RAPPR_PROFESSIONS.length} reglementierten Berufe ab. Kein Treffer? Öffnen Sie das offizielle Register der Kammer. Tragen Sie anschließend das Ergebnis unten ein — der Vorgang wird mit Ihrer Kennung protokolliert und mit der gesamten Redaktion geteilt.`
+    : `Recherchez d'abord dans whoswho-lu (répertoire interne de la rédaction) — il couvre déjà ces ${RAPPR_PROFESSIONS.length} professions réglementées. Aucun résultat ? Ouvrez le registre officiel de l'ordre. Consignez ensuite le résultat ci-dessous — l'action est journalisée avec votre identifiant et partagée avec toute la rédaction.`;
 
   body.innerHTML = `
     <div class="rappr-retention-box">⏱ ${expiryTxt}</div>
@@ -5257,15 +5372,16 @@ function _ragRenderBody(){
     <div class="rappr-professions">
       ${RAPPR_PROFESSIONS.map(p => `
         <div class="rappr-card">
-          <div class="rappr-card-head">
-            <div>
-              <div class="rappr-card-name">${escHtml(isDE ? p.name_de : p.name)}</div>
-              <div class="rappr-card-organe">${escHtml(p.organe)}</div>
-            </div>
-            <span class="rappr-badge ${p.statut}">${p.statut==='blocked' ? (isDE?'🔴 Schriftliche Genehmigung erforderlich':'🔴 Autorisation écrite requise') : p.statut==='permissive' ? (isDE?'🟢 Günstige AGB (Quellenangabe nötig)':'🟢 CGU favorables (attribution requise)') : (isDE?'🟡 Keine Nutzungsbedingungen gefunden':'🟡 Aucune CGU trouvée')}</span>
+          <div class="rappr-card-name">${escHtml(isDE ? p.name_de : p.name)}</div>
+          <div class="rappr-card-organe">${escHtml(p.organe)}</div>
+          <div class="rappr-card-actions">
+            <a class="rappr-btn rappr-btn-primary" href="${whoswholuLink(p.whoswho_sub, p.id==='avocats' ? (d.entities?.lawyers?.[0]||'') : '')}" target="_blank" rel="noopener">${isDE?'In whoswho-lu suchen':'Rechercher dans whoswho-lu'}</a>
+            <a class="rappr-btn rappr-btn-secondary" href="${p.url}" target="_blank" rel="noopener">${isDE?'Kein Treffer? Offizielles Register':'Aucun résultat ? Registre officiel'}</a>
           </div>
-          <div class="rappr-card-note">${escHtml(isDE ? p.note_de : p.note)}</div>
-          <a class="rappr-card-link" href="${p.url}" target="_blank" rel="noopener">${isDE?'Offizielles Register öffnen →':'Ouvrir le registre officiel →'}</a>
+          <details class="rappr-card-note">
+            <summary>${isDE?'Zugriffsbedingungen des Registers':'Conditions d\'accès au registre'}</summary>
+            <p>${escHtml(isDE ? p.note_de : p.note)}</p>
+          </details>
           <div class="rappr-card-form">
             <select id="rappr-statut-${p.id}">
               <option value="a_verifier">${isDE?'Zu prüfen / in Bearbeitung':'À vérifier / en cours'}</option>
