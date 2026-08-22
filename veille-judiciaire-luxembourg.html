@@ -799,6 +799,20 @@ table.analyse-tbl tbody tr:hover{background:var(--row-sep);}
 .fulltext-modal-bar{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:16px 24px;border-bottom:1px solid var(--card-border);flex:0 0 auto;font-family:'Roboto Condensed','Arial Narrow',sans-serif;font-weight:700;font-size:15px;color:var(--text-main);}
 .fulltext-modal-body{flex:1;overflow-y:auto;padding:26px 32px;font-size:15px;line-height:1.85;white-space:pre-wrap;word-break:break-word;color:var(--text);}
 
+/* ── FAQ ── */
+.faq-intro{font-size:13.5px;color:var(--text-muted);line-height:1.6;margin:0 0 22px;}
+.faq-section-title{font-family:'Roboto Condensed','Arial Narrow',sans-serif;font-weight:700;font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:var(--accent-blue);margin:26px 0 10px;padding-bottom:6px;border-bottom:1px solid var(--card-border);}
+.faq-section-title:first-child{margin-top:0;}
+.faq-item{border-bottom:1px solid var(--row-sep);}
+.faq-item summary{cursor:pointer;padding:12px 4px;font-size:14px;font-weight:600;color:var(--text-main);list-style:none;display:flex;align-items:center;gap:10px;}
+.faq-item summary::-webkit-details-marker{display:none;}
+.faq-item summary::before{content:'+';flex:0 0 auto;width:16px;color:var(--accent-blue);font-weight:700;}
+.faq-item[open] summary::before{content:'−';}
+.faq-item-body{padding:0 4px 16px 30px;font-size:13px;line-height:1.65;color:var(--text-muted);}
+.faq-item-body strong{color:var(--text-main);}
+.faq-item-body p{margin:0 0 10px;}
+.faq-item-body p:last-child{margin-bottom:0;}
+
 /* ── Notice courte par section ── */
 .section-notice{border-left:3px solid var(--accent-red);background:var(--accent-red-tint);border-radius:0 5px 5px 0;padding:7px 13px;margin-bottom:16px;font-size:12px;color:#7A2420;line-height:1.45;}
 .section-notice a{color:#7A2420;font-weight:600;cursor:pointer;text-decoration:underline;}
@@ -1115,6 +1129,17 @@ body.printing-decision #print-decision-area{display:block!important;color:#000;b
       </div>
     </div>
 
+    <!-- MODAL FAQ -->
+    <div class="legal-modal-overlay" id="faq-modal-overlay" onclick="if(event.target===this)closeFaqModal()">
+      <div class="fulltext-modal" role="dialog" aria-modal="true" aria-labelledby="faq-modal-title">
+        <div class="fulltext-modal-bar">
+          <span id="faq-modal-title">FAQ</span>
+          <button class="legal-modal-close" onclick="closeFaqModal()" aria-label="Fermer">&times;</button>
+        </div>
+        <div class="fulltext-modal-body" id="faq-modal-body" style="white-space:normal;"></div>
+      </div>
+    </div>
+
     <!-- DASHBOARD -->
     <section class="screen active" data-screen="dashboard" aria-labelledby="h-dashboard">
       <div class="eyebrow" data-i18n="dashboard_eyebrow">Vue d'ensemble</div>
@@ -1187,6 +1212,10 @@ body.printing-decision #print-decision-area{display:block!important;color:#000;b
         <div class="action-tile" data-target="recherche" data-i18n-title="action_rappr_desc" title="Depuis une décision, vérifiez si elle concerne un professionnel identifiable, avec les garde-fous légaux intégrés.">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><g stroke-width="1.3" transform="scale(0.6)"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></g><g stroke-width="2.4"><circle cx="18" cy="18" r="4.3"/><path d="M21.3 21.3L23.5 23.5"/></g></svg>
           <h3 data-i18n="action_rappr_title">Qui est concerné ?</h3>
+        </div>
+        <div class="action-tile" onclick="openFaqModal()" data-i18n-title="action_faq_desc" title="Comprendre d'où viennent les données (open data anonymisé vs PDF déposés) et comment utiliser les outils d'investigation.">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M9.5 9a2.5 2.5 0 015 0c0 1.5-2.5 2-2.5 3.5"/><circle cx="12" cy="16.7" r="0.2" fill="currentColor"/></svg>
+          <h3 data-i18n="action_faq_title">FAQ</h3>
         </div>
         <div class="action-card">
           <div class="action-icon" aria-hidden="true">
@@ -1713,6 +1742,8 @@ const TRANSLATIONS = {
     action_rappr_desc: "Depuis une décision, vérifiez si elle concerne un professionnel identifiable, avec les garde-fous légaux intégrés.",
     action_rappr_btn: "Découvrir",
     rappr_eyebrow: "Piste d'identification — mode manuel assisté",
+    action_faq_title: "FAQ",
+    action_faq_desc: "Comprendre d'où viennent les données (open data anonymisé vs PDF déposés) et comment utiliser les outils d'investigation.",
     action_account_title: "Mon compte",
     connexions_count_label: "Connexions enregistrées :",
     connexions_detail_btn: "Voir le détail",
@@ -1964,6 +1995,8 @@ const TRANSLATIONS = {
     action_rappr_desc: "Prüfen Sie direkt bei einer Entscheidung, ob sie eine identifizierbare Fachperson betrifft, mit integrierten rechtlichen Schutzmaßnahmen.",
     action_rappr_btn: "Entdecken",
     rappr_eyebrow: "Beteiligte Person identifizieren — manuell unterstützter Modus",
+    action_faq_title: "FAQ",
+    action_faq_desc: "Verstehen, woher die Daten stammen (anonymisierte Open Data vs. hochgeladene PDFs) und wie die Recherchewerkzeuge zu nutzen sind.",
     action_account_title: "Mein Konto",
     connexions_count_label: "Erfasste Verbindungen:",
     connexions_detail_btn: "Details ansehen",
@@ -3213,6 +3246,99 @@ async function renderConnexionsStats(){
     const { data: isViewer } = await _sb.rpc('is_connexion_log_viewer');
     detailBtn.style.display = isViewer ? 'inline-flex' : 'none';
   }
+}
+
+// --- FAQ : contenu FR/DE — la question centrale de ce module est la distinction entre deux
+// origines de données totalement différentes (open data anonymisé vs PDF déposés par la
+// rédaction) ; voir la section "Décisions & Radar" et "Audiences & Affaires en cours".
+const FAQ_CONTENT = {
+  fr: {
+    title: "Foire aux questions",
+    intro: "Ce module combine deux sources de données très différentes et des outils pour faire le lien entre elles. Cette FAQ explique précisément d'où vient chaque donnée et comment utiliser les outils d'investigation développés pour simplifier ton travail.",
+    sections: [
+      ["Pour commencer", [
+        ["Qu'est-ce que ce module, en deux mots ?", "<p>Un outil de veille sur les décisions de justice luxembourgeoises et les audiences à venir, partagé par toute la rédaction. Il combine deux sources de données de nature très différente (voir ci-dessous) et des outils pour tenter d'identifier qui se cache derrière une décision anonymisée.</p>"],
+        ["Il y a deux types de données bien distincts dans ce module — lesquels ?", "<p><strong>1. Les décisions de justice</strong> (onglets \"Recherche &amp; entités\" et \"Radar décisions\") : des textes anonymisés, publiés en open data par les juridictions elles-mêmes, récupérés et indexés automatiquement, sans aucune intervention de la rédaction.</p><p><strong>2. Les audiences et affaires en cours</strong> (onglets \"Audiences\" et \"Affaires en cours\") : des convocations PDF que la rédaction télécharge et dépose elle-même. Ces documents ne sont PAS anonymisés — ils contiennent les vrais noms des parties.</p><p>Ces deux mondes ne se croisent jamais automatiquement. C'est justement pour les relier qu'existe l'outil \"Qui est concerné ?\" (voir plus bas).</p>"],
+        ["Comment se connecter ?", "Bouton \"Se connecter\" ou lien magique envoyé par e-mail (@reporter.lu). Une fois connecté, tu le restes sur cet appareil."]
+      ]],
+      ["Décisions &amp; Radar — données anonymisées, open source", [
+        ["D'où viennent les décisions affichées dans \"Recherche &amp; entités\" ?", "<p>De <strong>data.public.lu</strong>, la plateforme officielle d'open data du Grand-Duché. Chaque juridiction (Cour administrative, Tribunal administratif, Cour de cassation, etc. — 8 sources officielles au total) y publie chaque semaine une archive de ses décisions.</p><p>Une extraction automatisée (une tâche planifiée, sans intervention humaine) télécharge ces archives, les dézippe et indexe leur contenu ici. Tu peux voir la date de la dernière mise à jour dans l'onglet \"Collecte des données\".</p>"],
+        ["Que veut dire \"anonymisé\" concrètement ?", "<p>Les juridictions retirent elles-mêmes les noms des parties <em>avant</em> de publier leurs décisions en open data — ce travail d'anonymisation est fait en amont, par la justice, pas par nous. Le texte que tu lis ici ne contient donc jamais le nom réel d'un particulier ou d'une société identifiable directement (remplacés par des initiales ou des rôles génériques).</p><p>C'est ce qui rend ces données publiables librement (licence CC BY-ND 4.0), mais ça veut aussi dire qu'une simple recherche par nom ne fonctionnera jamais ici — voir l'outil \"Qui est concerné ?\" pour tenter d'identifier une partie malgré tout.</p>"],
+        ["Comment fonctionne le Radar décisions ?", "<p>Tu enregistres un mot-clé à surveiller (nom de société, référence, thème...). Dès qu'une nouvelle décision indexée correspond, elle apparaît automatiquement dans ton radar — plus besoin de repasser une recherche manuelle chaque semaine.</p>"],
+        ["Pourquoi je ne trouve pas le nom d'une personne que je cherche dans une décision ?", "C'est normal et attendu : les décisions sont anonymisées à la source (voir ci-dessus). Si tu penses savoir qui se cache derrière une décision, utilise l'outil \"Qui est concerné ?\" plutôt que la recherche simple."]
+      ]],
+      ["Audiences &amp; Affaires en cours — PDF déposés par la rédaction", [
+        ["D'où viennent les données de \"Audiences\" et \"Affaires en cours\" ?", "<p>De convocations PDF que <strong>toi</strong>, ou un·e collègue, télécharge depuis le calendrier judiciaire officiel et dépose dans l'onglet \"Audiences\". Contrairement aux décisions, ce processus n'est pas automatisé : personne d'autre ne récupère ces PDF à ta place.</p>"],
+        ["Pourquoi ces données ne sont-elles pas anonymisées, contrairement aux décisions ?", "<p>Parce qu'une convocation d'audience n'est pas une décision de justice publiée : c'est un document de calendrier qui, par nature, doit mentionner les vraies parties et leurs avocats pour être utile. C'est précisément la différence structurelle entre les deux sources de ce module — et la raison pour laquelle ces PDF ne sont jamais publiés tels quels, seuls les champs extraits (numéro de rôle, matière, stade, chambre, avocats) sont partagés avec la rédaction.</p>"],
+        ["Comment déposer un PDF de convocation ?", "Dans l'onglet \"Audiences\", dépose un ou plusieurs PDF (ou une archive ZIP) — les numéros d'affaire, matières et avocats en sont extraits automatiquement et partagés avec toute la rédaction. Le PDF lui-même n'est jamais conservé sur le serveur, seules les informations extraites le sont."],
+        ["Qu'est-ce que le regroupement \"Semaine du X au Y\" dans les audiences passées ?", "Un simple classement chronologique par semaine des convocations déjà traitées, pour éviter une liste illisible au bout de quelques mois. Le moteur de recherche au-dessus ne porte que sur ces PDF déposés par la rédaction, jamais sur les décisions open data."]
+      ]],
+      ["\"Qui est concerné ?\" — relier les deux mondes", [
+        ["À quoi sert cet outil, concrètement ?", "<p>C'est le seul endroit où les deux sources de données de ce module se rencontrent. Depuis une décision anonymisée, l'outil te permet de vérifier si elle pourrait concerner un professionnel identifiable (avocat, médecin, notaire, huissier...), en croisant les indices disponibles avec les ordres professionnels et avec le répertoire whoswho-lu de la rédaction.</p><p>Objectif : t'éviter de fouiller manuellement plusieurs annuaires professionnels un par un à chaque piste — le tout est centralisé ici, avec ton résultat (à vérifier / aucune correspondance / confirmé / écarté) partagé avec toute la rédaction pour ne pas refaire le travail en double.</p>"],
+        ["Pourquoi un formulaire de justification apparaît-il parfois avant de pouvoir chercher ?", "<p>Pour les décisions pénales, le RGPD (article 10) encadre strictement le traitement de données relatives à des infractions. Avant de lancer une identification, tu dois cocher que la situation remplit certaines conditions (fonction publique/profession, faits déjà rendus publics, implication volontaire) et confirmer qu'il ne s'agit ni d'une victime, ni d'un témoin, ni d'un proche, ni d'un mineur — puis rédiger une courte justification. Cette validation est enregistrée, comme un garde-fou légal intégré à l'outil plutôt qu'une simple recommandation orale."],
+        ["Que devient un résultat confirmé ?", "Un bouton \"Lier dans whoswho-lu\" apparaît : un clic crée automatiquement le lien entre la décision et la fiche de la personne dans whoswho-lu (avec protection anti-doublon), visible immédiatement pour toute la rédaction dans les deux modules."],
+        ["Que se passe-t-il si je ne confirme jamais une piste ?", "Les pistes non confirmées sont automatiquement supprimées après quelques mois, pour ne pas accumuler indéfiniment des suppositions non vérifiées."]
+      ]],
+      ["Collecte des données", [
+        ["Que fait l'onglet \"Collecte des données\" ?", "<p>Deux choses bien séparées : l'onglet \"Sources &amp; planification\" montre les 8 sources officielles open data et permet de forcer une mise à jour de l'index des décisions (le même processus automatisé décrit plus haut, déclenché manuellement si besoin).</p><p>L'onglet \"Import de fichiers\" est différent : c'est un espace personnel pour importer tes propres documents (PDF, CSV, XLSX, ZIP) dans ta base de recherche individuelle — indépendant des décisions open data et des convocations partagées avec la rédaction.</p>"]
+      ]],
+      ["Confidentialité &amp; cadre légal", [
+        ["Sur quelle base légale reposent les décisions affichées ici ?", "Les décisions elles-mêmes sont publiées par les juridictions sous licence CC BY-ND 4.0, en conformité avec les articles 6 et 85 du RGPD (traitement journalistique de données déjà rendues publiques). Un rappel de ce cadre s'affiche à la première visite."],
+        ["Qui voit mes rapprochements et mes recherches ?", "Toute la rédaction connectée voit les rapprochements confirmés ou en cours (pour éviter le travail en double), ainsi que les alertes radar enregistrées. Les connexions à l'outil sont journalisées pour des raisons de sécurité, consultables par les personnes autorisées via \"Voir le détail\" dans la barre latérale."]
+      ]]
+    ]
+  },
+  de: {
+    title: "Häufig gestellte Fragen",
+    intro: "Dieses Modul verbindet zwei sehr unterschiedliche Datenquellen mit Werkzeugen, um sie miteinander in Verbindung zu bringen. Diese FAQ erklärt genau, woher jede Angabe stammt und wie die entwickelten Recherchewerkzeuge deine Arbeit erleichtern sollen.",
+    sections: [
+      ["Zum Einstieg", [
+        ["Was ist dieses Modul in zwei Worten?", "<p>Ein von der gesamten Redaktion geteiltes Tool zur Beobachtung luxemburgischer Gerichtsentscheidungen und anstehender Anhörungen. Es verbindet zwei sehr unterschiedliche Datenquellen (siehe unten) sowie Werkzeuge, um zu versuchen herauszufinden, wer sich hinter einer anonymisierten Entscheidung verbirgt.</p>"],
+        ["Es gibt zwei klar getrennte Datentypen in diesem Modul — welche?", "<p><strong>1. Gerichtsentscheidungen</strong> (Tabs \"Recherche &amp; Entitäten\" und \"Radar Entscheidungen\"): anonymisierte Texte, die von den Gerichten selbst als Open Data veröffentlicht und automatisch abgerufen und indexiert werden, ganz ohne Zutun der Redaktion.</p><p><strong>2. Anhörungen und laufende Verfahren</strong> (Tabs \"Anhörungen\" und \"Laufende Verfahren\"): PDF-Vorladungen, die die Redaktion selbst herunterlädt und hochlädt. Diese Dokumente sind NICHT anonymisiert — sie enthalten die echten Namen der Parteien.</p><p>Diese beiden Welten überschneiden sich nie automatisch. Genau dafür gibt es das Werkzeug \"Wer ist betroffen?\" (siehe unten).</p>"],
+        ["Wie melde ich mich an?", "Button \"Anmelden\" oder Magic Link per E-Mail (@reporter.lu). Einmal angemeldet, bleibst du es auf diesem Gerät."]
+      ]],
+      ["Entscheidungen &amp; Radar — anonymisierte Open-Data-Quelle", [
+        ["Woher stammen die Entscheidungen unter \"Recherche &amp; Entitäten\"?", "<p>Von <strong>data.public.lu</strong>, der offiziellen Open-Data-Plattform des Großherzogtums. Jedes Gericht (Verwaltungsgerichtshof, Verwaltungsgericht, Kassationsgerichtshof usw. — insgesamt 8 offizielle Quellen) veröffentlicht dort wöchentlich ein Archiv seiner Entscheidungen.</p><p>Ein automatisierter Abruf (eine geplante Aufgabe, ohne menschliches Zutun) lädt diese Archive herunter, entpackt sie und indexiert den Inhalt hier. Das Datum der letzten Aktualisierung siehst du im Tab \"Datenerfassung\".</p>"],
+        ["Was bedeutet \"anonymisiert\" konkret?", "<p>Die Gerichte entfernen die Namen der Parteien selbst, <em>bevor</em> sie ihre Entscheidungen als Open Data veröffentlichen — diese Anonymisierung erfolgt vorgelagert durch die Justiz, nicht durch uns. Der Text, den du hier liest, enthält also nie den echten Namen einer direkt identifizierbaren Privatperson oder Firma (ersetzt durch Initialen oder generische Rollenbezeichnungen).</p><p>Das macht diese Daten frei veröffentlichbar (Lizenz CC BY-ND 4.0), bedeutet aber auch, dass eine einfache Namenssuche hier nie funktionieren wird — siehe das Werkzeug \"Wer ist betroffen?\", um eine Partei trotzdem zu identifizieren.</p>"],
+        ["Wie funktioniert der Entscheidungs-Radar?", "<p>Du speicherst ein zu überwachendes Stichwort (Firmenname, Aktenzeichen, Thema...). Sobald eine neu indexierte Entscheidung passt, erscheint sie automatisch in deinem Radar — keine manuelle Suche mehr jede Woche nötig.</p>"],
+        ["Warum finde ich den Namen einer gesuchten Person nicht in einer Entscheidung?", "Das ist normal und erwartet: Entscheidungen werden an der Quelle anonymisiert (siehe oben). Wenn du vermutest, wer sich hinter einer Entscheidung verbirgt, nutze das Werkzeug \"Wer ist betroffen?\" statt der einfachen Suche."]
+      ]],
+      ["Anhörungen &amp; laufende Verfahren — von der Redaktion hochgeladene PDFs", [
+        ["Woher stammen die Daten unter \"Anhörungen\" und \"Laufende Verfahren\"?", "<p>Aus PDF-Vorladungen, die <strong>du</strong> oder eine Kollegin/ein Kollege vom offiziellen Gerichtskalender herunterlädt und im Tab \"Anhörungen\" hochlädt. Anders als bei den Entscheidungen ist dieser Prozess nicht automatisiert: niemand sonst holt diese PDFs für dich ab.</p>"],
+        ["Warum sind diese Daten nicht anonymisiert, im Gegensatz zu den Entscheidungen?", "<p>Weil eine Ladung zu einer Anhörung keine veröffentlichte Gerichtsentscheidung ist: Es ist ein Kalenderdokument, das naturgemäß die echten Parteien und ihre Anwälte nennen muss, um nützlich zu sein. Das ist genau der strukturelle Unterschied zwischen den beiden Quellen dieses Moduls — und der Grund, warum diese PDFs nie als solche veröffentlicht werden, sondern nur die extrahierten Felder (Aktenzeichen, Sachgebiet, Verfahrensstand, Kammer, Anwälte) mit der Redaktion geteilt werden.</p>"],
+        ["Wie lade ich eine PDF-Vorladung hoch?", "Im Tab \"Anhörungen\" lädst du eine oder mehrere PDFs (oder ein ZIP-Archiv) hoch — Aktenzeichen, Sachgebiete und Anwälte werden automatisch extrahiert und mit der gesamten Redaktion geteilt. Das PDF selbst wird nie auf dem Server gespeichert, nur die extrahierten Informationen."],
+        ["Was ist die Gruppierung \"Woche vom X bis Y\" bei vergangenen Anhörungen?", "Eine einfache chronologische Einteilung nach Wochen für bereits bearbeitete Vorladungen, um nach ein paar Monaten keine unübersichtliche Liste zu bekommen. Die Suche darüber betrifft nur diese von der Redaktion hochgeladenen PDFs, nie die Open-Data-Entscheidungen."]
+      ]],
+      ["\"Wer ist betroffen?\" — die beiden Welten verbinden", [
+        ["Wozu dient dieses Werkzeug konkret?", "<p>Es ist der einzige Ort, an dem sich die beiden Datenquellen dieses Moduls treffen. Ausgehend von einer anonymisierten Entscheidung kannst du prüfen, ob sie eine identifizierbare Fachperson betreffen könnte (Anwalt, Arzt, Notar, Gerichtsvollzieher...), indem verfügbare Hinweise mit den Berufskammern und dem whoswho-lu-Verzeichnis der Redaktion abgeglichen werden.</p><p>Ziel: dir erspart zu bleiben, bei jeder Spur manuell mehrere Berufsverzeichnisse einzeln zu durchsuchen — alles ist hier zentralisiert, dein Ergebnis (zu prüfen / keine Übereinstimmung / bestätigt / verworfen) wird mit der gesamten Redaktion geteilt, um Doppelarbeit zu vermeiden.</p>"],
+        ["Warum erscheint manchmal ein Rechtfertigungsformular, bevor ich suchen kann?", "<p>Bei Strafentscheidungen regelt die DSGVO (Artikel 10) die Verarbeitung von Daten zu Straftaten streng. Vor einer Identifizierung musst du bestätigen, dass bestimmte Bedingungen erfüllt sind (öffentliches Amt/Beruf, bereits öffentlich gemachte Tatsachen, freiwillige Beteiligung), und ausschließen, dass es sich um ein Opfer, eine Zeugin/einen Zeugen, Angehörige oder Minderjährige handelt — anschließend eine kurze Begründung verfassen. Diese Bestätigung wird protokolliert, als in das Werkzeug integrierte rechtliche Schutzmaßnahme statt einer bloßen mündlichen Empfehlung."],
+        ["Was passiert mit einem bestätigten Ergebnis?", "Ein Button \"In whoswho-lu verknüpfen\" erscheint: ein Klick verknüpft die Entscheidung automatisch mit dem Profil der Person in whoswho-lu (mit Duplikatschutz), sofort sichtbar für die gesamte Redaktion in beiden Modulen."],
+        ["Was passiert, wenn ich eine Spur nie bestätige?", "Unbestätigte Spuren werden nach einigen Monaten automatisch gelöscht, damit sich nicht endlos ungeprüfte Vermutungen ansammeln."]
+      ]],
+      ["Datenerfassung", [
+        ["Was macht der Tab \"Datenerfassung\"?", "<p>Zwei klar getrennte Dinge: Der Tab \"Quellen &amp; Planung\" zeigt die 8 offiziellen Open-Data-Quellen und ermöglicht es, die Aktualisierung des Entscheidungsindex manuell anzustoßen (derselbe oben beschriebene automatisierte Prozess, bei Bedarf manuell ausgelöst).</p><p>Der Tab \"Dateien importieren\" ist anders: ein persönlicher Bereich, um eigene Dokumente (PDF, CSV, XLSX, ZIP) in deine individuelle Suchbasis zu importieren — unabhängig von den Open-Data-Entscheidungen und den mit der Redaktion geteilten Vorladungen.</p>"]
+      ]],
+      ["Datenschutz &amp; rechtlicher Rahmen", [
+        ["Auf welcher Rechtsgrundlage beruhen die hier angezeigten Entscheidungen?", "Die Entscheidungen selbst werden von den Gerichten unter der Lizenz CC BY-ND 4.0 veröffentlicht, im Einklang mit Artikel 6 und 85 der DSGVO (journalistische Verarbeitung bereits veröffentlichter Daten). Ein Hinweis auf diesen Rahmen erscheint beim ersten Besuch."],
+        ["Wer sieht meine Abgleiche und Suchen?", "Die gesamte angemeldete Redaktion sieht bestätigte oder laufende Abgleiche (um Doppelarbeit zu vermeiden) sowie gespeicherte Radar-Warnungen. Anmeldungen am Tool werden aus Sicherheitsgründen protokolliert, einsehbar für befugte Personen über \"Details anzeigen\" in der Seitenleiste."]
+      ]]
+    ]
+  }
+};
+function renderFaqSection(title, items){
+  const rows = items.map(([q,a])=>`<details class="faq-item"><summary>${q}</summary><div class="faq-item-body">${a.startsWith('<p>')?a:'<p>'+a+'</p>'}</div></details>`).join('');
+  return `<div class="faq-section-title">${title}</div>${rows}`;
+}
+function openFaqModal(){
+  const f = FAQ_CONTENT[currentLang] || FAQ_CONTENT.fr;
+  document.getElementById('faq-modal-title').textContent = f.title;
+  document.getElementById('faq-modal-body').innerHTML = `<p class="faq-intro">${f.intro}</p>${f.sections.map(([title,items])=>renderFaqSection(title,items)).join('')}`;
+  document.getElementById('faq-modal-overlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+function closeFaqModal(){
+  document.getElementById('faq-modal-overlay').classList.remove('open');
+  document.body.style.overflow = '';
 }
 
 function openConnexionsModal(){
