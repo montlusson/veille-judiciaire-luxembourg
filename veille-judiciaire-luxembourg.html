@@ -5889,5 +5889,117 @@ function renderStats(){
 initAuth();
 
 </script>
+<!-- Reporter — recouvrement "connexion rompue" (glitch 404), partagé par les modules Reporter -->
+<div id="rpt-offline-overlay" style="display:none;position:fixed;inset:0;z-index:2147483000;background:#fff;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:32px 24px;">
+<style>
+#rpt-offline-overlay{font-family:'Roboto',system-ui,-apple-system,sans-serif;color:#0d0e12;}
+#rpt-offline-overlay .rpt-brand{position:fixed;top:24px;left:28px;display:flex;align-items:center;gap:9px;}
+#rpt-offline-overlay .rpt-brand-badge{width:26px;height:26px;flex:0 0 26px;background:#0d0e12;color:#fff;display:flex;align-items:center;justify-content:center;font:700 12px 'Roboto Condensed',sans-serif;}
+#rpt-offline-overlay .rpt-brand-name{font:700 13px 'Roboto Condensed',sans-serif;letter-spacing:.01em;color:#0d0e12;}
+#rpt-offline-overlay .rpt-brand-name span{color:#5e71a1;}
+
+#rpt-offline-overlay .rpt-eyebrow{position:relative;display:inline-block;font:700 16px/1.2 'Roboto Condensed',sans-serif;letter-spacing:.16em;text-transform:uppercase;color:#0d0e12;margin-bottom:8px;}
+#rpt-offline-overlay .rpt-eyebrow::before,#rpt-offline-overlay .rpt-eyebrow::after{content:attr(data-text);position:absolute;inset:0;overflow:hidden;}
+#rpt-offline-overlay .rpt-eyebrow::before{color:#5e71a1;mix-blend-mode:multiply;clip-path:polygon(0 4%,100% 4%,100% 40%,0 40%);}
+#rpt-offline-overlay .rpt-eyebrow::after{color:#c8202f;mix-blend-mode:multiply;clip-path:polygon(0 58%,100% 58%,100% 96%,0 96%);}
+@media (prefers-reduced-motion: no-preference){
+  #rpt-offline-overlay .rpt-eyebrow::before{animation:rptGlitchA2 2.2s infinite steps(1);}
+  #rpt-offline-overlay .rpt-eyebrow::after{animation:rptGlitchB2 2.2s infinite steps(1);}
+}
+@media (prefers-reduced-motion: reduce){
+  #rpt-offline-overlay .rpt-eyebrow::before{transform:translate(-3px,0);}
+  #rpt-offline-overlay .rpt-eyebrow::after{transform:translate(3px,0);}
+}
+@keyframes rptGlitchA2{
+  0%{transform:translate(-4px,-1px);clip-path:polygon(0 8%,100% 8%,100% 30%,0 30%);}
+  6%{transform:translate(3px,1px);clip-path:polygon(0 20%,100% 20%,100% 44%,0 44%);}
+  12%{transform:translate(-3px,0);clip-path:polygon(0 2%,100% 2%,100% 34%,0 34%);}
+  18%{transform:translate(4px,-1px);clip-path:polygon(0 14%,100% 14%,100% 40%,0 40%);}
+  24%{transform:translate(-2px,1px);clip-path:polygon(0 6%,100% 6%,100% 36%,0 36%);}
+  32%{transform:translate(3px,0);clip-path:polygon(0 18%,100% 18%,100% 38%,0 38%);}
+  40%{transform:translate(-3px,0);clip-path:polygon(0 4%,100% 4%,100% 28%,0 28%);}
+  50%{transform:translate(2px,1px);clip-path:polygon(0 10%,100% 10%,100% 40%,0 40%);}
+  62%{transform:translate(0,0);clip-path:polygon(0 4%,100% 4%,100% 40%,0 40%);}
+  100%{transform:translate(0,0);clip-path:polygon(0 4%,100% 4%,100% 40%,0 40%);}
+}
+@keyframes rptGlitchB2{
+  0%{transform:translate(3px,1px);clip-path:polygon(0 66%,100% 66%,100% 88%,0 88%);}
+  7%{transform:translate(-3px,0);clip-path:polygon(0 52%,100% 52%,100% 74%,0 74%);}
+  14%{transform:translate(2px,1px);clip-path:polygon(0 70%,100% 70%,100% 98%,0 98%);}
+  22%{transform:translate(-4px,0);clip-path:polygon(0 58%,100% 58%,100% 80%,0 80%);}
+  30%{transform:translate(2px,-1px);clip-path:polygon(0 62%,100% 62%,100% 92%,0 92%);}
+  38%{transform:translate(-3px,1px);clip-path:polygon(0 56%,100% 56%,100% 78%,0 78%);}
+  46%{transform:translate(3px,0);clip-path:polygon(0 68%,100% 68%,100% 96%,0 96%);}
+  58%{transform:translate(0,0);clip-path:polygon(0 58%,100% 58%,100% 96%,0 96%);}
+  100%{transform:translate(0,0);clip-path:polygon(0 58%,100% 58%,100% 96%,0 96%);}
+}
+
+#rpt-offline-overlay .rpt-glitch{position:relative;display:inline-block;font:700 clamp(120px,28vw,440px)/.82 'Roboto Condensed',sans-serif;letter-spacing:-.015em;color:#0d0e12;}
+#rpt-offline-overlay .rpt-glitch::before,#rpt-offline-overlay .rpt-glitch::after{content:attr(data-text);position:absolute;inset:0;overflow:hidden;}
+#rpt-offline-overlay .rpt-glitch::before{color:#5e71a1;mix-blend-mode:multiply;clip-path:polygon(0 4%,100% 4%,100% 40%,0 40%);}
+#rpt-offline-overlay .rpt-glitch::after{color:#c8202f;mix-blend-mode:multiply;clip-path:polygon(0 58%,100% 58%,100% 96%,0 96%);}
+@media (prefers-reduced-motion: no-preference){
+  #rpt-offline-overlay .rpt-glitch::before{animation:rptGlitchA 2.2s infinite steps(1);}
+  #rpt-offline-overlay .rpt-glitch::after{animation:rptGlitchB 2.2s infinite steps(1);}
+}
+@media (prefers-reduced-motion: reduce){
+  #rpt-offline-overlay .rpt-glitch::before{transform:translate(-8px,0);}
+  #rpt-offline-overlay .rpt-glitch::after{transform:translate(8px,0);}
+}
+@keyframes rptGlitchA{
+  0%{transform:translate(-14px,-3px);clip-path:polygon(0 8%,100% 8%,100% 30%,0 30%);}
+  6%{transform:translate(11px,3px);clip-path:polygon(0 20%,100% 20%,100% 44%,0 44%);}
+  12%{transform:translate(-9px,0);clip-path:polygon(0 2%,100% 2%,100% 34%,0 34%);}
+  18%{transform:translate(12px,-2px);clip-path:polygon(0 14%,100% 14%,100% 40%,0 40%);}
+  24%{transform:translate(-7px,2px);clip-path:polygon(0 6%,100% 6%,100% 36%,0 36%);}
+  32%{transform:translate(9px,0);clip-path:polygon(0 18%,100% 18%,100% 38%,0 38%);}
+  40%{transform:translate(-11px,-1px);clip-path:polygon(0 4%,100% 4%,100% 28%,0 28%);}
+  50%{transform:translate(7px,1px);clip-path:polygon(0 10%,100% 10%,100% 40%,0 40%);}
+  62%{transform:translate(0,0);clip-path:polygon(0 4%,100% 4%,100% 40%,0 40%);}
+  100%{transform:translate(0,0);clip-path:polygon(0 4%,100% 4%,100% 40%,0 40%);}
+}
+@keyframes rptGlitchB{
+  0%{transform:translate(12px,2px);clip-path:polygon(0 66%,100% 66%,100% 88%,0 88%);}
+  7%{transform:translate(-9px,-1px);clip-path:polygon(0 52%,100% 52%,100% 74%,0 74%);}
+  14%{transform:translate(8px,3px);clip-path:polygon(0 70%,100% 70%,100% 98%,0 98%);}
+  22%{transform:translate(-12px,0);clip-path:polygon(0 58%,100% 58%,100% 80%,0 80%);}
+  30%{transform:translate(5px,-1px);clip-path:polygon(0 62%,100% 62%,100% 92%,0 92%);}
+  38%{transform:translate(-8px,2px);clip-path:polygon(0 56%,100% 56%,100% 78%,0 78%);}
+  46%{transform:translate(10px,0);clip-path:polygon(0 68%,100% 68%,100% 96%,0 96%);}
+  58%{transform:translate(0,0);clip-path:polygon(0 58%,100% 58%,100% 96%,0 96%);}
+  100%{transform:translate(0,0);clip-path:polygon(0 58%,100% 58%,100% 96%,0 96%);}
+}
+
+#rpt-offline-overlay .rpt-message{font:400 17px/1.6 'Roboto',sans-serif;color:#3a3a3c;max-width:44ch;margin:8px 0 0;}
+#rpt-offline-overlay .rpt-message-strong{font:500 23px/1.5 'Roboto',sans-serif;color:#0d0e12;max-width:40ch;margin-top:20px;}
+</style>
+<div class="rpt-brand"><div class="rpt-brand-badge">R</div><div class="rpt-brand-name">REPORTER<span>.lu</span></div></div>
+<div class="rpt-eyebrow" data-text="Erreur">Erreur</div>
+<div class="rpt-glitch" data-text="404">404</div>
+<p class="rpt-message">Ce module est actuellement indisponible&hellip;</p>
+<p class="rpt-message-strong">Nous travaillons au r&eacute;tablissement de l'acc&egrave;s.</p>
+</div>
+<script>
+(function(){
+  var overlay = document.getElementById('rpt-offline-overlay');
+  if(!overlay) return;
+  function notifyMaintainers(){
+    try{
+      if (sessionStorage.getItem('rpt-offline-notified')) return;
+      sessionStorage.setItem('rpt-offline-notified', '1');
+    }catch(e){}
+    // Pas de canal d'alerte configuré pour l'instant (choix du 2026-09-12).
+    // Brancher ici un webhook (Slack/Discord), EmailJS, ou un endpoint
+    // Zapier/Make/n8n dès qu'un canal est choisi.
+    // Contexte disponible : location.href, new Date().toISOString()
+  }
+  function show(){ overlay.style.display = 'flex'; notifyMaintainers(); }
+  function hide(){ overlay.style.display = 'none'; }
+  window.addEventListener('offline', show);
+  window.addEventListener('online', hide);
+  if (!navigator.onLine) show();
+})();
+</script>
+
 </body>
 </html>
