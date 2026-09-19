@@ -3619,7 +3619,7 @@ function renderConvocations(jurFilter){
     const linkHtml = links.map(function(l){
       return '<a class="convoc-link" href="' + l.url + '" target="_blank" rel="noopener">' + PDF_ICON + ' ' + l.label + '</a>';
     }).join('');
-    const rowLabel = isDE ? ('Ladungen — ' + court) : ('Convocations — ' + court);
+    const rowLabel = court;
     const noteText  = isDE
       ? 'Diese PDF enthalten die Namen der Parteien vor der Anonymisierung. Anhand des Aktenzeichens können Sie die Entscheidung in der Datenbank wiederfinden und die Anonymisierung teilweise aufheben.'
       : 'Ces PDF contiennent les noms des parties avant anonymisation. En relevant la référence d\'une affaire, vous pouvez la retrouver dans les décisions indexées et lever partiellement l\'anonymat.';
