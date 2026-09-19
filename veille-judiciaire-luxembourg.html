@@ -85,6 +85,9 @@ nav.navlist{display:flex;flex-direction:column;gap:2px;margin-top:6px;}
 .sidebar-footer{margin-top:auto;padding:14px 10px 0;color:var(--sidebar-text-faint);font-size:11.5px;line-height:1.5;}
 
 main{flex:1;min-width:0;padding:36px 40px 56px;max-width:1180px;}
+/* Le calendrier des audiences (grille de jours + bandeaux de convocations) profite d'une
+   largeur libre — c'est la seule vue de l'app qui a besoin de toute la largeur disponible. */
+main:has(.screen[data-screen="agenda"].active){max-width:none;}
 .screen{display:none;}
 .screen.active{display:block;}
 .eyebrow{font-size:12.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--text-faint);font-weight:400;margin-bottom:8px;}
@@ -425,7 +428,7 @@ details.alt-table th,details.alt-table td{border:1px solid var(--card-border);pa
 .agenda-copy-btn:hover{background:var(--row-sep);color:var(--text-muted);}
 .agenda-copy-btn.copied{color:#1A7F3C;opacity:1;}
 /* Agenda — grille de cartes jour (façon Apple Calendar) */
-.agenda-day-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:12px;}
+.agenda-day-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:14px;}
 .agenda-day-card{
   background:var(--card-bg);border:1px solid var(--card-border);border-radius:var(--radius-lg);
   padding:14px 16px;cursor:pointer;text-align:left;font-family:inherit;transition:border-color .15s,transform .1s;
@@ -449,8 +452,9 @@ details.alt-table th,details.alt-table td{border:1px solid var(--card-border);pa
 }
 .agenda-chip:hover{border-color:var(--accent-blue);color:var(--accent-blue);}
 .agenda-chip.active{background:var(--accent-blue);border-color:var(--accent-blue);color:#fff;}
-.agenda-filter-bar{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:8px;align-items:center;}
-.agenda-filter-bar select{min-width:160px;}
+.agenda-toolbar{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin:18px 0 14px;}
+.agenda-toolbar select{min-width:160px;}
+.agenda-toolbar-actions{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
 .week-nav{display:flex;align-items:center;gap:12px;margin-bottom:24px;}
 .week-nav button{
   width:34px;height:34px;border-radius:8px;border:1px solid var(--card-border);
@@ -506,9 +510,9 @@ details.alt-table th,details.alt-table td{border:1px solid var(--card-border);pa
 .convoc-card p{font-size:12.5px;color:var(--text-muted);margin:6px 0 12px;}
 .convoc-links{display:flex;flex-wrap:wrap;gap:8px;}
 .convoc-link{
-  display:inline-flex;align-items:center;gap:6px;
+  display:inline-flex;align-items:center;justify-content:center;gap:6px;
   background:#fff;border:1px solid #C0D0E4;border-radius:7px;
-  padding:7px 12px;font-size:12.5px;font-weight:700;color:var(--accent-blue);
+  padding:6px 12px;font-size:12px;font-weight:700;color:var(--accent-blue);
   text-decoration:none;cursor:pointer;transition:background .15s,border-color .15s;
   font-family:inherit;
 }
@@ -518,9 +522,23 @@ details.alt-table th,details.alt-table td{border:1px solid var(--card-border);pa
   padding:10px 14px;font-size:12px;color:#6B4C0A;margin-top:12px;
   display:flex;gap:8px;align-items:flex-start;
 }
-.convoc-strip{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:8px 12px;background:#F0F4F9;border:1px solid #C0D0E4;border-radius:var(--radius-md);margin-bottom:0;font-size:12.5px;}
-.convoc-strip .convoc-link{padding:5px 10px;font-size:12px;}
-.convoc-strip-info-ic{cursor:help;color:var(--accent-blue);flex:0 0 auto;}
+
+/* ── Bandeaux de convocations (Cour administrative / Tribunal administratif) : une
+   colonne d'intitulé de largeur fixe pour que les deux bandeaux s'alignent, quel que
+   soit le nombre de liens qu'ils contiennent. ── */
+.convoc-panel{display:flex;flex-direction:column;gap:8px;margin-bottom:18px;}
+.convoc-row{
+  display:grid;grid-template-columns:180px 1fr 26px;align-items:start;gap:16px;
+  padding:14px 16px;background:#F0F4F9;border:1px solid #C0D0E4;border-radius:var(--radius-md);
+  font-size:12.5px;
+}
+.convoc-row-head{font-weight:700;color:var(--accent-blue);padding-top:6px;line-height:1.35;}
+.convoc-row-body{display:flex;flex-wrap:wrap;gap:8px;}
+.convoc-chambres-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;}
+.convoc-info-btn{
+  background:none;border:none;padding:4px;margin-top:2px;cursor:help;color:var(--accent-blue);
+  display:flex;align-items:center;justify-content:center;flex:0 0 auto;
+}
 
 /* ── Archives d'audience ── */
 .archive-week{margin-bottom:12px;}
@@ -1452,15 +1470,8 @@ body.printing-decision #print-decision-area{display:block!important;color:#000;b
 
       <!-- Calendrier -->
       <div id="agendapanel-cal" style="display:none;margin-top:20px;">
-        <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;flex-wrap:wrap;">
-          <div id="convoc-container" style="flex:1;min-width:220px;"></div>
-          <a id="ics-download" href="#" download="audiences-luxembourg.ics" class="ics-btn">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
-            <span data-i18n="agenda_ics_btn">Exporter vers mon agenda (.ics)</span>
-          </a>
-          <button class="btn btn-secondary" onclick="loadAudiencesJSON()" style="font-size:12px;padding:5px 13px;" data-i18n="agenda_refresh">↺ Actualiser</button>
-        </div>
-        <div class="agenda-filter-bar">
+        <div id="convoc-container"></div>
+        <div class="agenda-toolbar">
           <select id="agenda-filter-semaine">
             <option value="0" data-i18n="agenda_week0">Cette semaine</option>
             <option value="1" data-i18n="agenda_week1">Semaine +1</option>
@@ -1468,6 +1479,13 @@ body.printing-decision #print-decision-area{display:block!important;color:#000;b
             <option value="3" data-i18n="agenda_week3">Semaine +3</option>
             <option value="4" data-i18n="agenda_week4">Semaine +4</option>
           </select>
+          <div class="agenda-toolbar-actions">
+            <a id="ics-download" href="#" download="audiences-luxembourg.ics" class="ics-btn">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+              <span data-i18n="agenda_ics_btn">Exporter vers mon agenda (.ics)</span>
+            </a>
+            <button class="btn btn-secondary" onclick="loadAudiencesJSON()" data-i18n="agenda_refresh">↺ Actualiser</button>
+          </div>
         </div>
         <div class="agenda-chips" id="agenda-chips"></div>
         <div id="agenda-list">
@@ -3574,7 +3592,7 @@ function renderAudiencesStrip(){
 /* PDFs de convocations toujours à jour — mis à jour en place par les greffes */
 const CONVOCATIONS = {
   "Cour administrative": [
-    { label: "Convocations — Cour administrative", url: "https://justice.public.lu/downloads.jurad/Cour.pdf" }
+    { label: "Voir les convocations (PDF)", url: "https://justice.public.lu/downloads.jurad/Cour.pdf" }
   ],
   "Tribunal administratif": [
     { label: "1re chambre", url: "https://justice.public.lu/downloads.jurad/trib1.pdf" },
@@ -3592,22 +3610,25 @@ function renderConvocations(jurFilter){
     : Object.keys(CONVOCATIONS);
   if(!courts.length) return '';
   const PDF_ICON = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6"/></svg>';
-  return courts.map(function(court){
+  const INFO_ICON = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>';
+  const isDE = document.documentElement.lang === 'de';
+  return '<div class="convoc-panel">' + courts.map(function(court){
     const links = CONVOCATIONS[court];
-    const isDE = document.documentElement.lang === 'de';
+    const isGrid = links.length > 1; // Tribunal administratif (6 chambres) → grille 4 colonnes,
+                                      // pour que la 5e chambre tombe sous la 1re, la 6e sous la 2e.
     const linkHtml = links.map(function(l){
       return '<a class="convoc-link" href="' + l.url + '" target="_blank" rel="noopener">' + PDF_ICON + ' ' + l.label + '</a>';
     }).join('');
-    const stripLabel = isDE ? ('Ladungen — ' + court) : ('Convocations — ' + court);
+    const rowLabel = isDE ? ('Ladungen — ' + court) : ('Convocations — ' + court);
     const noteText  = isDE
       ? 'Diese PDF enthalten die Namen der Parteien vor der Anonymisierung. Anhand des Aktenzeichens können Sie die Entscheidung in der Datenbank wiederfinden und die Anonymisierung teilweise aufheben.'
       : 'Ces PDF contiennent les noms des parties avant anonymisation. En relevant la référence d\'une affaire, vous pouvez la retrouver dans les décisions indexées et lever partiellement l\'anonymat.';
-    return '<div class="convoc-strip">'
-      + '<span style="font-weight:700;color:var(--accent-blue);white-space:nowrap;">' + PDF_ICON + ' ' + stripLabel + '</span>'
-      + linkHtml
-      + '<svg class="convoc-strip-info-ic" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" title="' + noteText.replace(/"/g,'&quot;') + '"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>'
+    return '<div class="convoc-row">'
+      + '<div class="convoc-row-head">' + rowLabel + '</div>'
+      + '<div class="convoc-row-body' + (isGrid ? ' convoc-chambres-grid' : '') + '">' + linkHtml + '</div>'
+      + '<button type="button" class="convoc-info-btn" title="' + noteText.replace(/"/g,'&quot;') + '" aria-label="Info">' + INFO_ICON + '</button>'
       + '</div>';
-  }).join('');
+  }).join('') + '</div>';
 }
 
 /* ── Données : Supabase (table files, accès authentifié) d'abord,
