@@ -1053,6 +1053,28 @@ body.printing-decision #print-decision-area{display:block!important;color:#000;b
       </div>
     </div>
 
+    <!-- MODAL TUTORIEL DE PREMIÈRE CONNEXION — aperçu rapide des rubriques, affiché une
+         fois par navigateur (localStorage), à la suite de l'alerte RGPD. Contenu détaillé
+         toujours délégué à la FAQ (FAQ_CONTENT), jamais dupliqué ici. -->
+    <div class="legal-modal-overlay" id="intro-tutorial-overlay" onclick="if(event.target===this)closeIntroTutorial()">
+      <div class="legal-modal" style="max-width:560px;" role="dialog" aria-modal="true" aria-labelledby="intro-tutorial-title">
+        <div class="legal-modal-head">
+          <div>
+            <div style="font-family:'Roboto Condensed','Arial Narrow',sans-serif;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--text-faint);margin-bottom:6px;" data-i18n="intro_tutorial_eyebrow">Première connexion</div>
+            <div class="legal-modal-title" id="intro-tutorial-title" data-i18n="intro_tutorial_title">Bienvenue dans la Veille judiciaire</div>
+          </div>
+        </div>
+        <div class="legal-modal-body">
+          <p data-i18n="intro_tutorial_intro">Un aperçu rapide des rubriques avant de commencer :</p>
+          <div data-i18n="intro_tutorial_body"></div>
+        </div>
+        <div class="legal-modal-footer">
+          <button class="btn btn-secondary" onclick="closeIntroTutorial()" data-i18n="intro_tutorial_close">Fermer</button>
+          <button class="btn btn-primary" onclick="openIntroTutorialFaq()" data-i18n="intro_tutorial_cta">Voir la FAQ complète</button>
+        </div>
+      </div>
+    </div>
+
     <!-- MODAL RAPPROCHEMENT D'IDENTITÉ (mode manuel assisté) -->
     <div class="legal-modal-overlay" id="rappr-modal-overlay" onclick="if(event.target===this)closeRapprochement()">
       <div class="legal-modal" role="dialog" aria-modal="true" aria-labelledby="rappr-modal-title">
@@ -1864,6 +1886,18 @@ const TRANSLATIONS = {
       + "<li>En cas de doute, consultez la rédaction en chef ou la CNPD avant tout usage éditorial.</li></ul>",
     rgpd_alert_dismiss: "Ne plus afficher ce message",
     rgpd_alert_close: "J'ai compris",
+    intro_tutorial_eyebrow: "Première connexion",
+    intro_tutorial_title: "Bienvenue dans la Veille judiciaire",
+    intro_tutorial_intro: "Un aperçu rapide des rubriques avant de commencer :",
+    intro_tutorial_body: "<ul style=\"margin:0;padding-left:20px;display:flex;flex-direction:column;gap:10px;\">"
+      + "<li><strong>Tableau de bord</strong> — vue d'ensemble : dernières décisions indexées, alertes radar actives et prochaines audiences.</li>"
+      + "<li><strong>Affaires en cours</strong> — les dossiers PDF déposés par la rédaction, mis à jour au fil des audiences.</li>"
+      + "<li><strong>Audiences</strong> — le calendrier judiciaire hebdomadaire ; dépose une convocation PDF pour l'indexer.</li>"
+      + "<li><strong>Recherche &amp; entités</strong> — les décisions anonymisées en open data, avec l'outil « Qui est concerné ? » pour tenter d'identifier une partie.</li>"
+      + "<li><strong>Radar décisions</strong> — enregistre un mot-clé à surveiller ; les nouvelles décisions correspondantes y apparaissent automatiquement.</li>"
+      + "<li><strong>Collecte des données</strong> — suit les sources open data et permet d'importer tes propres documents dans ta base personnelle.</li></ul>",
+    intro_tutorial_close: "Fermer",
+    intro_tutorial_cta: "Voir la FAQ complète",
     agenda_eyebrow: "Calendrier judiciaire",
     agenda_title: "Audiences & agenda",
     agenda_intro: "Séances hebdomadaires récurrentes de toutes les juridictions luxembourgeoises. Données issues de <strong>justice.public.lu</strong>. Exportez vers votre agenda ou filtrez par juridiction.",
@@ -2117,6 +2151,18 @@ const TRANSLATIONS = {
       + "<li>Im Zweifelsfall wenden Sie sich vor jeder redaktionellen Nutzung an die Chefredaktion oder die CNPD.</li></ul>",
     rgpd_alert_dismiss: "Diese Meldung nicht mehr anzeigen",
     rgpd_alert_close: "Verstanden",
+    intro_tutorial_eyebrow: "Erste Anmeldung",
+    intro_tutorial_title: "Willkommen bei der Veille judiciaire",
+    intro_tutorial_intro: "Ein kurzer Überblick über die Rubriken, bevor es losgeht:",
+    intro_tutorial_body: "<ul style=\"margin:0;padding-left:20px;display:flex;flex-direction:column;gap:10px;\">"
+      + "<li><strong>Tableau de bord</strong> — Übersicht: zuletzt indexierte Entscheidungen, aktive Radar-Warnungen und anstehende Anhörungen.</li>"
+      + "<li><strong>Laufende Verfahren</strong> — die von der Redaktion hochgeladenen PDF-Dossiers, laufend anhand der Anhörungen aktualisiert.</li>"
+      + "<li><strong>Anhörungen</strong> — der wöchentliche Gerichtskalender; lade eine PDF-Vorladung hoch, um sie zu indexieren.</li>"
+      + "<li><strong>Recherche &amp; Entitäten</strong> — die anonymisierten Open-Data-Entscheidungen, mit dem Werkzeug „Wer ist betroffen?“, um eine Partei trotzdem zu identifizieren.</li>"
+      + "<li><strong>Radar Entscheidungen</strong> — speichere ein zu überwachendes Stichwort; passende neue Entscheidungen erscheinen dort automatisch.</li>"
+      + "<li><strong>Datenerfassung</strong> — verfolgt die Open-Data-Quellen und ermöglicht den Import eigener Dokumente in deine persönliche Suchbasis.</li></ul>",
+    intro_tutorial_close: "Schließen",
+    intro_tutorial_cta: "Vollständige FAQ ansehen",
     agenda_eyebrow: "Gerichtskalender",
     agenda_title: "Sitzungen & Terminkalender",
     agenda_intro: "Wöchentlich wiederkehrende Sitzungen aller luxemburgischen Gerichte. Daten von <strong>justice.public.lu</strong>. Exportieren Sie in Ihren Kalender oder filtern Sie nach Gericht.",
@@ -5141,7 +5187,7 @@ async function authOnSession(session){
   hideAuthOverlay();
   applyI18n();
   renderAll();
-  maybeShowRgpdAlert();
+  maybeShowOnboarding();
   loadDecisionsFromSupabase();
   loadAudiencesJSON();
   loadAffairesFromSupabase();
@@ -5174,7 +5220,7 @@ async function initAuth(){
     /* Bypass actif : accès direct sans auth (développement) */
     hideAuthOverlay();
     renderAll();
-    maybeShowRgpdAlert();
+    maybeShowOnboarding();
     loadDecisionsFromSupabase();
     loadAudiencesJSON();
     return;
@@ -5418,6 +5464,35 @@ function closeRgpdAlert(){
   }
   document.getElementById('rgpd-alert-overlay').classList.remove('open');
   document.body.style.overflow = '';
+  maybeShowIntroTutorial();
+}
+
+/* Tutoriel de première connexion — aperçu rapide des rubriques de la sidebar, affiché
+   une fois par navigateur (localStorage), à la suite de l'alerte RGPD. Contenu détaillé
+   toujours délégué à la FAQ (FAQ_CONTENT) pour ne jamais le dupliquer ici. */
+const INTRO_TUTORIAL_KEY = 'vj_intro_tutorial_seen';
+
+function maybeShowOnboarding(){
+  if(localStorage.getItem(RGPD_ALERT_KEY)) maybeShowIntroTutorial();
+  else maybeShowRgpdAlert();
+}
+
+function maybeShowIntroTutorial(){
+  if(localStorage.getItem(INTRO_TUTORIAL_KEY)) return;
+  localStorage.setItem(INTRO_TUTORIAL_KEY, '1');
+  applyI18n();
+  document.getElementById('intro-tutorial-overlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeIntroTutorial(){
+  document.getElementById('intro-tutorial-overlay').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+function openIntroTutorialFaq(){
+  closeIntroTutorial();
+  openFaqModal();
 }
 
 function closeRapprochement(){
