@@ -1033,29 +1033,9 @@ body.printing-decision #print-decision-area{display:block!important;color:#000;b
   </aside>
   <main id="main-content">
 
-    <!-- MODAL RGPD — alerte unique, affichée au premier chargement (localStorage) -->
-    <div class="legal-modal-overlay" id="rgpd-alert-overlay">
-      <div class="legal-modal" style="max-width:560px;" role="dialog" aria-modal="true" aria-labelledby="rgpd-alert-title">
-        <div class="legal-modal-head">
-          <div>
-            <div style="font-family:'Roboto Condensed','Arial Narrow',sans-serif;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--text-faint);margin-bottom:6px;" data-i18n="rgpd_alert_eyebrow">Avant d'utiliser cet outil</div>
-            <div class="legal-modal-title" id="rgpd-alert-title" data-i18n="rgpd_alert_title">Risques RGPD &amp; licence des sources</div>
-          </div>
-        </div>
-        <div class="legal-modal-body">
-          <div data-i18n="rgpd_alert_body"></div>
-          <label class="chk" style="display:flex;align-items:flex-start;gap:8px;font-size:12.5px;color:var(--text-muted);line-height:1.5;margin:18px 0 4px;cursor:pointer;">
-            <input type="checkbox" id="rgpd-alert-dismiss" style="margin-top:2px;flex-shrink:0;">
-            <span data-i18n="rgpd_alert_dismiss">Ne plus afficher ce message</span>
-          </label>
-          <button class="btn btn-primary" style="margin-top:14px;" onclick="closeRgpdAlert()" data-i18n="rgpd_alert_close">J'ai compris</button>
-        </div>
-      </div>
-    </div>
-
     <!-- MODAL TUTORIEL DE PREMIÈRE CONNEXION — aperçu rapide des rubriques, affiché une
-         fois par navigateur (localStorage), à la suite de l'alerte RGPD. Contenu détaillé
-         toujours délégué à la FAQ (FAQ_CONTENT), jamais dupliqué ici. -->
+         fois par navigateur (localStorage). Contenu détaillé toujours délégué à la FAQ
+         (FAQ_CONTENT), jamais dupliqué ici. -->
     <div class="legal-modal-overlay" id="intro-tutorial-overlay" onclick="if(event.target===this)closeIntroTutorial()">
       <div class="legal-modal" style="max-width:560px;" role="dialog" aria-modal="true" aria-labelledby="intro-tutorial-title">
         <div class="legal-modal-head">
@@ -1877,15 +1857,6 @@ const TRANSLATIONS = {
     file_indexed: "Indexé",
     file_size: "{size}",
     file_uploaded_on: "Importé le {date}",
-    rgpd_alert_eyebrow: "Avant d'utiliser cet outil",
-    rgpd_alert_title: "Risques RGPD &amp; licence des sources",
-    rgpd_alert_body: "<ul style=\"margin:0;padding-left:20px;display:flex;flex-direction:column;gap:10px;\">"
-      + "<li>Les décisions sont publiées sous licence <strong>CC BY-ND 4.0</strong> (sans modification) — l'indexation et la recherche plein texte peuvent constituer une transformation au sens de la licence.</li>"
-      + "<li>Les noms d'avocats et autres données identifiables présents dans les décisions et les convocations sont des <strong>données personnelles</strong> : leur traitement doit reposer sur une base légale documentée (Art. 6 RGPD), l'exception journalistique (Art. 85 RGPD) s'appliquant sous conditions.</li>"
-      + "<li>Toute tentative de ré-identification sur une <strong>décision pénale</strong> reste encadrée séparément par une validation obligatoire (Art. 10 RGPD) dans l'outil « Piste d'identification ».</li>"
-      + "<li>En cas de doute, consultez la rédaction en chef ou la CNPD avant tout usage éditorial.</li></ul>",
-    rgpd_alert_dismiss: "Ne plus afficher ce message",
-    rgpd_alert_close: "J'ai compris",
     intro_tutorial_eyebrow: "Première connexion",
     intro_tutorial_title: "Bienvenue dans la Veille judiciaire",
     intro_tutorial_intro: "Un aperçu rapide des rubriques avant de commencer :",
@@ -2142,15 +2113,6 @@ const TRANSLATIONS = {
     file_indexed: "Indiziert",
     file_size: "{size}",
     file_uploaded_on: "Importiert am {date}",
-    rgpd_alert_eyebrow: "Vor der Nutzung dieses Tools",
-    rgpd_alert_title: "DSGVO-Risiken &amp; Quellenlizenz",
-    rgpd_alert_body: "<ul style=\"margin:0;padding-left:20px;display:flex;flex-direction:column;gap:10px;\">"
-      + "<li>Die Entscheidungen werden unter der Lizenz <strong>CC BY-ND 4.0</strong> (keine Bearbeitung) veröffentlicht — die Indexierung und Volltextsuche könnten eine Bearbeitung im Sinne der Lizenz darstellen.</li>"
-      + "<li>Namen von Anwälten und andere identifizierbare Daten in Entscheidungen und Ladungen sind <strong>personenbezogene Daten</strong>: ihre Verarbeitung muss auf einer dokumentierten Rechtsgrundlage beruhen (Art. 6 DSGVO), die journalistische Ausnahme (Art. 85 DSGVO) gilt unter Bedingungen.</li>"
-      + "<li>Jeder Versuch einer Re-Identifizierung bei einer <strong>strafrechtlichen Entscheidung</strong> wird gesondert durch eine verpflichtende Prüfung (Art. 10 DSGVO) im Tool „Piste d'identification\" geregelt.</li>"
-      + "<li>Im Zweifelsfall wenden Sie sich vor jeder redaktionellen Nutzung an die Chefredaktion oder die CNPD.</li></ul>",
-    rgpd_alert_dismiss: "Diese Meldung nicht mehr anzeigen",
-    rgpd_alert_close: "Verstanden",
     intro_tutorial_eyebrow: "Erste Anmeldung",
     intro_tutorial_title: "Willkommen bei der Veille judiciaire",
     intro_tutorial_intro: "Ein kurzer Überblick über die Rubriken, bevor es losgeht:",
@@ -5187,7 +5149,7 @@ async function authOnSession(session){
   hideAuthOverlay();
   applyI18n();
   renderAll();
-  maybeShowOnboarding();
+  maybeShowIntroTutorial();
   loadDecisionsFromSupabase();
   loadAudiencesJSON();
   loadAffairesFromSupabase();
@@ -5220,7 +5182,7 @@ async function initAuth(){
     /* Bypass actif : accès direct sans auth (développement) */
     hideAuthOverlay();
     renderAll();
-    maybeShowOnboarding();
+    maybeShowIntroTutorial();
     loadDecisionsFromSupabase();
     loadAudiencesJSON();
     return;
@@ -5446,36 +5408,10 @@ function openRapprochement(id){
   if(_sb) _ragLoadHistory();
 }
 
-/* Alerte RGPD unique — affichée une fois au premier chargement de l'app,
-   consolide les notices RGPD/CC BY-ND autrefois dispersées sur plusieurs
-   écrans. Ne remplace PAS le gate art. 10 RGPD (piste d'identification sur
-   décision pénale), qui reste une validation par action, pas une notice. */
-const RGPD_ALERT_KEY = 'vj_rgpd_alert_dismissed';
-
-function maybeShowRgpdAlert(){
-  if(localStorage.getItem(RGPD_ALERT_KEY)) return;
-  document.getElementById('rgpd-alert-overlay').classList.add('open');
-  document.body.style.overflow = 'hidden';
-}
-
-function closeRgpdAlert(){
-  if(document.getElementById('rgpd-alert-dismiss').checked){
-    localStorage.setItem(RGPD_ALERT_KEY, '1');
-  }
-  document.getElementById('rgpd-alert-overlay').classList.remove('open');
-  document.body.style.overflow = '';
-  maybeShowIntroTutorial();
-}
-
 /* Tutoriel de première connexion — aperçu rapide des rubriques de la sidebar, affiché
-   une fois par navigateur (localStorage), à la suite de l'alerte RGPD. Contenu détaillé
-   toujours délégué à la FAQ (FAQ_CONTENT) pour ne jamais le dupliquer ici. */
+   une fois par navigateur (localStorage). Contenu détaillé toujours délégué à la FAQ
+   (FAQ_CONTENT) pour ne jamais le dupliquer ici. */
 const INTRO_TUTORIAL_KEY = 'vj_intro_tutorial_seen';
-
-function maybeShowOnboarding(){
-  if(localStorage.getItem(RGPD_ALERT_KEY)) maybeShowIntroTutorial();
-  else maybeShowRgpdAlert();
-}
 
 function maybeShowIntroTutorial(){
   if(localStorage.getItem(INTRO_TUTORIAL_KEY)) return;
