@@ -122,8 +122,12 @@ def make_excerpt(text: str, max_chars: int = 500) -> str:
     return joined
 
 
-def make_fulltext(text: str, max_chars: int = 12000) -> str:
-    """Texte complet pour la recherche — conserve toutes les lignes dont >3 chars."""
+def make_fulltext(text: str, max_chars: int = 200_000) -> str:
+    """Texte complet pour la recherche — conserve toutes les lignes dont >3 chars.
+    max_chars n'est qu'un garde-fou contre un PDF anormalement long (colonne TEXT
+    non bornée côté Supabase) : à 12000, environ la moitié des décisions étaient
+    coupées avant même d'atteindre le dispositif final ("PAR CES MOTIFS..."), qui
+    se trouve en toute fin de document."""
     lines = [l.strip() for l in text.splitlines() if len(l.strip()) > 3]
     joined = "\n".join(lines)
     return joined[:max_chars] if len(joined) > max_chars else joined

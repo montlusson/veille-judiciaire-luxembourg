@@ -4687,6 +4687,15 @@ function _despaceHeadingLine(line){
    rejointes. Approximatif par nature (aucune information de paragraphe n'est
    conservée à l'extraction) mais nettement plus lisible que le texte haché
    d'origine. */
+/* Marqueurs de grande articulation du raisonnement ("Vu l'arrêt", "Selon
+   l'arrêt"...) : une ligne vide est insérée avant chacun pour aérer le texte,
+   qui reste dense même une fois les phrases recollées (beaucoup de clauses
+   "Vu..." consécutives, chacune déjà sa propre ligne, mais sans respiration
+   entre elles). Comparaison insensible à la casse et à la variante de
+   l'apostrophe (’ dans les PDF sources, ' le plus souvent tapée ici). */
+const PARA_BREAK_MARKERS = ["vu l'arrêt", "vu l'avis", "vu les conclusions", "selon l'arrêt", "vu l'article"];
+function _normApostrophes(s){ return s.replace(/[’‘]/g, "'"); }
+
 function reflowFulltext(text){
   if(!text) return text;
   const rawLines = text.split('\n');
@@ -4705,7 +4714,17 @@ function reflowFulltext(text){
     if(endsStrong || !looksFull){ out.push(buffer); buffer=''; }
   }
   if(buffer) out.push(buffer);
-  return out.join('\n');
+
+  const withBreaks = [];
+  for(const line of out){
+    const norm = _normApostrophes(line).toLowerCase();
+    const isMarker = PARA_BREAK_MARKERS.some(m => norm.startsWith(m));
+    if(isMarker && withBreaks.length && withBreaks[withBreaks.length - 1] !== ''){
+      withBreaks.push('');
+    }
+    withBreaks.push(line);
+  }
+  return withBreaks.join('\n');
 }
 
 /* ── Normalisation légère des espaces issus de l'extraction PDF ──
