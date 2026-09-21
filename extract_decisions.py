@@ -10,6 +10,17 @@ Usage :
   pip install pdfplumber requests
   python3 extract_decisions.py
 
+Options :
+  --push-new              Pousse vers Supabase uniquement les décisions
+                           fraîchement extraites (usage CI hebdomadaire).
+  --push-supabase         Pousse tout decisions.json vers Supabase (local).
+  --backfill-year=YYYY    Force la ré-extraction de TOUTES les archives de
+                           l'année YYYY, cache ignoré pour elles — sert à
+                           récupérer le texte intégral des décisions
+                           tronquées à l'ancienne limite de make_fulltext().
+                           Voir .github/workflows/backfill-fulltext.yml
+                           (un an à la fois, déclenché manuellement).
+
 Options d'environnement (optionnelles, pour Phase 2 — Supabase) :
   SUPABASE_URL=https://xxxx.supabase.co
   SUPABASE_KEY=votre-anon-key
@@ -77,11 +88,29 @@ def main() -> None:
             elif source.get(year_key):
                 tasks.append((source, year_int, source[year_key], "fallback"))
 
+    # ── Backfill ciblé (--backfill-year=YYYY) : force la ré-extraction de toutes
+    # les archives d'UNE année, même si le cache les marque comme déjà traitées —
+    # pour récupérer le texte intégral des décisions tronquées à l'ancienne limite
+    # de make_fulltext() sans repasser par tout le corpus (qui dépasse le timeout
+    # CI, voir historique git du 11/07 : "backfill CI impossible >2h"). Les
+    # décisions tronquées touchent 26/28 juridictions sur les 3 années — un
+    # découpage par année reste la plus petite unité qui a du sens (le cache est
+    # granulaire par archive = source×année, pas par décision individuelle).
+    backfill_year = None
+    for arg in sys.argv:
+        if arg.startswith("--backfill-year="):
+            backfill_year = int(arg.split("=", 1)[1])
+    if backfill_year:
+        log(f"  ⚠ Backfill ciblé : année {backfill_year} — cache ignoré pour ces archives\n")
+
     # ── Filtre incrémental : on saute les ZIPs dont l'URL n'a pas changé ──────
     # Clé de cache = "nom_source::année" → URL traitée lors du dernier run
     todo   = []   # tâches à exécuter
     skip   = set()# (source_name, year_int) → réutiliser depuis existing
     for s, yi, url, orig in tasks:
+        if backfill_year and yi == backfill_year:
+            todo.append((s, yi, url, orig))
+            continue
         key = f"{s['name']}::{yi}"
         if zip_cache.get(key) == url:
             skip.add((s["name"], yi))

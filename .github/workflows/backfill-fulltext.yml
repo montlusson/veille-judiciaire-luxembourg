@@ -1,0 +1,91 @@
+name: Backfill texte intégral (par année)
+
+# Déclenchement MANUEL uniquement — jamais de cron. Sert à récupérer le texte
+# intégral des décisions tronquées à l'ancienne limite de 12000 caractères de
+# make_fulltext() (voir extract_parsing.py) : environ la moitié du corpus
+# (5154/10369 décisions, mesuré le 21/09) touchait pile cette limite, coupée
+# avant même d'atteindre le dispositif final ("PAR CES MOTIFS...").
+#
+# Le cache d'extraction (zip_cache.json) est granulaire par archive
+# (source × année), pas par décision — impossible de ne retraiter QUE les
+# décisions tronquées sans retélécharger toute l'archive qui les contient. Les
+# décisions tronquées touchent 26 des 28 juridictions sur les 3 années : un
+# run unique pour tout le corpus a déjà été tenté (11/07) et a dépassé même
+# 120 minutes ("backfill CI impossible >2h"), en plus d'empêcher l'étape
+# scrape_audiences de tourner ce jour-là.
+#
+# D'où ce découpage : un run par année (2024 / 2025 / 2026), déclenché à la
+# main depuis l'onglet Actions, un par un plutôt qu'enchaînés automatiquement —
+# pour pouvoir vérifier chaque run avant de lancer le suivant. Volume estimé
+# par année (total d'archives à retraiter, pas seulement les tronquées, le
+# cache ne permettant pas plus fin) : 2024 ≈ 4038 décisions (~65-70 min),
+# 2025 ≈ 4329 (~70-75 min), 2026 ≈ 2002 (~30-35 min), à ~1 décision/seconde
+# (mesuré sur le run hebdomadaire du 20/09). N'affecte pas le workflow
+# hebdomadaire (extract.yml) : fichiers séparés, aucun déclenchement partagé.
+
+on:
+  workflow_dispatch:
+    inputs:
+      year:
+        description: "Année à retraiter intégralement"
+        required: true
+        type: choice
+        options:
+          - '2024'
+          - '2025'
+          - '2026'
+
+jobs:
+  backfill:
+    name: Backfill ${{ github.event.inputs.year }} → Supabase
+    runs-on: ubuntu-latest
+    timeout-minutes: 150
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout du repo
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+
+      - name: Installer Python 3.11
+        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
+        with:
+          python-version: '3.11'
+
+      - name: Installer les dépendances
+        run: pip install pdfplumber requests beautifulsoup4
+
+      # Ignore le cache pour cette seule année : retélécharge + reparse toutes
+      # les archives de l'année choisie, puis upsert vers Supabase (par id
+      # stable) — écrase le fulltext tronqué des décisions déjà en base.
+      # BACKFILL_YEAR passée en variable d'env (pas d'interpolation directe
+      # ${{ }} dans le run:) même si "year" est un choice à options fixes —
+      # bonne pratique de sécurité pour toute donnée issue du contexte github.
+      - name: Ré-extraire l'année choisie (texte intégral → Supabase)
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL || 'https://lhtkvogmkebslihuwfyu.supabase.co' }}
+          SUPABASE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY || secrets.SUPABASE }}
+          BACKFILL_YEAR: ${{ github.event.inputs.year }}
+        run: python extract_decisions.py --push-new --backfill-year="$BACKFILL_YEAR"
+
+      # Même logique de retry que extract.yml (voir son commentaire) — un push
+      # rejeté ponctuellement par GitHub ne doit pas repartir inaperçu.
+      - name: Committer le cache d'extraction
+        if: always()
+        env:
+          BACKFILL_YEAR: ${{ github.event.inputs.year }}
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add zip_cache.json || true
+          git diff --cached --quiet || git commit -m "chore: backfill $BACKFILL_YEAR — cache extraction $(date -u +'%Y-%m-%d')"
+          for attempt in 1 2 3; do
+            if git push; then
+              echo "✓ Cache poussé (tentative $attempt)"
+              exit 0
+            fi
+            echo "✗ Push échoué (tentative $attempt/3) — rebase sur origin/main et nouvel essai"
+            sleep $((attempt * 5))
+            git pull --rebase origin main || true
+          done
+          echo "::warning::Le cache d'extraction n'a pas pu être poussé après 3 tentatives — sans impact sur les données (déjà envoyées à Supabase)."
