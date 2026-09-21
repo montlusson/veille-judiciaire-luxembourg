@@ -427,15 +427,33 @@ details.alt-table th,details.alt-table td{border:1px solid var(--card-border);pa
 .agenda-row:hover .agenda-copy-btn{opacity:1;}
 .agenda-copy-btn:hover{background:var(--row-sep);color:var(--text-muted);}
 .agenda-copy-btn.copied{color:#1A7F3C;opacity:1;}
+/* Dossiers identifiés (convocation déposée) dans le détail d'un jour de l'agenda */
+.agenda-day-identified{margin-bottom:14px;padding-bottom:12px;border-bottom:1px solid var(--row-sep);}
+.agenda-day-identified-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--accent-gold);margin-bottom:8px;}
+.agenda-day-identified-row{display:flex;gap:10px;padding:6px 10px;border-radius:6px;}
+.agenda-day-identified-row:hover{background:var(--card-bg);}
+.agenda-day-identified-num{flex:0 0 60px;font-weight:700;font-size:12.5px;color:var(--text);}
+.agenda-day-identified-detail{flex:1;min-width:0;font-size:12.5px;color:var(--text-muted);line-height:1.5;}
 /* Agenda — grille de cartes jour (façon Apple Calendar) */
 .agenda-day-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:14px;}
 .agenda-day-card{
+  position:relative;
   background:var(--card-bg);border:1px solid var(--card-border);border-radius:var(--radius-lg);
   padding:14px 16px;cursor:pointer;text-align:left;font-family:inherit;transition:border-color .15s,transform .1s;
 }
 .agenda-day-card:hover{border-color:var(--accent-blue);transform:translateY(-1px);}
 .agenda-day-card:active{transform:scale(0.98) translateY(0);}
 .agenda-day-card.is-today{border-color:var(--accent-blue);}
+.agenda-day-card.has-identified{border-color:var(--accent-gold);}
+/* Nombre d'affaires identifiées (convocations PDF déposées) pour ce jour — relie le
+   calendrier automatique (créneaux récurrents, sans identité) aux dossiers déposés
+   manuellement (noms réels), invisible sinon. */
+.agenda-day-card-id-badge{
+  position:absolute;top:-7px;right:-7px;min-width:19px;height:19px;padding:0 4px;
+  background:var(--accent-gold);color:#fff;border-radius:10px;
+  font-size:10.5px;font-weight:700;display:flex;align-items:center;justify-content:center;
+  box-shadow:0 1px 3px rgba(0,0,0,.25);
+}
 .agenda-day-card-dow{font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--text-faint);font-weight:700;}
 .agenda-day-card-num{font-family:'Roboto Condensed','Arial Narrow',sans-serif;font-weight:700;font-size:30px;line-height:1.15;color:var(--text-main);}
 .agenda-day-card-month{font-size:11.5px;color:var(--text-muted);margin-bottom:8px;}
@@ -733,6 +751,8 @@ table.analyse-tbl tbody tr:hover{background:var(--row-sep);}
 .watchlist-toggle{background:none;border:1px solid var(--card-border);border-radius:5px;padding:3px 9px;font-size:11px;cursor:pointer;color:var(--text-muted);font-family:inherit;transition:all .15s;white-space:nowrap;}
 .watchlist-toggle.watching{background:var(--accent-blue);border-color:var(--accent-blue);color:#fff;}
 .watchlist-toggle:hover:not(.watching){background:var(--row-sep);}
+.affaire-whoswho-link{color:var(--accent-blue);text-decoration:none;font-weight:700;margin-left:2px;}
+.affaire-whoswho-link:hover{text-decoration:underline;}
 /* ── Affaires tabs & grouping ── */
 .affaires-tabs{display:flex;gap:0;padding:0 20px;border-bottom:1px solid var(--card-border);background:var(--row-sep);}
 .affaires-tab{padding:10px 16px;font-size:12px;font-weight:600;letter-spacing:.03em;color:var(--text-muted);cursor:pointer;border:none;background:none;border-bottom:2px solid transparent;margin-bottom:-1px;transition:color .15s,border-color .15s;border-radius:0;font-family:inherit;white-space:nowrap;}
@@ -1656,8 +1676,10 @@ body.printing-decision #print-decision-area{display:block!important;color:#000;b
             <thead>
               <tr>
                 <th style="width:100px;">N° d'affaire</th>
+                <th style="width:160px;">Demandeur</th>
                 <th>Matière</th>
-                <th style="width:200px;">Défendeur / Ministère</th>
+                <th style="width:180px;">Défendeur / Ministère</th>
+                <th style="width:160px;">Avocat</th>
                 <th style="width:110px;">Stade</th>
                 <th style="width:90px;"></th>
               </tr>
@@ -1675,8 +1697,10 @@ body.printing-decision #print-decision-area{display:block!important;color:#000;b
             <thead>
               <tr>
                 <th style="width:100px;">N° d'affaire</th>
+                <th style="width:160px;">Demandeur</th>
                 <th>Matière</th>
-                <th style="width:200px;">Défendeur / Ministère</th>
+                <th style="width:180px;">Défendeur / Ministère</th>
+                <th style="width:160px;">Avocat</th>
                 <th style="width:110px;">Stade</th>
                 <th style="width:90px;"></th>
               </tr>
@@ -1919,7 +1943,7 @@ const TRANSLATIONS = {
     archive_none: "Aucune archive. Lancez <strong>scrape_audiences.py</strong> pour télécharger les PDF.",
     audiences_archive_title: "Audiences passées",
     audiences_archive_intro: "Audiences déjà tenues, reconstituées à partir des convocations déposées par la rédaction. Conservées un an, sauf affaire suivie (« Surveiller »).",
-    audiences_archive_search_ph: "Numéro d'affaire, matière, avocat…",
+    audiences_archive_search_ph: "Numéro d'affaire, matière, avocat, demandeur…",
     audiences_archive_empty_html: "Les audiences passées apparaîtront ici au fil des convocations déposées, classées par date d'audience.<br>Déposez des convocations dans l'onglet « Déposer les convocations ».",
     audiences_archive_none: "Aucune audience passée pour l'instant.",
     archive_downloaded: "Semaine {w} · Téléchargé le {d}",
@@ -2175,7 +2199,7 @@ const TRANSLATIONS = {
     archive_none: "Kein Archiv. Starten Sie <strong>scrape_audiences.py</strong>, um die PDF herunterzuladen.",
     audiences_archive_title: "Vergangene Sitzungen",
     audiences_archive_intro: "Bereits stattgefundene Sitzungen, rekonstruiert aus den von der Redaktion hochgeladenen Ladungen. Ein Jahr aufbewahrt, außer bei verfolgten Verfahren („Verfolgen“).",
-    audiences_archive_search_ph: "Aktenzeichen, Sachgebiet, Anwalt…",
+    audiences_archive_search_ph: "Aktenzeichen, Sachgebiet, Anwalt, Kläger…",
     audiences_archive_empty_html: "Vergangene Sitzungen erscheinen hier nach und nach anhand der hochgeladenen Ladungen, geordnet nach Sitzungsdatum.<br>Laden Sie Ladungen im Tab „Ladungen hochladen“ hoch.",
     audiences_archive_none: "Noch keine vergangenen Sitzungen.",
     archive_downloaded: "Woche {w} · Heruntergeladen am {d}",
@@ -3793,6 +3817,14 @@ function renderAgenda(){
 
   const locale = currentLang === 'de' ? 'de-LU' : 'fr-LU';
 
+  /* Nombre de dossiers identifiés (convocations PDF déposées, table `affaires`)
+     par date d'audience — relie le calendrier automatique (créneaux récurrents,
+     sans identité) aux dossiers déposés manuellement, sous forme de badge. */
+  const identifiedByDate = {};
+  (AFFAIRES_DATA || []).forEach(a => {
+    if(a.date_audience) identifiedByDate[a.date_audience] = (identifiedByDate[a.date_audience] || 0) + 1;
+  });
+
   el.innerHTML = '<div class="agenda-day-grid">' + Object.entries(byDate).sort((a,b) => a[0].localeCompare(b[0])).map(([dateStr, evts]) => {
     const d       = new Date(dateStr + 'T00:00:00');
     const isToday = dateStr === todayStr;
@@ -3802,7 +3834,12 @@ function renderAgenda(){
     const count   = evts.length;
     const isDE    = currentLang==='de';
     const countLabel = count + ' ' + (count>1 ? (isDE?'Sitzungen':'audiences') : (isDE?'Sitzung':'audience'));
-    return `<button class="agenda-day-card${isToday?' is-today':''}" onclick="openAgendaDay('${escHtml(dateStr)}')">
+    const idCount = identifiedByDate[dateStr] || 0;
+    const idTitle = isDE
+      ? `${idCount} identifizierte(s) Verfahren an diesem Tag (hochgeladene Ladung)`
+      : `${idCount} affaire${idCount>1?'s':''} identifiée${idCount>1?'s':''} ce jour (convocation déposée)`;
+    return `<button class="agenda-day-card${isToday?' is-today':''}${idCount?' has-identified':''}" onclick="openAgendaDay('${escHtml(dateStr)}')">
+      ${idCount ? `<span class="agenda-day-card-id-badge" title="${escHtml(idTitle)}">${idCount}</span>` : ''}
       <div class="agenda-day-card-dow">${escHtml(dow)}${isToday ? ' · ' + t('agenda_today') : ''}</div>
       <div class="agenda-day-card-num">${d.getDate()}</div>
       <div class="agenda-day-card-month">${escHtml(month)}</div>
@@ -3832,8 +3869,29 @@ function openAgendaDay(dateStr){
       <button class="agenda-copy-btn" title="" onclick="${escHtml(`copyHearing(this,${safeArgs[1]},${safeArgs[2]},${safeArgs[3]},${safeArgs[4]},${safeArgs[0]})`)}">${COPY_ICON}</button>
     </div>`;
   }).join('');
+
+  /* Dossiers identifiés ce jour-là (convocation PDF déposée, table `affaires`) —
+     relie le créneau récurrent ci-dessus aux vraies parties/avocats si connus. */
+  const identified = (AFFAIRES_DATA || []).filter(a => a.date_audience === dateStr);
+  const isDE = currentLang === 'de';
+  const identifiedHtml = identified.length ? `<div class="agenda-day-identified">
+    <div class="agenda-day-identified-title">${isDE ? 'Identifizierte Verfahren' : 'Affaires identifiées'} (${identified.length})</div>
+    ${identified.map(a => {
+      const avocatHtml = a.avocat
+        ? `${escHtml(a.avocat)} <a href="${whoswholuLink('Avocats', (a.avocat||'').split(',')[0].trim())}" target="_blank" rel="noopener" class="affaire-whoswho-link" title="Rechercher dans whoswho-lu">↗</a>`
+        : '';
+      return `<div class="agenda-day-identified-row">
+        <span class="agenda-day-identified-num">${escHtml(a.num)}</span>
+        <span class="agenda-day-identified-detail">
+          ${escHtml(a.demandeur || (isDE?'Kläger unbekannt':'Demandeur inconnu'))} — ${escHtml(a.matiere)}
+          ${avocatHtml ? `<br>${isDE?'Anwalt':'Avocat'} : ${avocatHtml}` : ''}
+        </span>
+      </div>`;
+    }).join('')}
+  </div>` : '';
+
   document.getElementById('agenda-day-modal-title').textContent = label;
-  document.getElementById('agenda-day-modal-body').innerHTML = rows;
+  document.getElementById('agenda-day-modal-body').innerHTML = identifiedHtml + rows;
   document.getElementById('agenda-day-modal-overlay').classList.add('open');
   document.body.style.overflow = 'hidden';
 }
@@ -3910,7 +3968,8 @@ function renderAudiencesArchive(){
     ? past.filter(a =>
         (a.num || '').toLowerCase().includes(q)
         || (a.matiere || '').toLowerCase().includes(q)
-        || (a.avocat || '').toLowerCase().includes(q))
+        || (a.avocat || '').toLowerCase().includes(q)
+        || (a.demandeur || '').toLowerCase().includes(q))
     : past;
 
   if(!filtered.length){
@@ -3925,8 +3984,10 @@ function renderAudiencesArchive(){
   const th = {
     num:      isDE ? 'Aktenzeichen'            : 'N° d\'affaire',
     jur:      isDE ? 'Gericht'                 : 'Juridiction',
+    demandeur:isDE ? 'Kläger'                  : 'Demandeur',
     matiere:  isDE ? 'Sachgebiet'              : 'Matière',
     defendeur:isDE ? 'Beklagter / Ministerium' : 'Défendeur / Ministère',
+    avocat:   isDE ? 'Rechtsanwalt'            : 'Avocat',
     stade:    isDE ? 'Stand'                   : 'Stade'
   };
 
@@ -3944,8 +4005,10 @@ function renderAudiencesArchive(){
   const theadHtml = `<thead><tr>
     <th style="width:100px;">${th.num}</th>
     <th style="width:120px;">${th.jur}</th>
+    <th style="width:160px;">${th.demandeur}</th>
     <th>${th.matiere}</th>
-    <th style="width:200px;">${th.defendeur}</th>
+    <th style="width:180px;">${th.defendeur}</th>
+    <th style="width:160px;">${th.avocat}</th>
     <th style="width:110px;">${th.stade}</th>
     <th style="width:90px;"></th>
   </tr></thead>`;
@@ -5363,8 +5426,14 @@ function parseConvocationText(text, court, chambre){
     if(!numMatch) continue;
 
     const num = numMatch[1];
+    // Le nom de la partie demanderesse suit parfois le numéro sur la même ligne
+    // ("2) 54160 Stiga C S.à.r.l., Luxembourg") — absent pour certaines affaires
+    // (immigration notamment), ou remplacé par "…" quand le greffe l'anonymise
+    // lui-même dans la convocation.
+    let demandeur = line.slice(numMatch[0].length).trim();
+    if(/^[.…]+$/.test(demandeur)) demandeur = "";
     let defendeur = "", matiere = "", avocat = "";
-    let lastField = null; // pour recoller les lignes de suite (voir plus bas)
+    let lastField = demandeur ? 'demandeur' : null; // pour recoller les lignes de suite (voir plus bas)
 
     // Lecture des lignes suivantes — jusqu'à la prochaine affaire numérotée ("N) ...") ou
     // la limite de 8 lignes, la première atteinte l'emportant. Sans cet arrêt, un dossier
@@ -5393,9 +5462,10 @@ function parseConvocationText(text, court, chambre){
       else if(/^(Rapporteur|Composition)\s*:/.test(l)){ lastField = null; }
       else if(lastField === 'matiere')   matiere   += ' ' + l;
       else if(lastField === 'defendeur') defendeur += ' ' + l;
+      else if(lastField === 'demandeur') demandeur += ' ' + l;
     }
 
-    entries.push({ num, juridiction, matiere, defendeur, avocat, stade: currentStade });
+    entries.push({ num, juridiction, demandeur, matiere, defendeur, avocat, stade: currentStade });
   }
 
   return entries;
@@ -5841,11 +5911,17 @@ function renderAffaireRow(a, hideJur){
   const sc   = STADE_CONFIG[a.stade] || { cls:"stade-setup", label:a.stade };
   const inWL = _watchlist.includes(a.num);
   const jur  = a.juridiction || (_isCour(a) ? "Cour adm." : "Trib. adm.");
+  const firstAvocat = (a.avocat || '').split(',')[0].trim();
+  const avocatCell = a.avocat
+    ? `${escHtml(a.avocat)} <a href="${whoswholuLink('Avocats', firstAvocat)}" target="_blank" rel="noopener" class="affaire-whoswho-link" title="Rechercher dans whoswho-lu">↗</a>`
+    : '';
   return `<tr>
     <td class="num-cell">${escHtml(a.num)}</td>
     ${hideJur ? '' : `<td style="font-size:11.5px;color:var(--text-muted);">${escHtml(jur)}</td>`}
+    <td style="font-size:12.5px;">${escHtml(a.demandeur || '—')}</td>
     <td>${escHtml(a.matiere)}</td>
     <td style="color:var(--text-muted);font-size:12.5px;">${escHtml(a.defendeur)}</td>
+    <td style="font-size:12.5px;">${avocatCell}</td>
     <td><span class="stade-badge ${sc.cls}">${escHtml(sc.label)}</span></td>
     <td style="text-align:right;">
       <button onclick="${escHtml(`toggleWatchlist(${JSON.stringify(String(a.num))})`)}" class="watchlist-toggle${inWL?' watching':''}" aria-pressed="${inWL}">
@@ -5999,9 +6075,10 @@ function lookupAffaire(){
       </div>
       <div style="display:grid;grid-template-columns:140px 1fr;gap:6px 12px;font-size:12.5px;">
         <span style="color:var(--text-faint);">Juridiction</span><span>${escHtml(jur)}</span>
+        <span style="color:var(--text-faint);">Demandeur</span><span>${escHtml(found.demandeur || '—')}</span>
         <span style="color:var(--text-faint);">Matière</span><span>${escHtml(found.matiere)}</span>
         <span style="color:var(--text-faint);">Défendeur</span><span>${escHtml(found.defendeur)}</span>
-        <span style="color:var(--text-faint);">Avocat</span><span>${escHtml(found.avocat)}</span>
+        <span style="color:var(--text-faint);">Avocat</span><span>${found.avocat ? `${escHtml(found.avocat)} <a href="${whoswholuLink('Avocats', (found.avocat||'').split(',')[0].trim())}" target="_blank" rel="noopener" class="affaire-whoswho-link" title="Rechercher dans whoswho-lu">↗</a>` : '—'}</span>
       </div>
       <div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--card-border);">
         <a href="https://jurad.public.lu" target="_blank" rel="noopener" style="font-size:12.5px;color:var(--accent-red);">Vérifier manuellement sur jurad.public.lu</a>

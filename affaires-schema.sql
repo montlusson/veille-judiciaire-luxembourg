@@ -18,6 +18,8 @@
 CREATE TABLE IF NOT EXISTS affaires (
   num          TEXT PRIMARY KEY,
   juridiction  TEXT,       -- "Cour adm." / "Trib. 1re ch." … (même format que renderAffaireRow côté app)
+  demandeur    TEXT,       -- partie demanderesse — présente sur la ligne "N) NUMÉRO NOM" du PDF,
+                            -- absente ou "…" (anonymisée) pour certaines affaires (ex. immigration)
   matiere      TEXT,
   defendeur    TEXT,
   avocat       TEXT,
@@ -59,6 +61,14 @@ CREATE POLICY "Reporter update affaires"
 -- ═══════════════════════════════════════════════════════════════
 ALTER TABLE affaires ADD COLUMN IF NOT EXISTS date_audience DATE;
 CREATE INDEX IF NOT EXISTS affaires_date_audience_idx ON affaires (date_audience);
+
+-- ═══════════════════════════════════════════════════════════════
+-- Ajout colonne demandeur (identification de la partie demanderesse,
+-- jusqu'ici extraite du PDF mais jetée par le parseur) — à exécuter si
+-- la table `affaires` existe déjà. Sans effet si la table vient d'être
+-- créée ci-dessus. Supabase → SQL Editor → New query → Run.
+-- ═══════════════════════════════════════════════════════════════
+ALTER TABLE affaires ADD COLUMN IF NOT EXISTS demandeur TEXT;
 
 -- ── Vérification ───────────────────────────────────────────────
 SELECT 'Schéma affaires créé avec succès ✓' AS status;
