@@ -4642,6 +4642,34 @@ async function handleAnalyseFile(file){
 
 function escHtml(s){ return String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }
 
+/* En-têtes de section écrites en capitales espacées dans le PDF source
+   ("F A I T S", "- p r é v e n u -") — l'extraction perd la différence entre
+   l'espacement (large) entre deux mots et celui (étroit) entre deux lettres
+   d'un même mot, donc impossible à recoller par une règle générale : un essai
+   sur "il y a lieu" (des mots courts ordinaires, PAS un en-tête) le déformait
+   en "ilyal". D'où une liste fermée des en-têtes réels les plus fréquents
+   (catalogués sur l'ensemble des décisions), reconnus seulement en DÉBUT DE
+   LIGNE (parfois suivis de texte normal, ex. "J U G E M E N T qui suit :",
+   ou précédés d'un tiret décoratif, ex. "- p r é v e n u -") — jamais au
+   milieu d'une phrase — et seulement sur correspondance EXACTE avec la liste,
+   pour ne prendre aucun risque sur le texte courant. */
+const SPACED_HEADINGS = [
+  'ENTRE','FAITS','PAR CES MOTIFS','LE JUGEMENT QUI SUIT','JUGEMENT QUI SUIT',
+  'EN PRÉSENCE DE','EN PRÉSENCE DU','LE TRIBUNAL','ORDONNANCE','ET ENCORE',
+  'PROCEDURE','PRESENTS','JUGEMENT','ET DU','ARRÊT TUTELLE','LA COUR','ARRÊT CIVIL',
+  'PRÉVENU','PRÉVENUS'
+];
+function _stripAccentsUpper(s){ return s.normalize('NFD').replace(/[̀-ͯ]/g,'').toUpperCase(); }
+const SPACED_HEADINGS_LOOKUP = new Map(SPACED_HEADINGS.map(h => [_stripAccentsUpper(h).replace(/\s+/g,''), h]));
+
+function _despaceHeadingLine(line){
+  const m = line.match(/^(-\s*)?((?:\p{L}\s){2,}\p{L})\b(.*)$/u);
+  if(!m) return line;
+  const key = _stripAccentsUpper(m[2]).replace(/\s+/g,'');
+  const known = SPACED_HEADINGS_LOOKUP.get(key);
+  return known ? (m[1]||'') + known + m[3] : line;
+}
+
 /* Le texte des décisions (extrait_parsing.py côté serveur) garde un retour à la
    ligne après CHAQUE ligne physique du PDF source, pas après chaque phrase — le
    texte affiché paraît haché, coupé au milieu de phrases sans rapport avec leur
@@ -4651,10 +4679,14 @@ function escHtml(s){ return String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'
    (en-têtes de section, listes à la composition/aux parties, dates) qui,
    justement, n'atteignent jamais cette largeur. Seuil de largeur calculé par
    document (90e percentile des longueurs de ligne) plutôt que fixe, les PDF de
-   juridictions différentes n'ayant pas la même mise en page. Testé sur un texte
-   réel (Cour de cassation) : en-têtes et listes intacts, phrases rejointes.
-   Approximatif par nature (aucune information de paragraphe n'est conservée à
-   l'extraction) mais nettement plus lisible que le texte haché d'origine. */
+   juridictions différentes n'ayant pas la même mise en page. Un mot coupé en
+   fin de ligne (souvent un mot composé, ex. "Grand-\nDuché") est recollé sans
+   espace ajouté pour garder "Grand-Duché" plutôt que "Grand- Duché". Testé sur
+   plusieurs textes réels (Cour de cassation, Tribunaux d'arrondissement,
+   Justices de paix) : en-têtes, listes et mots composés intacts, phrases
+   rejointes. Approximatif par nature (aucune information de paragraphe n'est
+   conservée à l'extraction) mais nettement plus lisible que le texte haché
+   d'origine. */
 function reflowFulltext(text){
   if(!text) return text;
   const rawLines = text.split('\n');
@@ -4665,11 +4697,11 @@ function reflowFulltext(text){
   const out = [];
   let buffer = '';
   for(const raw of rawLines){
-    const line = raw.trim();
+    const line = _despaceHeadingLine(raw.trim());
     if(!line){ if(buffer){ out.push(buffer); buffer=''; } out.push(''); continue; }
     const endsStrong = /[.;:!?][»”")]?$/.test(line);
     const looksFull  = line.length >= wrapThreshold;
-    buffer = buffer ? buffer + ' ' + line : line;
+    buffer = buffer ? (buffer.endsWith('-') ? buffer + line : buffer + ' ' + line) : line;
     if(endsStrong || !looksFull){ out.push(buffer); buffer=''; }
   }
   if(buffer) out.push(buffer);
