@@ -17,10 +17,10 @@ jobs:
 
     steps:
       - name: Checkout du repo
-        uses: actions/checkout@v4
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
 
       - name: Installer Python 3.11
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
         with:
           python-version: '3.11'
 
@@ -43,7 +43,10 @@ jobs:
         run: python scrape_audiences.py || true
 
       # Seul le cache d'URLs est committé (URLs publiques data.public.lu,
-      # nécessaire à l'extraction incrémentale entre deux runs CI)
+      # nécessaire à l'extraction incrémentale entre deux runs CI). Le push est
+      # retenté avec rebase : un simple "|| true" masquait un rejet ponctuel de
+      # GitHub (ex. "fatal error in commit_refs" du 2026-09-13) sans que
+      # personne ne s'en aperçoive — le run restait "success" malgré tout.
       - name: Committer le cache d'extraction
         if: always()   # évite de re-télécharger les mêmes archives au run suivant
         run: |
@@ -51,4 +54,13 @@ jobs:
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add zip_cache.json || true
           git diff --cached --quiet || git commit -m "chore: cache extraction $(date -u +'%Y-%m-%d')"
-          git push || true
+          for attempt in 1 2 3; do
+            if git push; then
+              echo "✓ Cache poussé (tentative $attempt)"
+              exit 0
+            fi
+            echo "✗ Push échoué (tentative $attempt/3) — rebase sur origin/main et nouvel essai"
+            sleep $((attempt * 5))
+            git pull --rebase origin main || true
+          done
+          echo "::warning::Le cache d'extraction n'a pas pu être poussé après 3 tentatives — sans impact sur les données (déjà envoyées à Supabase), mais l'extraction incrémentale re-téléchargera davantage d'archives au prochain run."

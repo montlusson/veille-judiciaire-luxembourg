@@ -4023,11 +4023,22 @@ async function _sbFetchAllDecisions(){
 }
 
 /* Vérification en arrière-plan — rechargement si nouvelle extraction.
-   En cas d'échec de la vérification elle-même (pas juste "rien de neuf"),
-   le voyant du tableau de bord passe en erreur au lieu de rester muet,
-   pour ne pas laisser croire que l'index affiché est à jour. */
-async function _checkStaticUpdate(){
+   C'est le SEUL point qui rattrape un utilisateur revenant avec un cache
+   IndexedDB déjà rempli (cas normal d'un usage régulier) : loadDecisionsFromSupabase
+   affiche alors le cache tel quel et délègue la fraîcheur à cette fonction. Un
+   échec silencieux ici (RLS transitoire, réveil du réseau) pouvait donc laisser
+   un utilisateur avec un index vieux d'une semaine sans qu'il s'en aperçoive —
+   d'où le retry et le message explicite en cas d'échec définitif, plutôt qu'un
+   simple point rouge que personne ne remarque. */
+async function _checkStaticUpdate(retriesLeft = 1){
   const dot = $('#index-update-dot');
+  const sub = $('#index-update-sub');
+  const giveUp = () => {
+    if(dot) dot.className = 'index-update-dot error';
+    if(sub) sub.textContent = currentLang==='de'
+      ? 'Aktualisierungsprüfung fehlgeschlagen — wird beim nächsten Öffnen erneut versucht'
+      : 'Vérification des mises à jour impossible — nouvel essai à la prochaine ouverture';
+  };
   try {
     const stored = localStorage.getItem('vj_last_generated');
     let latest = await _sbLastGenerated();
@@ -4038,13 +4049,15 @@ async function _checkStaticUpdate(){
       } catch(e){}
     }
     if(!latest){
-      if(dot) dot.className = 'index-update-dot error';
+      if(retriesLeft > 0){ await new Promise(r => setTimeout(r, 3000)); return _checkStaticUpdate(retriesLeft - 1); }
+      giveUp();
       return;
     }
     if(stored && latest <= stored) return;
     await loadDecisionsJSON(false);
   } catch(e){
-    if(dot) dot.className = 'index-update-dot error';
+    if(retriesLeft > 0){ await new Promise(r => setTimeout(r, 3000)); return _checkStaticUpdate(retriesLeft - 1); }
+    giveUp();
   }
 }
 
