@@ -5364,13 +5364,30 @@ function parseConvocationText(text, court, chambre){
 
     const num = numMatch[1];
     let defendeur = "", matiere = "", avocat = "";
+    let lastField = null; // pour recoller les lignes de suite (voir plus bas)
 
-    // Lecture des lignes suivantes
+    // Lecture des lignes suivantes — jusqu'à la prochaine affaire numérotée ("N) ...") ou
+    // la limite de 8 lignes, la première atteinte l'emportant. Sans cet arrêt, un dossier
+    // suivant proche dans le texte (peu de lignes d'écart) se faisait silencieusement
+    // écraser : ses champs "c/" / "en matière de :" restaient dans la fenêtre de lecture
+    // du dossier précédent et lui étaient attribués à tort.
+    //
+    // "en matière de :" (et parfois "c/") tient rarement sur une seule ligne dans les
+    // vrais PDF de convocation — vérifié sur des convocations réelles (Tribunal et Cour
+    // administrative) : ex. "...art. 35 (2) L2015 - proc." se termine sur une ligne et
+    // "accélérée" arrive seul sur la suivante. Une ligne qui ne correspond à aucun champ
+    // connu est donc recollée au dernier champ ouvert, sauf "Rapporteur :"/"Composition :"
+    // (juges, propres aux convocations de la Cour) qui referment ce recollage.
     for(let j = i + 1; j < Math.min(i + 8, lines.length); j++){
       const l = lines[j].trim();
-      if(l.startsWith("c/"))          defendeur = l.replace(/^c\/\s*/, "").trim();
-      else if(l.startsWith("en matière de :")) matiere = l.replace(/^en matière de :\s*/, "").trim();
-      else if(l.startsWith("Avocat(s) :"))     avocat  = l.replace(/^Avocat\(s\) :\s*/, "").replace(/^Me\s+/, "").trim();
+      if(/^\d+\)\s+\d+[A-Z]?\b/.test(l)) break;
+      if(!l) continue;
+      if(l.startsWith("c/")){ defendeur = l.replace(/^c\/\s*/, "").trim(); lastField = 'defendeur'; }
+      else if(l.startsWith("en matière de :")){ matiere = l.replace(/^en matière de :\s*/, "").trim(); lastField = 'matiere'; }
+      else if(l.startsWith("Avocat(s) :")){ avocat = l.replace(/^Avocat\(s\) :\s*/, "").replace(/^Me\s+/, "").trim(); lastField = 'avocat'; }
+      else if(/^(Rapporteur|Composition)\s*:/.test(l)){ lastField = null; }
+      else if(lastField === 'matiere')   matiere   += ' ' + l;
+      else if(lastField === 'defendeur') defendeur += ' ' + l;
     }
 
     entries.push({ num, juridiction, matiere, defendeur, avocat, stade: currentStade });
