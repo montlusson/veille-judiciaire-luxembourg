@@ -1454,22 +1454,6 @@ body.printing-decision #print-decision-area{display:block!important;color:#000;b
           <input type="file" id="convoc-file-input" accept="application/pdf,.zip" multiple style="display:none;">
           <p data-i18n="convoc_drop_cta">Glissez-déposez un ou plusieurs PDF de convocation ici (ou un ZIP les contenant), ou cliquez pour parcourir</p>
         </div>
-        <div style="display:flex;gap:10px;margin:14px 0;flex-wrap:wrap;align-items:center;">
-          <label for="convoc-upload-jur" class="sr-only" data-i18n="convoc_jur_label">Juridiction</label>
-          <select id="convoc-upload-jur">
-            <option value="Cour administrative">Cour administrative</option>
-            <option value="Tribunal administratif">Tribunal administratif</option>
-          </select>
-          <label for="convoc-upload-chambre" class="sr-only" data-i18n="convoc_chambre_label">Chambre</label>
-          <select id="convoc-upload-chambre" style="display:none;">
-            <option value="1re ch.">1re ch.</option>
-            <option value="2e ch.">2e ch.</option>
-            <option value="3e ch.">3e ch.</option>
-            <option value="4e ch.">4e ch.</option>
-            <option value="5e ch.">5e ch.</option>
-            <option value="6e ch.">6e ch.</option>
-          </select>
-        </div>
         <p class="status-line" id="convoc-upload-status" role="status"></p>
         <div class="recherche-split" style="height:calc(100vh - 380px);">
           <div class="recherche-left" id="convoc-files-list">
@@ -1923,8 +1907,6 @@ const TRANSLATIONS = {
     convoc_drop_cta: "Glissez-déposez un ou plusieurs PDF de convocation ici (ou un ZIP les contenant), ou cliquez pour parcourir",
     convoc_files_empty: "Les fichiers déposés apparaîtront ici.",
     convoc_reader_placeholder: "Sélectionnez un fichier déposé pour le consulter.",
-    convoc_jur_label: "Juridiction",
-    convoc_chambre_label: "Chambre",
     agenda_filter_all: "Toutes les juridictions",
     agenda_week0: "Cette semaine",
     agenda_week1: "Semaine +1",
@@ -2179,8 +2161,6 @@ const TRANSLATIONS = {
     convoc_drop_cta: "Ein oder mehrere Ladungs-PDFs hier ablegen (oder ein ZIP damit) oder klicken, um zu durchsuchen",
     convoc_files_empty: "Die abgelegten Dateien erscheinen hier.",
     convoc_reader_placeholder: "Wählen Sie eine abgelegte Datei aus, um sie anzusehen.",
-    convoc_jur_label: "Gericht",
-    convoc_chambre_label: "Kammer",
     agenda_filter_all: "Alle Gerichte",
     agenda_week0: "Diese Woche",
     agenda_week1: "Woche +1",
@@ -4362,12 +4342,6 @@ if(analyseZone && analyseInput){
    rédaction via la table Supabase `affaires`. */
 const convocZone  = $('#convoc-drop-zone');
 const convocInput = $('#convoc-file-input');
-const convocJurSel = $('#convoc-upload-jur');
-const convocChambreSel = $('#convoc-upload-chambre');
-
-convocJurSel?.addEventListener('change', () => {
-  convocChambreSel.style.display = convocJurSel.value === 'Tribunal administratif' ? 'inline-block' : 'none';
-});
 
 if(convocZone && convocInput){
   convocZone.addEventListener('click', () => convocInput.click());
@@ -4424,10 +4398,13 @@ function openConvocFileDetail(idx){
   const annotId = 'convoc:' + entry.file.name;
   const affaireRows = entry.parsed.map(a => {
     const inWL = _watchlist.includes(a.num);
+    const avocatHtml = a.avocat
+      ? ` · ${isDE?'Anwalt':'Avocat'} : ${escHtml(a.avocat)} <a href="${whoswholuLink('Avocats', (a.avocat||'').split(',')[0].trim())}" target="_blank" rel="noopener" class="affaire-whoswho-link" title="Rechercher dans whoswho-lu">↗</a>`
+      : '';
     return `<div class="watchlist-item">
       <div>
         <span style="font-family:monospace;font-weight:700;font-size:13px;">${escHtml(a.num)}</span>
-        <span style="font-size:12px;color:var(--text-muted);margin-left:10px;">${escHtml(a.matiere)} — ${escHtml(a.stade)}</span>
+        <span style="font-size:12px;color:var(--text-muted);margin-left:10px;">${escHtml(a.demandeur || (isDE?'Kläger unbekannt':'Demandeur inconnu'))} — ${escHtml(a.matiere)} — ${escHtml(a.stade)}${avocatHtml}</span>
       </div>
       <button onclick="${escHtml(`toggleWatchlist(${JSON.stringify(String(a.num))})`)}" class="watchlist-toggle${inWL?' watching':''}" aria-pressed="${inWL}">
         ${inWL ? '✓ ' + (isDE?'Verfolgt':'Suivi') : (isDE?'Verfolgen':'Surveiller')}
@@ -4521,6 +4498,26 @@ function _extractDateAudience(text){
 
 /* Extrait le texte d'un PDF de convocation, le passe à parseConvocationText()
    et repère la date d'audience commune à toutes les affaires du PDF. */
+/* Juridiction (et chambre pour le Tribunal) déterminées à partir de l'en-tête du
+   PDF lui-même ("TRIBUNAL ADMINISTRATIF" / "COUR ADMINISTRATIVE", "chambre N"),
+   plutôt que du menu déroulant. Un dépôt groupé (plusieurs fichiers sélectionnés
+   ou glissés en une fois) applique le même réglage de menu à tous les fichiers —
+   en pratique, un lot mêlant Cour et Tribunal (ou plusieurs chambres) se
+   retrouvait donc entièrement mal étiqueté dès qu'on oubliait de changer le menu
+   entre deux fichiers. Le texte du PDF ne ment pas, lui. Repli sur le menu
+   déroulant seulement si l'en-tête ne permet pas de trancher. */
+const CHAMBRE_ORDINALS = {1:'1re ch.',2:'2e ch.',3:'3e ch.',4:'4e ch.',5:'5e ch.',6:'6e ch.'};
+function _detectJurChambre(text, fallbackJur, fallbackChambre){
+  const head = text.slice(0, 400);
+  if(/\bcour administrative\b/i.test(head)) return { jur: 'Cour administrative', chambre: '' };
+  if(/\btribunal administratif\b/i.test(head)){
+    const m = head.match(/chambre\s+(\d)\b/i);
+    const chambre = (m && CHAMBRE_ORDINALS[+m[1]]) ? CHAMBRE_ORDINALS[+m[1]] : fallbackChambre;
+    return { jur: 'Tribunal administratif', chambre };
+  }
+  return { jur: fallbackJur, chambre: fallbackChambre };
+}
+
 async function parseConvocPdf(file, jur, chambre){
   if(typeof pdfjsLib === 'undefined') throw new Error('PDF.js non chargé');
   const arrayBuffer = await file.arrayBuffer();
@@ -4532,10 +4529,11 @@ async function parseConvocPdf(file, jur, chambre){
     const lines = await extractPageLines(page);
     text += lines.map(l => l.text).join('\n') + '\n';
   }
+  const detected = _detectJurChambre(text, jur, chambre);
   const dateAudience = _extractDateAudience(text);
-  const entries = parseConvocationText(text, jur, chambre);
+  const entries = parseConvocationText(text, detected.jur, detected.chambre);
   entries.forEach(e => { e.date_audience = dateAudience; });
-  return { entries, dateAudience };
+  return { entries, dateAudience, jur: detected.jur, chambre: detected.chambre };
 }
 
 /* Accepte un fichier unique ou un tableau (PDF et/ou ZIP contenant des PDF).
@@ -4545,8 +4543,6 @@ async function parseConvocPdf(file, jur, chambre){
 async function handleConvocUpload(fileOrFiles){
   const isDE = currentLang==='de';
   const statusEl = $('#convoc-upload-status');
-  const jur = convocJurSel?.value || 'Cour administrative';
-  const chambre = jur === 'Tribunal administratif' ? (convocChambreSel?.value || '') : '';
 
   const incoming = Array.isArray(fileOrFiles) ? fileOrFiles : [fileOrFiles];
   const zipFiles = incoming.filter(f => /\.zip$/i.test(f.name));
@@ -4571,7 +4567,9 @@ async function handleConvocUpload(fileOrFiles){
   let firstNewIdx = null;
   for(const file of pdfFiles){
     try {
-      const { entries, dateAudience } = await parseConvocPdf(file, jur, chambre);
+      // Juridiction/chambre par défaut ("Cour administrative", sans chambre) si
+      // jamais l'en-tête du PDF ne permet pas de trancher — voir _detectJurChambre.
+      const { entries, dateAudience, jur, chambre } = await parseConvocPdf(file, 'Cour administrative', '');
       depositedConvocFiles.push({ file, jur, chambre, sourceWeek, dateAudience, parsed: entries });
       if(firstNewIdx === null) firstNewIdx = depositedConvocFiles.length - 1;
       if(entries.length) allParsed.push(...entries);
