@@ -3139,7 +3139,7 @@ function openReader(id){
       <div class="reader-section-title" style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--text-faint);margin:14px 0 10px;">
         ${isDE?'Auszug aus dem Urteil':'Texte extrait du jugement'}
       </div>
-      <div class="detail-full-text" id="detail-fulltext-body">${hl(d.fulltext||d.excerpt||'— '+(isDE?'Text nicht verfügbar':'Texte non disponible pour cette décision')+' —')}</div>
+      <div class="detail-full-text" id="detail-fulltext-body">${hl(reflowFulltext(d.fulltext||d.excerpt)||'— '+(isDE?'Text nicht verfügbar':'Texte non disponible pour cette décision')+' —')}</div>
       ${d.entities&&(d.entities.societes.length||d.entities.montants.length)?`
       <div style="margin-top:22px;">
         <div class="reader-section-title" style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--text-faint);margin-bottom:10px;">${isDE?'Automatisch extrahierte Entitäten':'Entités extraites automatiquement'}</div>
@@ -3160,7 +3160,7 @@ function openReader(id){
       .then(({data, error}) => {
         if(!error && data && data.fulltext){
           d.fulltext = data.fulltext;
-          if(ftEl()) ftEl().innerHTML = hl(d.fulltext);
+          if(ftEl()) ftEl().innerHTML = hl(reflowFulltext(d.fulltext));
         }
       });
   }
@@ -4642,6 +4642,40 @@ async function handleAnalyseFile(file){
 
 function escHtml(s){ return String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }
 
+/* Le texte des décisions (extrait_parsing.py côté serveur) garde un retour à la
+   ligne après CHAQUE ligne physique du PDF source, pas après chaque phrase — le
+   texte affiché paraît haché, coupé au milieu de phrases sans rapport avec leur
+   sens. Recolle les lignes qui se poursuivent visiblement (pas de ponctuation
+   forte en fin de ligne ET la ligne fait à peu près la largeur "pleine page" du
+   document), tout en préservant les lignes courtes intentionnellement isolées
+   (en-têtes de section, listes à la composition/aux parties, dates) qui,
+   justement, n'atteignent jamais cette largeur. Seuil de largeur calculé par
+   document (90e percentile des longueurs de ligne) plutôt que fixe, les PDF de
+   juridictions différentes n'ayant pas la même mise en page. Testé sur un texte
+   réel (Cour de cassation) : en-têtes et listes intacts, phrases rejointes.
+   Approximatif par nature (aucune information de paragraphe n'est conservée à
+   l'extraction) mais nettement plus lisible que le texte haché d'origine. */
+function reflowFulltext(text){
+  if(!text) return text;
+  const rawLines = text.split('\n');
+  if(rawLines.length < 3) return text;
+  const lens = rawLines.map(l => l.length).filter(n => n > 0).sort((a,b) => a-b);
+  const p90 = lens[Math.floor(lens.length * 0.9)] || 0;
+  const wrapThreshold = Math.max(40, p90 * 0.75);
+  const out = [];
+  let buffer = '';
+  for(const raw of rawLines){
+    const line = raw.trim();
+    if(!line){ if(buffer){ out.push(buffer); buffer=''; } out.push(''); continue; }
+    const endsStrong = /[.;:!?][»”")]?$/.test(line);
+    const looksFull  = line.length >= wrapThreshold;
+    buffer = buffer ? buffer + ' ' + line : line;
+    if(endsStrong || !looksFull){ out.push(buffer); buffer=''; }
+  }
+  if(buffer) out.push(buffer);
+  return out.join('\n');
+}
+
 /* ── Normalisation légère des espaces issus de l'extraction PDF ──
    NB: la majorité des espaces parasites est corrigée en amont par la
    reconstruction basée sur le gap X. Ce post-traitement reste minimal
@@ -5703,7 +5737,7 @@ function openFulltextModal(){
   document.getElementById('fulltext-modal-title').textContent = `${d.ref} — ${d.jur}`;
   document.getElementById('fulltext-modal-print-label').textContent = isDE ? 'Drucken' : 'Imprimer';
   document.getElementById('fulltext-modal-body').textContent =
-    d.fulltext || d.excerpt || (isDE?'Text nicht verfügbar':'Texte non disponible pour cette décision');
+    reflowFulltext(d.fulltext || d.excerpt) || (isDE?'Text nicht verfügbar':'Texte non disponible pour cette décision');
   document.getElementById('fulltext-modal-overlay').classList.add('open');
   document.body.style.overflow = 'hidden';
 }
@@ -5726,7 +5760,7 @@ function printDecision(id){
     <div class="print-ref">${escHtml(d.ref)} — ${escHtml(d.type)}</div>
     <div class="print-meta">${escHtml(d.jur)} · ${escHtml(d.date)}</div>
     <div class="print-section-title">${isDE?'Urteilstext':'Texte du jugement'}</div>
-    <div class="print-text">${escHtml(d.fulltext || d.excerpt || (isDE?'Text nicht verfügbar':'Texte non disponible pour cette décision'))}</div>
+    <div class="print-text">${escHtml(reflowFulltext(d.fulltext || d.excerpt) || (isDE?'Text nicht verfügbar':'Texte non disponible pour cette décision'))}</div>
     ${socs}${amts}`;
   document.body.classList.add('printing-decision');
   const cleanup = () => document.body.classList.remove('printing-decision');
