@@ -4139,13 +4139,38 @@ async function loadDecisionsJSON(forceRefresh = false){
       if(fresh && fresh.length === 0) fresh = null; /* table vide ou accès refusé → fallback */
     }
     if(!fresh){
-      /* Secours : index statique local (mode LANCER.command — plus publié en ligne) */
-      const r = await fetch('decisions_index.json', { cache: 'no-cache' });
-      if(!r.ok) throw new Error('not found');
-      const idx = await r.json();
-      if(!Array.isArray(idx.decisions) || idx.decisions.length === 0) throw new Error('empty');
-      fresh = idx.decisions;
-      fetchedGenerated = idx.generated_at || fetchedGenerated;
+      /* Secours : index statique local (mode LANCER.command uniquement — répond 404
+         en production sur GitHub Pages, ce fichier n'y étant jamais publié). */
+      try {
+        const r = await fetch('decisions_index.json', { cache: 'no-cache' });
+        if(r.ok){
+          const idx = await r.json();
+          if(Array.isArray(idx.decisions) && idx.decisions.length > 0){
+            fresh = idx.decisions;
+            fetchedGenerated = idx.generated_at || fetchedGenerated;
+          }
+        }
+      } catch(e) { /* fichier absent en production — cas normal */ }
+    }
+    if(!fresh){
+      /* Dernier recours : le cache IndexedDB déjà connu. Sans ça, un aléa réseau
+         ponctuel sur Supabase (le seul secours réel en production) laissait le
+         tableau de bord vide ou bloqué sur les données d'exemple, au lieu de
+         continuer à afficher la dernière version réelle disponible. */
+      try {
+        const db = await _vjOpenDB();
+        const cached = await _vjIDBGet(db, 'decisions');
+        if(Array.isArray(cached) && cached.length > 0){
+          DECISIONS = cached;
+          showBanner(currentLang==='de'
+            ? '⚠ Aktualisierung fehlgeschlagen — letzte bekannte Version angezeigt'
+            : '⚠ Mise à jour impossible pour l\'instant — dernière version connue affichée', 'var(--accent-red)', '#fff');
+          setButtonsDisabled(false);
+          renderAll();
+          return;
+        }
+      } catch(e) { /* IDB également indisponible → on tombe dans le message d'erreur ci-dessous */ }
+      throw new Error('not found');
     }
     const data = { decisions: fresh };
     const existingIds = new Set(DECISIONS.filter(d => !d._demo).map(d => d.id));
