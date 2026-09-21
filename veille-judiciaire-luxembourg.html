@@ -2499,8 +2499,23 @@ let ANNOTATIONS = JSON.parse(localStorage.getItem('vj_annotations') || '{}');
 async function loadAnnotationsFromSupabase(){
   if(!_sb) return;
   try {
-    const { data, error } = await _sb.from('annotations').select('*');
-    if(error || !data) return;
+    /* Pagination explicite : un .select('*') simple est plafonné en silence
+       par le réglage "Max Rows" du projet Supabase (voir le même correctif
+       sur loadAffairesFromSupabase) — cette table grossit à chaque décision
+       annotée, donc tout aussi exposée avec le temps. */
+    const PAGE = 1000;
+    let data = [], from = 0;
+    for(;;){
+      const { data: page, error } = await _sb.from('annotations')
+        .select('*')
+        .order('decision_id', { ascending: true })
+        .range(from, from + PAGE - 1);
+      if(error) throw error;
+      data = data.concat(page || []);
+      if(!page || page.length < PAGE) break;
+      from += PAGE;
+    }
+    if(!data.length) return;
     const fresh = {};
     data.forEach(r => {
       fresh[r.decision_id] = {
@@ -5352,12 +5367,29 @@ function parseConvocationText(text, court, chambre){
 
 /* Affaires en cours : table Supabase partagée `affaires`, alimentée par les
    dépôts PDF volontaires des journalistes (voir handleConvocUpload, onglet
-   Audiences) — remplace l'ancien pipeline automatisé archives/index.json. */
+   Audiences) — remplace l'ancien pipeline automatisé archives/index.json.
+   Un simple .select('*') sans pagination est plafonné en silence par le
+   réglage "Max Rows" du projet Supabase (aucune erreur, juste une troncature
+   invisible) — d'où un total bloqué depuis des semaines dès que le nombre
+   réel d'affaires a dépassé ce plafond. Pagination explicite par blocs de
+   1000, comme pour les décisions (_sbFetchAllDecisions), pour toujours
+   récupérer l'intégralité de la table. */
 async function loadAffairesFromSupabase(){
   if(!_sb) return;
   try {
-    const { data, error } = await _sb.from('affaires').select('*');
-    if(error || !data || !data.length) return;
+    const PAGE = 1000;
+    let data = [], from = 0;
+    for(;;){
+      const { data: page, error } = await _sb.from('affaires')
+        .select('*')
+        .order('num', { ascending: true })
+        .range(from, from + PAGE - 1);
+      if(error) throw error;
+      data = data.concat(page || []);
+      if(!page || page.length < PAGE) break;
+      from += PAGE;
+    }
+    if(!data.length) return;
     AFFAIRES_DATA = data;
     const kpi = document.getElementById("kpi-affaires");
     if(kpi) kpi.textContent = AFFAIRES_DATA.length;
