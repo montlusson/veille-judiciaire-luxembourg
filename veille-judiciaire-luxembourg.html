@@ -5384,7 +5384,12 @@ function parseConvocationText(text, court, chambre){
       if(!l) continue;
       if(l.startsWith("c/")){ defendeur = l.replace(/^c\/\s*/, "").trim(); lastField = 'defendeur'; }
       else if(l.startsWith("en matière de :")){ matiere = l.replace(/^en matière de :\s*/, "").trim(); lastField = 'matiere'; }
-      else if(l.startsWith("Avocat(s) :")){ avocat = l.replace(/^Avocat\(s\) :\s*/, "").replace(/^Me\s+/, "").trim(); lastField = 'avocat'; }
+      else if(l.startsWith("Avocat(s) :")){
+        // Plusieurs avocats sur une ligne ("Me X, Me Y, Me Z") : on retire "Me " partout,
+        // pas seulement en tête, sinon les avocats après le premier gardaient leur "Me ".
+        avocat = l.replace(/^Avocat\(s\) :\s*/, "").replace(/\bMe\s+/g, "").trim();
+        lastField = 'avocat';
+      }
       else if(/^(Rapporteur|Composition)\s*:/.test(l)){ lastField = null; }
       else if(lastField === 'matiere')   matiere   += ' ' + l;
       else if(lastField === 'defendeur') defendeur += ' ' + l;
