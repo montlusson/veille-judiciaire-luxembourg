@@ -751,8 +751,15 @@ table.analyse-tbl tbody tr:hover{background:var(--row-sep);}
 .watchlist-toggle{background:none;border:1px solid var(--card-border);border-radius:5px;padding:3px 9px;font-size:11px;cursor:pointer;color:var(--text-muted);font-family:inherit;transition:all .15s;white-space:nowrap;}
 .watchlist-toggle.watching{background:var(--accent-blue);border-color:var(--accent-blue);color:#fff;}
 .watchlist-toggle:hover:not(.watching){background:var(--row-sep);}
-.affaire-whoswho-link{color:var(--accent-blue);text-decoration:none;font-weight:700;margin-left:2px;}
-.affaire-whoswho-link:hover{text-decoration:underline;}
+/* Lien vers whoswho-lu — même gabarit de puce que .annot-count-badge (fond
+   teinté + couleur d'accent Reporter), plutôt qu'un simple caractère flèche. */
+.affaire-whoswho-link{
+  display:inline-flex;align-items:center;justify-content:center;
+  width:18px;height:18px;border-radius:5px;vertical-align:-3px;margin-left:4px;
+  background:var(--accent-red-tint);color:var(--accent-red);
+  transition:background .15s,color .15s;
+}
+.affaire-whoswho-link:hover{background:var(--accent-red);color:#fff;}
 /* ── Affaires tabs & grouping ── */
 .affaires-tabs{display:flex;gap:0;padding:0 20px;border-bottom:1px solid var(--card-border);background:var(--row-sep);}
 .affaires-tab{padding:10px 16px;font-size:12px;font-weight:600;letter-spacing:.03em;color:var(--text-muted);cursor:pointer;border:none;background:none;border-bottom:2px solid transparent;margin-bottom:-1px;transition:color .15s,border-color .15s;border-radius:0;font-family:inherit;white-space:nowrap;}
@@ -3858,7 +3865,7 @@ function openAgendaDay(dateStr){
     <div class="agenda-day-identified-title">${isDE ? 'Identifizierte Verfahren' : 'Affaires identifiées'} (${identified.length})</div>
     ${identified.map(a => {
       const avocatHtml = a.avocat
-        ? `${escHtml(a.avocat)} <a href="${whoswholuLink('Avocats', (a.avocat||'').split(',')[0].trim())}" target="_blank" rel="noopener" class="affaire-whoswho-link" title="Rechercher dans whoswho-lu">↗</a>`
+        ? `${escHtml(a.avocat)} <a href="${whoswholuLink('Avocats', _lawyerSearchName(a.avocat))}" target="_blank" rel="noopener" class="affaire-whoswho-link" title="Rechercher dans whoswho-lu">${WHOSWHO_ICON}</a>`
         : '';
       return `<div class="agenda-day-identified-row">
         <span class="agenda-day-identified-num">${escHtml(a.num)}</span>
@@ -4399,7 +4406,7 @@ function openConvocFileDetail(idx){
   const affaireRows = entry.parsed.map(a => {
     const inWL = _watchlist.includes(a.num);
     const avocatHtml = a.avocat
-      ? ` · ${isDE?'Anwalt':'Avocat'} : ${escHtml(a.avocat)} <a href="${whoswholuLink('Avocats', (a.avocat||'').split(',')[0].trim())}" target="_blank" rel="noopener" class="affaire-whoswho-link" title="Rechercher dans whoswho-lu">↗</a>`
+      ? ` · ${isDE?'Anwalt':'Avocat'} : ${escHtml(a.avocat)} <a href="${whoswholuLink('Avocats', _lawyerSearchName(a.avocat))}" target="_blank" rel="noopener" class="affaire-whoswho-link" title="Rechercher dans whoswho-lu">${WHOSWHO_ICON}</a>`
       : '';
     return `<div class="watchlist-item">
       <div>
@@ -5571,6 +5578,33 @@ const RAPPR_RETENTION_MOIS = 6;
    (médecins / dentistes / pharmaciens) pour préserver ce lien 1:1, whoswho-lu
    n'ayant pas de sous-catégorie combinée. */
 const WHOSWHOLU_URL = 'https://whoswho-lu.pages.dev';
+/* Les convocations du greffe donnent les avocats en "NOM Prénom" (nom de
+   famille en capitales) — whoswho-lu attend l'ordre inverse "Prénom Nom".
+   Repère la coupure entre les mots tout en capitales (le nom) et le reste
+   (le prénom), remet le nom en casse normale, puis inverse. Gère aussi
+   "CABINET (Me NOM Prénom)" en n'inversant que ce qui est entre parenthèses.
+   Si aucune coupure nette n'est trouvée (un seul mot, tout en capitales…),
+   le nom est laissé tel quel plutôt que de risquer une inversion fausse. */
+function _titleCaseName(s){
+  return s.replace(/\p{L}+/gu, w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase());
+}
+function _invertLawyerName(name){
+  const words = (name || '').trim().split(/\s+/).filter(Boolean);
+  let i = 0;
+  while(i < words.length && words[i] === words[i].toLocaleUpperCase('fr') && /\p{L}/u.test(words[i])) i++;
+  if(i === 0 || i === words.length) return name;
+  const surname   = _titleCaseName(words.slice(0, i).join(' '));
+  const firstname = words.slice(i).join(' ');
+  return `${firstname} ${surname}`;
+}
+function _lawyerSearchName(avocatField){
+  const first = (avocatField || '').split(',')[0].trim();
+  const paren = first.match(/\(([^)]+)\)/); // "CABINET (Me NOM Prénom)" → ne garder que le nom
+  return _invertLawyerName(paren ? paren[1].trim() : first);
+}
+
+const WHOSWHO_ICON = '<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7M17 7H9M17 7V15"/></svg>';
+
 function whoswholuLink(whoswhoSub, searchName, addCase){
   const params = new URLSearchParams({ cat: 'Professions réglementées', sub: whoswhoSub });
   if(searchName) params.set('q', searchName);
@@ -5909,9 +5943,8 @@ function renderAffaireRow(a, hideJur){
   const sc   = STADE_CONFIG[a.stade] || { cls:"stade-setup", label:a.stade };
   const inWL = _watchlist.includes(a.num);
   const jur  = a.juridiction || (_isCour(a) ? "Cour adm." : "Trib. adm.");
-  const firstAvocat = (a.avocat || '').split(',')[0].trim();
   const avocatCell = a.avocat
-    ? `${escHtml(a.avocat)} <a href="${whoswholuLink('Avocats', firstAvocat)}" target="_blank" rel="noopener" class="affaire-whoswho-link" title="Rechercher dans whoswho-lu">↗</a>`
+    ? `${escHtml(a.avocat)} <a href="${whoswholuLink('Avocats', _lawyerSearchName(a.avocat))}" target="_blank" rel="noopener" class="affaire-whoswho-link" title="Rechercher dans whoswho-lu">${WHOSWHO_ICON}</a>`
     : '';
   return `<tr>
     <td class="num-cell">${escHtml(a.num)}</td>
@@ -6076,7 +6109,7 @@ function lookupAffaire(){
         <span style="color:var(--text-faint);">Demandeur</span><span>${escHtml(found.demandeur || '—')}</span>
         <span style="color:var(--text-faint);">Matière</span><span>${escHtml(found.matiere)}</span>
         <span style="color:var(--text-faint);">Défendeur</span><span>${escHtml(found.defendeur)}</span>
-        <span style="color:var(--text-faint);">Avocat</span><span>${found.avocat ? `${escHtml(found.avocat)} <a href="${whoswholuLink('Avocats', (found.avocat||'').split(',')[0].trim())}" target="_blank" rel="noopener" class="affaire-whoswho-link" title="Rechercher dans whoswho-lu">↗</a>` : '—'}</span>
+        <span style="color:var(--text-faint);">Avocat</span><span>${found.avocat ? `${escHtml(found.avocat)} <a href="${whoswholuLink('Avocats', _lawyerSearchName(found.avocat))}" target="_blank" rel="noopener" class="affaire-whoswho-link" title="Rechercher dans whoswho-lu">${WHOSWHO_ICON}</a>` : '—'}</span>
       </div>
       <div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--card-border);">
         <a href="https://jurad.public.lu" target="_blank" rel="noopener" style="font-size:12.5px;color:var(--accent-red);">Vérifier manuellement sur jurad.public.lu</a>
