@@ -4129,7 +4129,13 @@ async function loadDecisionsJSON(forceRefresh = false){
   try {
     let fresh = null, fetchedGenerated = newGenerated || '';
     if(_sb){
-      try { fresh = await _sbFetchAllDecisions(); } catch(e){ fresh = null; }
+      /* ~10 pages de 1000 lignes : un aléa réseau ponctuel sur l'une d'elles ne doit
+         pas faire échouer tout le rechargement (date + delta) — un essai de plus
+         avant d'abandonner. */
+      try { fresh = await _sbFetchAllDecisions(); }
+      catch(e){
+        try { fresh = await _sbFetchAllDecisions(); } catch(e2){ fresh = null; }
+      }
       if(fresh && fresh.length === 0) fresh = null; /* table vide ou accès refusé → fallback */
     }
     if(!fresh){
@@ -4143,7 +4149,24 @@ async function loadDecisionsJSON(forceRefresh = false){
     }
     const data = { decisions: fresh };
     const existingIds = new Set(DECISIONS.filter(d => !d._demo).map(d => d.id));
-    const hadBaseline = existingIds.size > 0;
+    let hadBaseline = existingIds.size > 0;
+    if(!hadBaseline){
+      /* DECISIONS (en mémoire) n'a pas encore été peuplé depuis le cache local à ce
+         stade — ex. "Mettre à jour l'index" cliqué avant que le chargement automatique
+         n'ait eu le temps de tourner. On va chercher la base précédente dans IndexedDB
+         avant de conclure à un tout premier chargement, sinon le delta "nouvelles
+         décisions" se perd à cause d'un simple ordre d'appel plutôt qu'un vrai premier
+         accès. */
+      try {
+        const db = await _vjOpenDB();
+        const idbCached = await _vjIDBGet(db, 'decisions');
+        const idbReal = Array.isArray(idbCached) ? idbCached.filter(d => !d._demo) : [];
+        if(idbReal.length > 0){
+          idbReal.forEach(d => existingIds.add(d.id));
+          hadBaseline = true;
+        }
+      } catch(e) { /* IDB inaccessible → on reste sur "pas de comparaison" */ }
+    }
     const newDecisions = data.decisions.filter(d => !existingIds.has(d.id));
     const newCount = newDecisions.length;
 
