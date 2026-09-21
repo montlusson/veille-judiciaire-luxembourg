@@ -4000,9 +4000,15 @@ async function _sbFetchAllDecisions(){
   const PAGE = 1000;
   let all = [], from = 0;
   for(;;){
+    /* Tri secondaire sur `id` indispensable : des centaines de décisions partagent
+       la même `date` (granularité au jour), et Postgres ne garantit aucun ordre
+       stable entre deux requêtes identiques pour des lignes à égalité de tri —
+       sans ce départage, la pagination peut faire apparaître/disparaître des
+       lignes d'un appel à l'autre et fausser le calcul des "nouvelles décisions". */
     const { data, error } = await _sb.from('decisions')
       .select('id,ref,date,jur,group,type,excerpt,entities,source_year')
       .order('date', { ascending: false })
+      .order('id', { ascending: true })
       .range(from, from + PAGE - 1);
     if(error) throw error;
     all = all.concat(data || []);
