@@ -1210,11 +1210,11 @@ body.printing-decision #print-decision-area{display:block!important;color:#000;b
             <svg class="kpi-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
           </div>
         </button>
-        <button class="kpi-card kpi-green" onclick="showScreen('affaires')" aria-label="Voir les affaires en cours">
-          <div class="kpi-num" id="kpi-affaires">18</div>
-          <div class="kpi-label" data-i18n="kpi_affaires">Affaires en cours</div>
+        <button class="kpi-card kpi-green" onclick="showScreen('agenda');switchAgendaTab('cal')" aria-label="Voir le calendrier des audiences">
+          <div class="kpi-num" id="kpi-affaires">—</div>
+          <div class="kpi-label" data-i18n="kpi_affaires">Séances programmées</div>
           <div class="kpi-foot">
-            <span data-i18n="kpi_affaires_foot">W25 · Cour administrative</span>
+            <span data-i18n="kpi_affaires_foot">Calendrier judiciaire</span>
             <svg class="kpi-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
           </div>
         </button>
@@ -1748,8 +1748,8 @@ const TRANSLATIONS = {
     kpi_entities: "Entités extraites",
     kpi_entities_foot: "Sociétés & montants",
     nav_affaires: "Affaires en cours",
-    kpi_affaires: "Affaires en cours",
-    kpi_affaires_foot: "W25 · Cour administrative",
+    kpi_affaires: "Séances programmées",
+    kpi_affaires_foot: "Calendrier judiciaire",
     action_affaires_title: "Affaires en cours",
     action_affaires_desc: "Suivez l'avancement des affaires en cours devant la Cour administrative.",
     action_affaires_btn: "Ouvrir",
@@ -2004,8 +2004,8 @@ const TRANSLATIONS = {
     kpi_entities: "Extrahierte Entitäten",
     kpi_entities_foot: "Gesellschaften & Beträge",
     nav_affaires: "Laufende Verfahren",
-    kpi_affaires: "Laufende Verfahren",
-    kpi_affaires_foot: "W25 · Verwaltungsgericht",
+    kpi_affaires: "Geplante Sitzungen",
+    kpi_affaires_foot: "Gerichtskalender",
     action_affaires_title: "Laufende Verfahren",
     action_affaires_desc: "Verfolgen Sie den Stand laufender Verfahren vor dem Verwaltungsgericht.",
     action_affaires_btn: "Öffnen",
@@ -2673,6 +2673,19 @@ function renderDashboard(){
     }
   }
   if($('#kpi-imports')) $('#kpi-imports').textContent = uploadedFiles.length;
+
+  /* "Affaires en cours" (tuile tableau de bord) — le nombre de dossiers
+     déposés manuellement stagnait des semaines sans bouger dès qu'aucun
+     PDF n'était déposé. Le calendrier automatique (scrape_audiences.py)
+     donne une meilleure idée générale de l'activité judiciaire, même
+     sans identité de dossier individuelle : nombre de séances programmées
+     (AUDIENCES_META.total_seances, déjà affiché tel quel dans Audiences →
+     Calendrier). */
+  const kpiAffaires = $('#kpi-affaires');
+  if(kpiAffaires){
+    const seances = AUDIENCES_META?.total_seances;
+    kpiAffaires.textContent = (seances || seances === 0) ? seances.toLocaleString(currentLang==='de'?'de-DE':'fr-LU') : '—';
+  }
 
   /* Activité récente : élément optionnel (peut ne pas exister selon le layout) */
   const recentEl = $('#recent-list');
@@ -3694,6 +3707,7 @@ async function loadAudiencesJSON(){
     }
     populateAgendaFilters();
     renderAgenda();
+    renderDashboard(); /* tuile "Affaires en cours" — dépend de AUDIENCES_META */
   } catch {
     $('#agenda-list').innerHTML = '<div class="empty-state" style="padding:40px;background:var(--card-bg);border:1px solid var(--card-border);border-radius:var(--radius-lg);">'+
       '<p>' + t('agenda_error') + '</p>'+
@@ -5391,8 +5405,9 @@ async function loadAffairesFromSupabase(){
     }
     if(!data.length) return;
     AFFAIRES_DATA = data;
-    const kpi = document.getElementById("kpi-affaires");
-    if(kpi) kpi.textContent = AFFAIRES_DATA.length;
+    /* La tuile "Affaires en cours" du tableau de bord affiche désormais le
+       nombre de séances programmées (calendrier automatique) plutôt que ce
+       compteur — voir renderDashboard(). */
     renderAffaires();
     renderStats();
     renderWatchlistPanel();
