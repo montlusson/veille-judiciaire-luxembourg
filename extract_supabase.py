@@ -46,8 +46,11 @@ def push_to_supabase(decisions: list[dict], generated_at: str) -> bool:
         seen[d["id"]] = d
     decisions = list(seen.values())
 
-    # Upsert par lots de 100 (payloads fulltext volumineux → timeout à 200)
-    batch_size = 100
+    # Upsert par lots de 20 (fulltext jusqu'à 200000 car/décision → un lot de 100
+    # peut peser ~20 Mo et dépasser le statement_timeout Postgres côté Supabase ;
+    # vu en prod le 22/09 : lot de 100 → 500 "canceling statement due to statement
+    # timeout" non retenté, cache perdu, tout le run à refaire)
+    batch_size = 20
     errors = 0
     total_batches = (len(decisions) - 1) // batch_size + 1
     for i in range(0, len(decisions), batch_size):
@@ -59,6 +62,11 @@ def push_to_supabase(decisions: list[dict], generated_at: str) -> bool:
                 if r.status_code in (200, 201):
                     log(f"  ✓ Lot {batch_num}/{total_batches} ({len(batch)} entrées)")
                     break
+                elif r.status_code >= 500 and attempt < 2:
+                    # Erreur serveur (ex. statement timeout) : potentiellement transitoire
+                    log(f"  ↻ Lot {batch_num} : {r.status_code} — retry {attempt+2}/3…")
+                    time.sleep(5 * (attempt + 1))
+                    continue
                 else:
                     errors += 1
                     log(f"  ✗ Lot {batch_num} : {r.status_code} — {r.text[:200]}")
