@@ -794,7 +794,8 @@ table.analyse-tbl tbody tr:hover{background:var(--row-sep);}
 .stats-col-title{font-family:'Roboto Condensed','Arial Narrow',sans-serif;font-weight:700;font-size:13px;text-transform:uppercase;letter-spacing:.04em;color:var(--text-faint);margin-bottom:12px;}
 .stats-period-head{display:flex;justify-content:space-between;align-items:baseline;border-bottom:2px solid var(--text);padding-bottom:8px;margin-bottom:18px;}
 .stats-period-label{font-family:'Roboto Condensed','Arial Narrow',sans-serif;font-weight:700;font-size:15px;text-transform:uppercase;letter-spacing:.03em;color:var(--text);}
-.stats-period-meta{font-size:12px;color:var(--text-faint);font-weight:500;}
+.stats-period-meta{display:flex;align-items:baseline;gap:7px;font-size:12.5px;color:var(--text-faint);font-weight:500;}
+.stats-period-total-num{font-family:'Roboto Condensed','Arial Narrow',sans-serif;font-weight:700;font-size:32px;color:var(--text);line-height:1;font-variant-numeric:normal;}
 .stats-period-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;}
 .stats-period-grid > div{min-width:0;}
 .stats-period-divider{height:1px;background:var(--card-border);margin:28px 0;}
@@ -807,7 +808,9 @@ table.analyse-tbl tbody tr:hover{background:var(--row-sep);}
 .stat-detail-sub{font-size:11px;color:var(--text-faint);margin-bottom:6px;}
 .stat-detail-row{display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid var(--row-sep);font-size:11.5px;}
 .stat-detail-row:last-child{border-bottom:none;}
-.stat-detail-row .num-cell{font-size:12px;flex:0 0 auto;}
+.stat-detail-row .num-cell{font-size:12px;flex:0 0 auto;cursor:pointer;background:none;border:none;font-family:inherit;color:inherit;padding:3px 7px;margin:-3px -7px -3px 0;border-radius:4px;transition:background .12s,color .12s;}
+.stat-detail-row .num-cell:hover{background:var(--row-sep);}
+.stat-detail-row .num-cell.copied{color:var(--success-fg);}
 .stat-detail-row .stat-detail-matiere{flex:1;color:var(--text-muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
 .watchlist-card{background:var(--card-bg);border:1px solid var(--card-border);border-radius:var(--radius-md);padding:11px 16px;margin-bottom:8px;display:flex;align-items:center;gap:12px;}
 .watchlist-num{font-family:'Roboto Condensed','Arial Narrow',sans-serif;font-weight:700;font-size:15px;white-space:nowrap;}
@@ -1607,50 +1610,6 @@ body.printing-decision #print-decision-area{display:block!important;color:#000;b
 
       <!-- ── VUE "TOUTES" : tableau de bord ── -->
       <div id="affaires-view-all">
-        <div class="kpi-grid" style="margin-top:20px;">
-          <div class="kpi-card kpi-dark"><div class="kpi-num" id="affaires-kpi-week">0</div><div class="kpi-label">Affaires cette semaine</div></div>
-          <div class="kpi-card kpi-blue"><div class="kpi-num" id="affaires-kpi-setup">0</div><div class="kpi-label">Mise en état</div></div>
-          <div class="kpi-card kpi-red"><div class="kpi-num" id="affaires-kpi-plaid">0</div><div class="kpi-label">Plaidoirie</div></div>
-          <div class="kpi-card kpi-green"><div class="kpi-num" id="affaires-kpi-delib">0</div><div class="kpi-label">Délibéré</div></div>
-        </div>
-
-        <!-- Recherche par numéro d'affaire -->
-        <div class="affaires-section">
-          <div class="affaires-section-head">
-            <h2>Recherche de décision par numéro d'affaire</h2>
-            <p>Vérifier si une décision a été publiée sur jurad.public.lu pour un numéro de rôle donné. Permet de croiser les affaires en cours avec la base de décisions rendues.</p>
-          </div>
-          <div class="affaires-section-body">
-            <div class="section-notice info">Accès manuel à jurad.public.lu autorisé. L'automatisation de la consultation nécessite une vérification du cadre d'utilisation acceptable auprès de l'Administration judiciaire.</div>
-            <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
-              <div class="searchbar" style="flex:1;max-width:320px;">
-                <span class="ic"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg></span>
-                <input class="input" id="lookup-input" type="text" placeholder="N° d'affaire (ex. 54701C)…" oninput="lookupAffaire()" style="width:100%;padding-left:36px;">
-              </div>
-              <button class="btn btn-secondary" onclick="lookupAffaire()" style="font-size:13px;">Rechercher</button>
-            </div>
-            <div id="lookup-result"></div>
-          </div>
-        </div>
-
-        <!-- Alertes par numéro d'affaire -->
-        <div class="affaires-section">
-          <div class="affaires-section-head">
-            <h2>Alertes par numéro d'affaire</h2>
-            <p>Surveiller des affaires spécifiques d'intérêt éditorial. Une notification peut être déclenchée lorsqu'une affaire change de stade ou qu'une décision est publiée.</p>
-          </div>
-          <div class="affaires-section-body">
-            <p style="font-size:12.5px;color:var(--text-muted);margin:0 0 14px;">Utilisez le bouton "Surveiller" dans les tableaux Cour adm. / Tribunal adm. pour ajouter des affaires à votre liste de suivi.</p>
-            <div id="watchlist-container"></div>
-            <div style="display:flex;gap:10px;margin-top:16px;flex-wrap:wrap;align-items:center;background:var(--card-bg);border:1px dashed var(--card-border);border-radius:var(--radius-lg);padding:14px 16px;">
-              <input class="input" id="watchlist-add-input" placeholder="Ajouter un numéro manuellement (ex. 54533C)…" style="flex:1;min-width:220px;">
-              <button class="btn btn-primary" onclick="addToWatchlistManual()" style="font-size:13px;">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
-                Ajouter
-              </button>
-            </div>
-          </div>
-        </div>
 
         <!-- Statistiques agrégées -->
         <div class="affaires-section">
@@ -1701,6 +1660,43 @@ body.printing-decision #print-decision-area{display:block!important;color:#000;b
                   <div id="stats-stade-year"></div>
                 </div>
               </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Recherche par numéro d'affaire -->
+        <div class="affaires-section">
+          <div class="affaires-section-head">
+            <h2>Recherche de décision par numéro d'affaire</h2>
+            <p>Vérifier si une décision a été publiée sur justice.public.lu pour un numéro de rôle donné. Permet de croiser les affaires en cours avec la base de décisions rendues.</p>
+          </div>
+          <div class="affaires-section-body">
+            <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+              <div class="searchbar" style="flex:1;max-width:320px;">
+                <span class="ic"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg></span>
+                <input class="input" id="lookup-input" type="text" placeholder="N° d'affaire (ex. 54701C)…" oninput="lookupAffaire()" style="width:100%;padding-left:36px;">
+              </div>
+              <button class="btn btn-secondary" onclick="lookupAffaire()" style="font-size:13px;">Rechercher</button>
+            </div>
+            <div id="lookup-result"></div>
+          </div>
+        </div>
+
+        <!-- Alertes par numéro d'affaire -->
+        <div class="affaires-section">
+          <div class="affaires-section-head">
+            <h2>Alertes par numéro d'affaire</h2>
+            <p>Surveiller des affaires spécifiques d'intérêt éditorial. Une notification peut être déclenchée lorsqu'une affaire change de stade ou qu'une décision est publiée.</p>
+          </div>
+          <div class="affaires-section-body">
+            <p style="font-size:12.5px;color:var(--text-muted);margin:0 0 14px;">Utilisez le bouton "Surveiller" dans les tableaux Cour adm. / Tribunal adm. pour ajouter des affaires à votre liste de suivi.</p>
+            <div id="watchlist-container"></div>
+            <div style="display:flex;gap:10px;margin-top:16px;flex-wrap:wrap;align-items:center;background:var(--card-bg);border:1px dashed var(--card-border);border-radius:var(--radius-lg);padding:14px 16px;">
+              <input class="input" id="watchlist-add-input" placeholder="Ajouter un numéro manuellement (ex. 54533C)…" style="flex:1;min-width:220px;">
+              <button class="btn btn-primary" onclick="addToWatchlistManual()" style="font-size:13px;">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
+                Ajouter
+              </button>
             </div>
           </div>
         </div>
@@ -6110,15 +6106,6 @@ function renderAffaireRow(a, hideJur){
   </tr>`;
 }
 
-function renderAffairesDashboard(data){
-  const weekData = _currentWeekAffaires(data);
-  const counts = computeStadeCounts(weekData);
-  const set = (id, v) => { const el = document.getElementById(id); if(el) el.textContent = v; };
-  set('affaires-kpi-week',  weekData.length);
-  set('affaires-kpi-setup', counts['Mise en état']);
-  set('affaires-kpi-plaid', counts['Plaidoirie']);
-  set('affaires-kpi-delib', counts['Délibéré']);
-}
 
 function renderTribunalChambres(trib){
   const jurOrder = ['Trib. 1re ch.','Trib. 2e ch.','Trib. 3e ch.','Trib. 4e ch.','Trib. 5e ch.','Trib. 6e ch.'];
@@ -6168,9 +6155,7 @@ function renderAffaires(){
   if(elCour) elCour.textContent = `(${cour.length})`;
   if(elTrib) elTrib.textContent = `(${trib.length})`;
 
-  if(_affairesFilter === 'all'){
-    renderAffairesDashboard(data);
-  } else if(_affairesFilter === 'cour'){
+  if(_affairesFilter === 'cour'){
     const summary = document.getElementById('affaires-summary-cour');
     if(summary){
       const counts = computeStadeCounts(cour);
@@ -6260,7 +6245,7 @@ function lookupAffaire(){
         <span style="color:var(--text-faint);">Avocat</span><span>${found.avocat ? `${escHtml(found.avocat)} <a href="${whoswholuLink('Avocats', _lawyerSearchName(found.avocat))}" target="_blank" rel="noopener" class="affaire-whoswho-link" title="Rechercher dans whoswho-lu">${WHOSWHO_ICON}</a>` : '—'}</span>
       </div>
       <div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--card-border);">
-        <a href="https://jurad.public.lu" target="_blank" rel="noopener" style="font-size:12.5px;color:var(--accent-red);">Vérifier manuellement sur jurad.public.lu</a>
+        <a href="https://justice.public.lu/fr/jurisprudence/juridictions-administratives.html" target="_blank" rel="noopener" style="font-size:12.5px;color:var(--accent-red);">Vérifier manuellement sur justice.public.lu</a>
         <span style="font-size:11.5px;color:var(--text-faint);margin-left:8px;">(pas encore de décision publiée dans les données locales)</span>
       </div>
     </div>`;
@@ -6290,6 +6275,22 @@ function toggleStatDetail(rowEl){
   if(!wasOpen) detail.classList.add("open");
 }
 
+/* Copie un numéro d'affaire au presse-papier, avec confirmation visuelle
+   temporaire sur le bouton lui-même. */
+function copyAffaireNum(btn, num){
+  if(!navigator.clipboard) return;
+  navigator.clipboard.writeText(num).then(() => {
+    clearTimeout(btn._copyTimeout);
+    const original = btn.textContent;
+    btn.textContent = "Copié";
+    btn.classList.add("copied");
+    btn._copyTimeout = setTimeout(() => {
+      btn.textContent = original;
+      btn.classList.remove("copied");
+    }, 1100);
+  }).catch(() => {});
+}
+
 function renderStats(){
   /* Barre plafonnée top 3 + "Autre" (jamais de repli si <= 3 catégories,
      ex. Stade procédural), cliquable pour révéler le détail des affaires
@@ -6315,7 +6316,8 @@ function renderStats(){
         : "";
       const detailRows = items.map(a => {
         const sc = STADE_CONFIG[a.stade] || { cls:"stade-setup", label:a.stade };
-        return `<div class="stat-detail-row"><span class="num-cell">${escHtml(a.num)}</span><span class="stat-detail-matiere">${escHtml(a.matiere||"")}</span><span class="stade-badge ${sc.cls}">${escHtml(sc.label)}</span></div>`;
+        const copyAttr = escHtml(`event.stopPropagation();copyAffaireNum(this,${JSON.stringify(String(a.num))})`);
+        return `<div class="stat-detail-row"><button type="button" class="num-cell" title="Copier le numéro d'affaire" onclick="${copyAttr}">${escHtml(a.num)}</button><span class="stat-detail-matiere">${escHtml(a.matiere||"")}</span><span class="stade-badge ${sc.cls}">${escHtml(sc.label)}</span></div>`;
       }).join("");
       return `
       <div class="stat-row" onclick="toggleStatDetail(this)">
@@ -6333,7 +6335,7 @@ function renderStats(){
 
   function setMeta(id, n){
     const el = document.getElementById(id);
-    if(el) el.textContent = `${n} affaire${n>1?"s":""}`;
+    if(el) el.innerHTML = `<span class="stats-period-total-num">${n}</span> affaire${n>1?"s":""}`;
   }
 
   const _aData = _affairesData();
