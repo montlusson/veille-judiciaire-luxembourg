@@ -786,9 +786,29 @@ table.analyse-tbl tbody tr:hover{background:var(--row-sep);}
 .stat-bar-track{flex:1;height:9px;background:var(--row-sep);border-radius:5px;overflow:hidden;}
 .stat-bar-fill{height:100%;border-radius:5px;background:var(--accent-blue);transition:width .5s ease;}
 .stat-bar-fill.red{background:var(--accent-red);}
-.stat-bar-fill.gold{background:var(--accent-gold);}
-.stat-bar-fill.green{background:var(--success-icon-bg);}
+.stat-bar-fill.rank1{background:var(--accent-blue);}
+.stat-bar-fill.rank2{background:#c71e1d;}
+.stat-bar-fill.rank3{background:#ffe303;box-shadow:inset 0 0 0 1px rgba(0,0,0,.15);}
+.stat-bar-fill.grey{background:#B9B4A6;}
 .stat-bar-num{flex:0 0 26px;text-align:right;color:var(--text-muted);font-size:12px;font-weight:700;}
+.stats-col-title{font-family:'Roboto Condensed','Arial Narrow',sans-serif;font-weight:700;font-size:13px;text-transform:uppercase;letter-spacing:.04em;color:var(--text-faint);margin-bottom:12px;}
+.stats-period-head{display:flex;justify-content:space-between;align-items:baseline;border-bottom:2px solid var(--text);padding-bottom:8px;margin-bottom:18px;}
+.stats-period-label{font-family:'Roboto Condensed','Arial Narrow',sans-serif;font-weight:700;font-size:15px;text-transform:uppercase;letter-spacing:.03em;color:var(--text);}
+.stats-period-meta{font-size:12px;color:var(--text-faint);font-weight:500;}
+.stats-period-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;}
+.stats-period-grid > div{min-width:0;}
+.stats-period-divider{height:1px;background:var(--card-border);margin:28px 0;}
+@media(max-width:900px){.stats-period-grid{grid-template-columns:1fr;gap:20px;}}
+.stat-row{cursor:pointer;border-radius:6px;padding:2px 4px;margin:0 -4px 9px;transition:background .12s;}
+.stat-row:hover{background:var(--row-sep);}
+.stat-row:last-child{margin-bottom:0;}
+.stat-detail{max-height:0;overflow:hidden;transition:max-height .2s ease;}
+.stat-detail.open{max-height:260px;overflow-y:auto;margin-top:8px;}
+.stat-detail-sub{font-size:11px;color:var(--text-faint);margin-bottom:6px;}
+.stat-detail-row{display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid var(--row-sep);font-size:11.5px;}
+.stat-detail-row:last-child{border-bottom:none;}
+.stat-detail-row .num-cell{font-size:12px;flex:0 0 auto;}
+.stat-detail-row .stat-detail-matiere{flex:1;color:var(--text-muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
 .watchlist-card{background:var(--card-bg);border:1px solid var(--card-border);border-radius:var(--radius-md);padding:11px 16px;margin-bottom:8px;display:flex;align-items:center;gap:12px;}
 .watchlist-num{font-family:'Roboto Condensed','Arial Narrow',sans-serif;font-weight:700;font-size:15px;white-space:nowrap;}
 .watchlist-meta{flex:1;font-size:12.5px;color:var(--text-muted);}
@@ -799,8 +819,6 @@ table.analyse-tbl tbody tr:hover{background:var(--row-sep);}
 .lookup-result-meta{font-size:12.5px;color:var(--text-muted);margin-bottom:14px;display:flex;flex-wrap:wrap;gap:8px;align-items:center;}
 .lookup-result-body{font-size:13.5px;line-height:1.75;color:var(--text);}
 .lookup-not-found{background:var(--row-sep);border-radius:var(--radius-md);padding:22px;text-align:center;color:var(--text-muted);font-size:13.5px;margin-top:14px;}
-.stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-top:4px;}
-@media(max-width:860px){.stats-grid{grid-template-columns:1fr;}.stat-bar-label{flex:0 0 160px;}}
 
 /* ── Modal légal ── */
 .legal-modal-overlay{
@@ -1638,21 +1656,50 @@ body.printing-decision #print-decision-area{display:block!important;color:#000;b
         <div class="affaires-section">
           <div class="affaires-section-head">
             <h2>Statistiques agrégées</h2>
-            <p>Répartition des affaires au rôle par ministère défendeur, matière et stade procédural.</p>
+            <p>Répartition des affaires au rôle par matière, ministère défendeur et stade procédural.</p>
           </div>
           <div class="affaires-section-body">
-            <div class="stats-grid">
-              <div>
-                <div style="font-family:'Roboto Condensed','Arial Narrow',sans-serif;font-weight:700;font-size:13px;text-transform:uppercase;letter-spacing:.04em;color:var(--text-faint);margin-bottom:12px;">Défendeur / Ministère</div>
-                <div id="stats-defendeur"></div>
+            <div class="stats-period">
+              <div class="stats-period-head">
+                <span class="stats-period-label">Cette semaine</span>
+                <span class="stats-period-meta" id="stats-week-meta"></span>
               </div>
-              <div>
-                <div style="font-family:'Roboto Condensed','Arial Narrow',sans-serif;font-weight:700;font-size:13px;text-transform:uppercase;letter-spacing:.04em;color:var(--text-faint);margin-bottom:12px;">Stade procédural</div>
-                <div id="stats-stade"></div>
+              <div class="stats-period-grid">
+                <div>
+                  <div class="stats-col-title">Matière principale</div>
+                  <div id="stats-matiere-week"></div>
+                </div>
+                <div>
+                  <div class="stats-col-title">Défendeur / Ministère</div>
+                  <div id="stats-defendeur-week"></div>
+                </div>
+                <div>
+                  <div class="stats-col-title">Stade procédural</div>
+                  <div id="stats-stade-week"></div>
+                </div>
               </div>
-              <div style="grid-column:1/-1;">
-                <div style="font-family:'Roboto Condensed','Arial Narrow',sans-serif;font-weight:700;font-size:13px;text-transform:uppercase;letter-spacing:.04em;color:var(--text-faint);margin-bottom:12px;">Matière principale</div>
-                <div id="stats-matiere"></div>
+            </div>
+
+            <div class="stats-period-divider"></div>
+
+            <div class="stats-period">
+              <div class="stats-period-head">
+                <span class="stats-period-label" id="stats-year-label">Année</span>
+                <span class="stats-period-meta" id="stats-year-meta"></span>
+              </div>
+              <div class="stats-period-grid">
+                <div>
+                  <div class="stats-col-title">Matière principale</div>
+                  <div id="stats-matiere-year"></div>
+                </div>
+                <div>
+                  <div class="stats-col-title">Défendeur / Ministère</div>
+                  <div id="stats-defendeur-year"></div>
+                </div>
+                <div>
+                  <div class="stats-col-title">Stade procédural</div>
+                  <div id="stats-stade-year"></div>
+                </div>
               </div>
             </div>
           </div>
@@ -6014,14 +6061,30 @@ function computeStadeCounts(data){
   return counts;
 }
 
+/* Dernier code de semaine présent dans les données ("2026-W25"), ou null
+   si aucune donnée de semaine (démo, ancien format). */
+function _latestSourceWeek(data){
+  const weeks = [...new Set(data.map(a => a.source_week).filter(Boolean))];
+  return weeks.length ? weeks.sort().slice(-1)[0] : null;
+}
+
 /* Affaires de la semaine la plus récente parmi les convocations déposées
    (champ source_week). Sans donnée de semaine (démo, ancien format), on
    retombe sur l'ensemble des affaires. */
 function _currentWeekAffaires(data){
-  const weeks = [...new Set(data.map(a => a.source_week).filter(Boolean))];
-  if(!weeks.length) return data;
-  const latest = weeks.sort().slice(-1)[0];
-  return data.filter(a => a.source_week === latest);
+  const latest = _latestSourceWeek(data);
+  return latest ? data.filter(a => a.source_week === latest) : data;
+}
+
+/* Affaires de l'année en cours (préfixe année du champ source_week).
+   Sert à l'analyse de tendances annuelles dans les statistiques
+   agrégées. Même repli que _currentWeekAffaires en l'absence de
+   source_week. */
+function _currentYearAffaires(data){
+  const latest = _latestSourceWeek(data);
+  if(!latest) return data;
+  const year = latest.split('-')[0];
+  return data.filter(a => a.source_week && a.source_week.startsWith(year + '-'));
 }
 
 function renderAffaireRow(a, hideJur){
@@ -6208,42 +6271,88 @@ function lookupAffaire(){
   }
 }
 
+/* Étiquette de ministère normalisée (raccourcie pour tenir sur une ligne). */
+function _defendeurKey(a){
+  return a.defendeur.replace(/^Administration des |^Min\. /,"").replace("Administration des bâtiments publics","Bâtiments publics").replace("contributions directes","Contributions dir.").replace("Fonds du Logement","Fonds du Logement");
+}
+function _matiereKey(a){ return a.matiere.split(" / ")[0]; }
+
+function _groupBy(data, keyFn){
+  const groups = {};
+  data.forEach(a => { const k = keyFn(a); (groups[k] = groups[k] || []).push(a); });
+  return groups;
+}
+
+function toggleStatDetail(rowEl){
+  const detail = rowEl.querySelector(".stat-detail");
+  const wasOpen = detail.classList.contains("open");
+  rowEl.parentElement.querySelectorAll(".stat-detail.open").forEach(d => d.classList.remove("open"));
+  if(!wasOpen) detail.classList.add("open");
+}
+
 function renderStats(){
-  function renderBar(containerId, counts){
+  /* Barre plafonnée top 3 + "Autre" (jamais de repli si <= 3 catégories,
+     ex. Stade procédural), cliquable pour révéler le détail des affaires
+     derrière chaque catégorie (et, pour "Autre", le sous-détail des
+     catégories repliées). */
+  function renderCapped(containerId, groups){
     const el = document.getElementById(containerId);
     if(!el) return;
-    const total = Object.values(counts).reduce((a,b)=>a+b,0)||1;
-    const sorted = Object.entries(counts).sort((a,b)=>b[1]-a[1]);
-    el.innerHTML = sorted.map(([k,v]) => `
-      <div style="margin-bottom:10px;">
+    const sorted = Object.entries(groups).sort((a,b) => b[1].length - a[1].length);
+    const top    = sorted.slice(0,3);
+    const rest   = sorted.slice(3);
+    const restItems = rest.flatMap(([,items]) => items);
+    const rows = top.slice();
+    if(restItems.length) rows.push([`Autre (${rest.length})`, restItems]);
+    const total = rows.reduce((a,[,items]) => a + items.length, 0) || 1;
+    const rankClass = ["rank1", "rank2", "rank3"];
+
+    el.innerHTML = rows.map(([label, items], i) => {
+      const isOther = i === 3;
+      const cls = isOther ? "grey" : rankClass[i];
+      const subLine = isOther
+        ? `<div class="stat-detail-sub">${rest.map(([rk,rv]) => `${escHtml(rk)} (${rv.length})`).join(" · ")}</div>`
+        : "";
+      const detailRows = items.map(a => {
+        const sc = STADE_CONFIG[a.stade] || { cls:"stade-setup", label:a.stade };
+        return `<div class="stat-detail-row"><span class="num-cell">${escHtml(a.num)}</span><span class="stat-detail-matiere">${escHtml(a.matiere||"")}</span><span class="stade-badge ${sc.cls}">${escHtml(sc.label)}</span></div>`;
+      }).join("");
+      return `
+      <div class="stat-row" onclick="toggleStatDetail(this)">
         <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px;">
-          <span style="color:var(--text-main);">${escHtml(k)}</span>
-          <span style="color:var(--text-faint);font-variant-numeric:tabular-nums;">${v}</span>
+          <span style="color:var(--text-main);">${escHtml(label)}</span>
+          <span style="color:var(--text-faint);font-variant-numeric:tabular-nums;">${items.length}</span>
         </div>
         <div class="stat-bar-track">
-          <div class="stat-bar-fill" style="width:${Math.round(v/total*100)}%"></div>
+          <div class="stat-bar-fill ${cls}" style="width:${Math.round(items.length/total*100)}%"></div>
         </div>
-      </div>`).join("");
+        <div class="stat-detail">${subLine}${detailRows}</div>
+      </div>`;
+    }).join("");
   }
 
-  const byDefendeur = {};
-  const byStade     = {};
-  const byMatiere   = {};
-  const byJur       = {};
-  const _aData = AFFAIRES_DATA.length ? AFFAIRES_DATA : DEMO_AFFAIRES_DATA;
-  _aData.forEach(a => {
-    const def = a.defendeur.replace(/^Administration des |^Min\. /,"").replace("Administration des bâtiments publics","Bâtiments publics").replace("contributions directes","Contributions dir.").replace("Fonds du Logement","Fonds du Logement");
-    byDefendeur[def]  = (byDefendeur[def]  || 0) + 1;
-    byStade[a.stade]  = (byStade[a.stade]  || 0) + 1;
-    const m = a.matiere.split(" / ")[0];
-    byMatiere[m]      = (byMatiere[m]      || 0) + 1;
-    const jur = a.juridiction || (a.num.endsWith("C") ? "Cour adm." : "Trib. adm.");
-    byJur[jur]        = (byJur[jur]        || 0) + 1;
-  });
+  function setMeta(id, n){
+    const el = document.getElementById(id);
+    if(el) el.textContent = `${n} affaire${n>1?"s":""}`;
+  }
 
-  renderBar("stats-defendeur", byDefendeur);
-  renderBar("stats-stade",     byStade);
-  renderBar("stats-matiere",   byMatiere);
+  const _aData = _affairesData();
+  const latestWeek = _latestSourceWeek(_aData);
+  const weekData = _currentWeekAffaires(_aData);
+  const yearData = _currentYearAffaires(_aData);
+  const yearLabel = latestWeek ? `Année ${latestWeek.split("-")[0]}` : "Toutes les affaires";
+
+  document.getElementById("stats-year-label").textContent = yearLabel;
+  setMeta("stats-week-meta", weekData.length);
+  setMeta("stats-year-meta", yearData.length);
+
+  renderCapped("stats-matiere-week",   _groupBy(weekData, _matiereKey));
+  renderCapped("stats-defendeur-week", _groupBy(weekData, _defendeurKey));
+  renderCapped("stats-stade-week",     _groupBy(weekData, a => a.stade));
+
+  renderCapped("stats-matiere-year",   _groupBy(yearData, _matiereKey));
+  renderCapped("stats-defendeur-year", _groupBy(yearData, _defendeurKey));
+  renderCapped("stats-stade-year",     _groupBy(yearData, a => a.stade));
 }
 
 /* ── Démarrage ── */
