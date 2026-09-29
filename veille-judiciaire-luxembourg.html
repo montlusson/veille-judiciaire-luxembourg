@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://cdn.sheetjs.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob:; connect-src 'self' https://lhtkvogmkebslihuwfyu.supabase.co https://data.public.lu https://download.data.public.lu https://cdn.jsdelivr.net; frame-src 'self' blob:; worker-src blob: https://cdn.jsdelivr.net; object-src 'none'; base-uri 'none'; form-action 'none'">
 <meta name="robots" content="noindex, nofollow">
 <title>Veille judiciaire — Outil de collecte, recherche et radar décisions</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -3237,7 +3238,7 @@ function addAnnotItem(id, type){
   if(!arr.includes(val)) arr.push(val);
   saveAnnotation(id, ann); inp.value='';
   const el = type==='party' ? $('#annot-parties') : $('#annot-tags');
-  el.innerHTML = arr.map((v,i)=>`<span class="annot-tag">${escHtml(v)}<button onclick="removeAnnotItem('${id}','${type}',${i})" aria-label="Supprimer">×</button></span>`).join('');
+  el.innerHTML = arr.map((v,i)=>`<span class="annot-tag">${escHtml(v)}<button onclick="removeAnnotItem(${escHtml(JSON.stringify(id))},'${type}',${i})" aria-label="Supprimer">×</button></span>`).join('');
   renderResults();
 }
 
@@ -3278,7 +3279,7 @@ function renderDetail(){ /* remplacé par openReader */ }
 function _annotFormHtml(id){
   const isDE = currentLang==='de';
   const ann  = getAnnotation(id)||{parties:[],notes:'',tags:[]};
-  const chips = (arr, type) => arr.map((v,i)=>`<span class="annot-tag">${escHtml(v)}<button onclick="removeAnnotItem('${id}','${type}',${i})" aria-label="Supprimer">×</button></span>`).join('');
+  const chips = (arr, type) => arr.map((v,i)=>`<span class="annot-tag">${escHtml(v)}<button onclick="removeAnnotItem(${escHtml(JSON.stringify(id))},'${type}',${i})" aria-label="Supprimer">×</button></span>`).join('');
   const attribution = ann.created_by
     ? `${isDE?'Erstellt von':'Créée par'} ${escHtml(ann.created_by)}`
       + (ann.updated_by && ann.updated_by !== ann.created_by ? ` · ${isDE?'geändert von':'modifiée par'} ${escHtml(ann.updated_by)}` : '')
