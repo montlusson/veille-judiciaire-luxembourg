@@ -70,6 +70,13 @@ nav.navlist{display:flex;flex-direction:column;gap:2px;margin-top:6px;}
   transition:background .18s cubic-bezier(0.16,1,0.3,1),color .18s cubic-bezier(0.16,1,0.3,1);
 }
 .navbtn:hover{background:var(--sidebar-hover-bg);color:var(--sidebar-text);}
+.navbadge{margin-left:auto;min-width:20px;height:20px;padding:0 6px;border-radius:10px;background:var(--accent-red);color:#fff;font-size:11px;font-weight:700;line-height:20px;text-align:center;font-variant-numeric:tabular-nums;}
+.navbadge[hidden]{display:none;}
+.radar-notice{background:var(--accent-red-tint);border:1px solid var(--accent-red);border-radius:var(--radius-md);padding:14px 16px;margin-bottom:16px;display:flex;flex-direction:column;gap:10px;align-items:flex-start;}
+.radar-notice ul{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:4px;}
+.radar-open{background:none;border:none;padding:0;color:var(--accent-blue);font:inherit;font-weight:700;text-decoration:underline;cursor:pointer;}
+.radar-sub{color:var(--text-muted);font-size:12.5px;}
+#radar-notif{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-bottom:20px;}
 .navbtn[aria-current="page"]{background:var(--sidebar-active-bg);color:var(--sidebar-text);border-left-color:var(--accent-blue);font-weight:700;}
 .navbtn .ic{flex:0 0 18px;width:18px;height:18px;}
 
@@ -1058,6 +1065,7 @@ body.printing-decision #print-decision-area{display:block!important;color:#000;b
       <button class="navbtn" data-target="veille">
         <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5.5"/><circle cx="12" cy="12" r="1.4" fill="currentColor" stroke="none"/><path d="M12 12L18 6"/><circle cx="16.6" cy="8.4" r="1" fill="currentColor" stroke="none"/></svg>
         <span data-i18n="nav_veille">Radar décisions</span>
+        <span class="navbadge" id="radar-badge" hidden></span>
       </button>
       <button class="navbtn" data-target="collecte">
         <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 3v12"/><path d="M7 11l5 5 5-5"/><path d="M4 19h16"/></svg>
@@ -1553,6 +1561,9 @@ body.printing-decision #print-decision-area{display:block!important;color:#000;b
       <h1 id="h-veille" class="title" data-i18n="veille_title">Radar décisions</h1>
       <p class="intro" data-i18n="veille_intro">Enregistrez des mots-clés à surveiller dans le corpus de décisions indexées. Les résultats s'affichent à chaque ouverture de l'outil.</p>
 
+      <div id="radar-notice"></div>
+      <div id="radar-notif"></div>
+
       <div style="display:flex;align-items:flex-start;gap:10px;background:#FBF1DC;border:1px solid #e6d3b0;border-radius:var(--radius-md);padding:10px 14px;margin-bottom:20px;font-size:12.5px;color:#8A6418;">
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink:0;margin-top:1px;"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>
         <span id="veille-scope-msg" data-i18n="veille_scope">
@@ -1915,6 +1926,15 @@ const TRANSLATIONS = {
     alert_enable: "Activer",
     alert_matches: "{n} résultat trouvé",
     alert_matches_pl: "{n} résultats trouvés",
+    radar_new_one: "{n} nouvelle décision correspond à vos recherches",
+    radar_new_many: "{n} nouvelles décisions correspondent à vos recherches",
+    radar_more: "… et {n} autres",
+    radar_ack: "Marquer comme vues",
+    radar_notif_enable: "Activer les notifications du navigateur",
+    radar_notif_disable: "Désactiver les notifications du navigateur",
+    radar_notif_denied: "Notifications bloquées dans le navigateur",
+    radar_notif_hint: "Une notification s'affiche à l'ouverture de l'outil quand une nouvelle décision correspond. Vos mots-clés restent dans ce navigateur : personne d'autre ne les voit.",
+    radar_notif_unsupported: "Ce navigateur ne gère pas les notifications. La pastille et le bandeau du radar fonctionnent quand même.",
     open_data: "Open data",
     indexed: "décisions indexées",
     synced: "synchronisé",
@@ -2169,6 +2189,15 @@ const TRANSLATIONS = {
     alert_enable: "Aktivieren",
     alert_matches: "{n} Treffer gefunden",
     alert_matches_pl: "{n} Treffer gefunden",
+    radar_new_one: "{n} neue Entscheidung passt zu Ihren Suchen",
+    radar_new_many: "{n} neue Entscheidungen passen zu Ihren Suchen",
+    radar_more: "… und {n} weitere",
+    radar_ack: "Als gesehen markieren",
+    radar_notif_enable: "Browser-Benachrichtigungen aktivieren",
+    radar_notif_disable: "Browser-Benachrichtigungen deaktivieren",
+    radar_notif_denied: "Benachrichtigungen im Browser blockiert",
+    radar_notif_hint: "Beim Öffnen des Tools erscheint eine Benachrichtigung, wenn eine neue Entscheidung passt. Ihre Stichwörter bleiben in diesem Browser : niemand sonst sieht sie.",
+    radar_notif_unsupported: "Dieser Browser unterstützt keine Benachrichtigungen. Das Zählersymbol und das Banner des Radars funktionieren trotzdem.",
     open_data: "Open data",
     indexed: "Entscheidungen indiziert",
     synced: "synchronisiert",
@@ -3389,7 +3418,7 @@ const FAQ_CONTENT = {
       ["Décisions &amp; Radar — données anonymisées, open source", [
         ["D'où viennent les décisions affichées dans \"Recherche &amp; entités\" ?", "<p>De <strong>data.public.lu</strong>, la plateforme officielle d'open data du Grand-Duché. Chaque juridiction (Cour administrative, Tribunal administratif, Cour de cassation, etc. — 8 sources officielles au total) y publie chaque semaine une archive de ses décisions.</p><p>Une extraction automatisée (une tâche planifiée, sans intervention humaine) télécharge ces archives, les dézippe et indexe leur contenu ici. Tu peux voir la date de la dernière mise à jour dans l'onglet \"Collecte des données\".</p>"],
         ["Que veut dire \"anonymisé\" concrètement ?", "<p>Les juridictions retirent elles-mêmes les noms des parties <em>avant</em> de publier leurs décisions en open data — ce travail d'anonymisation est fait en amont, par la justice, pas par nous. Le texte que tu lis ici ne contient donc jamais le nom réel d'un particulier ou d'une société identifiable directement (remplacés par des initiales ou des rôles génériques).</p><p>C'est ce qui rend ces données publiables librement (licence CC BY-ND 4.0), mais ça veut aussi dire qu'une simple recherche par nom ne fonctionnera jamais ici — voir l'outil \"Qui est concerné ?\" pour tenter d'identifier une partie malgré tout.</p>"],
-        ["Comment fonctionne le Radar décisions ?", "<p>Tu enregistres un mot-clé à surveiller (nom de société, référence, thème...). Dès qu'une nouvelle décision indexée correspond, elle apparaît automatiquement dans ton radar — plus besoin de repasser une recherche manuelle chaque semaine.</p>"],
+        ["Comment fonctionne le Radar décisions ?", "<p>Tu enregistres un mot-clé à surveiller (nom de société, référence, thème...). Dès qu'une nouvelle décision indexée correspond, elle apparaît automatiquement dans ton radar — plus besoin de repasser une recherche manuelle chaque semaine.</p><p>À chaque ouverture de l'outil, une pastille rouge sur « Radar décisions » et un bandeau t'indiquent les décisions arrivées depuis ta dernière validation (« Marquer comme vues »). Tu peux aussi activer les notifications du navigateur. Tes mots-clés restent dans ton navigateur : personne d'autre ne voit ce que tu surveilles. Les notifications ne s'affichent que quand l'outil est ouvert dans un onglet.</p>"],
         ["Pourquoi je ne trouve pas le nom d'une personne que je cherche dans une décision ?", "C'est normal et attendu : les décisions sont anonymisées à la source (voir ci-dessus). Si tu penses savoir qui se cache derrière une décision, utilise l'outil \"Qui est concerné ?\" plutôt que la recherche simple."]
       ]],
       ["Audiences &amp; Affaires en cours — PDF déposés par la rédaction", [
@@ -3425,7 +3454,7 @@ const FAQ_CONTENT = {
       ["Entscheidungen &amp; Radar — anonymisierte Open-Data-Quelle", [
         ["Woher stammen die Entscheidungen unter \"Recherche &amp; Entitäten\"?", "<p>Von <strong>data.public.lu</strong>, der offiziellen Open-Data-Plattform des Großherzogtums. Jedes Gericht (Verwaltungsgerichtshof, Verwaltungsgericht, Kassationsgerichtshof usw. — insgesamt 8 offizielle Quellen) veröffentlicht dort wöchentlich ein Archiv seiner Entscheidungen.</p><p>Ein automatisierter Abruf (eine geplante Aufgabe, ohne menschliches Zutun) lädt diese Archive herunter, entpackt sie und indexiert den Inhalt hier. Das Datum der letzten Aktualisierung siehst du im Tab \"Datenerfassung\".</p>"],
         ["Was bedeutet \"anonymisiert\" konkret?", "<p>Die Gerichte entfernen die Namen der Parteien selbst, <em>bevor</em> sie ihre Entscheidungen als Open Data veröffentlichen — diese Anonymisierung erfolgt vorgelagert durch die Justiz, nicht durch uns. Der Text, den du hier liest, enthält also nie den echten Namen einer direkt identifizierbaren Privatperson oder Firma (ersetzt durch Initialen oder generische Rollenbezeichnungen).</p><p>Das macht diese Daten frei veröffentlichbar (Lizenz CC BY-ND 4.0), bedeutet aber auch, dass eine einfache Namenssuche hier nie funktionieren wird — siehe das Werkzeug \"Wer ist betroffen?\", um eine Partei trotzdem zu identifizieren.</p>"],
-        ["Wie funktioniert der Entscheidungs-Radar?", "<p>Du speicherst ein zu überwachendes Stichwort (Firmenname, Aktenzeichen, Thema...). Sobald eine neu indexierte Entscheidung passt, erscheint sie automatisch in deinem Radar — keine manuelle Suche mehr jede Woche nötig.</p>"],
+        ["Wie funktioniert der Entscheidungs-Radar?", "<p>Du speicherst ein zu überwachendes Stichwort (Firmenname, Aktenzeichen, Thema...). Sobald eine neu indexierte Entscheidung passt, erscheint sie automatisch in deinem Radar — keine manuelle Suche mehr jede Woche nötig.</p><p>Bei jedem Öffnen des Tools zeigen ein roter Zähler an « Entscheidungsradar » und ein Banner die Entscheidungen, die seit deiner letzten Bestätigung (« Als gesehen markieren ») eingegangen sind. Du kannst auch die Browser-Benachrichtigungen aktivieren. Deine Stichwörter bleiben in deinem Browser : niemand sonst sieht, was du beobachtest. Benachrichtigungen erscheinen nur, solange das Tool in einem Tab geöffnet ist.</p>"],
         ["Warum finde ich den Namen einer gesuchten Person nicht in einer Entscheidung?", "Das ist normal und erwartet: Entscheidungen werden an der Quelle anonymisiert (siehe oben). Wenn du vermutest, wer sich hinter einer Entscheidung verbirgt, nutze das Werkzeug \"Wer ist betroffen?\" statt der einfachen Suche."]
       ]],
       ["Anhörungen &amp; laufende Verfahren — von der Redaktion hochgeladene PDFs", [
@@ -3540,7 +3569,8 @@ function deleteAlert(i){ ALERTS.splice(i,1); saveAlerts(); renderAlerts(); rende
 
 $('#add-alert-btn').addEventListener('click', () => {
   const kw = $('#new-alert-kw').value.trim(); if(!kw) return;
-  ALERTS.unshift({ kw, freq: $('#new-alert-freq').value, on:true, matches:0 });
+  /* seen/ack : base silencieuse, les décisions déjà indexées ne comptent pas comme nouvelles (voir NOTIFICATIONS DU RADAR) */
+  ALERTS.unshift({ kw, freq: $('#new-alert-freq').value, on:true, matches:0, seen: radarMatchingIds(kw), ack: Date.now() });
   $('#new-alert-kw').value = '';
   saveAlerts(); renderAlerts(); renderDashboard(); renderTimeline();
 });
@@ -3551,7 +3581,122 @@ function alertMatch(kw, ...fields){
   return fields.some(f => f && f.toLowerCase().includes(needle));
 }
 
+/* ===================== NOTIFICATIONS DU RADAR (personnelles) =====================
+   Les mots-clés (ALERTS) restent dans le localStorage de ce navigateur : rien n'est envoyé
+   à un serveur, donc rien ne révèle ce que chaque journaliste surveille. À chaque affichage
+   des décisions, les correspondances sont comparées aux ids déjà vus (a.seen) :
+   - pastille sur « Radar décisions » et bandeau listant les nouvelles décisions ;
+   - notification système du navigateur si elle est activée (seulement tant que l'onglet est ouvert).
+   Une recherche créée, ou rencontrée pour la première fois, part d'une base silencieuse : ses
+   correspondances existantes ne comptent pas comme nouvelles. La fréquence (a.freq) espace les
+   rappels : « À chaque ouverture » = tout de suite ; résumé quotidien/hebdomadaire = au plus un
+   rappel par 24 h / 7 j après la dernière validation (a.ack). Les décisions de démonstration
+   (_demo) ne notifient jamais. `var` et non `let` : renderAll() peut tourner avant cette ligne. */
+var RADAR_FREQ_MS = { instant:0, quotidien:24*3600*1000, hebdo:7*24*3600*1000 };
+var _radarPending = [];   /* [{ alert, dec }] : ce qui est dû à l'utilisateur maintenant */
+var _radarSig = '';       /* évite de recalculer quand rien n'a changé */
+
+function decSearchText(d){
+  const ann  = ANNOTATIONS[d.id];
+  const ann_ = ann ? ann.parties.join(' ')+' '+ann.tags.join(' ')+' '+(ann.notes||'') : '';
+  const socs = d.entities ? d.entities.societes.join(' ') : '';
+  const laws = d.entities && d.entities.lawyers ? d.entities.lawyers.join(' ') : '';
+  return [d.ref, d.jur, d.type, d.fulltext||d.excerpt||'', socs, laws, ann_].join(' ');
+}
+
+function radarMatchingIds(kw){
+  return DECISIONS.filter(d => !d._demo && alertMatch(kw, decSearchText(d))).map(d => String(d.id));
+}
+
+function radarCompute(){
+  const sig = DECISIONS.length+'|'+JSON.stringify(ALERTS.map(a => [a.kw, a.on, a.freq, a.ack||0, (a.seen||[]).length]));
+  if(sig === _radarSig) return;
+  _radarSig = sig;
+  _radarPending = [];
+  if(!DECISIONS.some(d => !d._demo)) return;   /* corpus de démonstration seul : rien à notifier */
+  const byId = new Map(DECISIONS.map(d => [String(d.id), d]));
+  let baselined = false;
+  ALERTS.filter(a => a.on).forEach(a => {
+    const ids = radarMatchingIds(a.kw);
+    if(!Array.isArray(a.seen)){ a.seen = ids; a.ack = Date.now(); baselined = true; return; }
+    const seen  = new Set(a.seen);
+    const fresh = ids.filter(id => !seen.has(id));
+    const due   = Date.now() - (a.ack || 0) >= (RADAR_FREQ_MS[a.freq] ?? 0);
+    if(fresh.length && due) fresh.forEach(id => _radarPending.push({ alert:a, dec:byId.get(id) }));
+  });
+  if(baselined) saveAlerts();
+}
+
+function radarAck(){
+  const now = Date.now();
+  _radarPending.forEach(({alert, dec}) => {
+    if(dec && !alert.seen.includes(String(dec.id))) alert.seen.push(String(dec.id));
+    alert.ack = now;
+  });
+  saveAlerts(); _radarSig = ''; renderRadarNotice();
+}
+
+function radarNotifSupported(){ return typeof Notification !== 'undefined'; }
+function radarNotifOn(){
+  try{ return radarNotifSupported() && Notification.permission === 'granted' && localStorage.getItem('vj_radar_notif') === '1'; }
+  catch(e){ return false; }
+}
+
+/* Une seule notification système par jeu de nouveautés : on mémorise une signature du lot. */
+function radarMaybeNotify(){
+  const n = _radarPending.length;
+  if(!n || !radarNotifOn()) return;
+  const sig = n+':'+_radarPending.slice(0,5).map(p => p.dec && p.dec.id).join(',');
+  try{
+    if(localStorage.getItem('vj_radar_notified') === sig) return;
+    localStorage.setItem('vj_radar_notified', sig);
+  }catch(e){}
+  const body = _radarPending.slice(0,3).filter(p => p.dec).map(p => (p.dec.ref||p.dec.id)+' ('+p.alert.kw+')').join(', ');
+  try{ new Notification(t(n===1?'radar_new_one':'radar_new_many',{n}), { body, tag:'vj-radar' }); }catch(e){}
+}
+
+function renderRadarNotifCtl(){
+  const el = $('#radar-notif');
+  if(!el) return;
+  if(!radarNotifSupported()){ el.innerHTML = `<p class="radar-sub">${escHtml(t('radar_notif_unsupported'))}</p>`; return; }
+  const denied = Notification.permission === 'denied';
+  const on = radarNotifOn();
+  const label = denied ? t('radar_notif_denied') : (on ? t('radar_notif_disable') : t('radar_notif_enable'));
+  el.innerHTML = `<button type="button" class="btn" id="radar-notif-btn" ${denied?'disabled':''}>${escHtml(label)}</button> <span class="radar-sub">${escHtml(t('radar_notif_hint'))}</span>`;
+  if(denied) return;
+  $('#radar-notif-btn').addEventListener('click', async () => {
+    try{
+      if(on) localStorage.setItem('vj_radar_notif','0');
+      else if(await Notification.requestPermission() === 'granted') localStorage.setItem('vj_radar_notif','1');
+    }catch(e){}
+    renderRadarNotice();
+  });
+}
+
+function renderRadarNotice(){
+  if(typeof RADAR_FREQ_MS === 'undefined') return;   /* appelé avant l'initialisation du bloc */
+  radarCompute();
+  const n = _radarPending.length;
+  const badge = $('#radar-badge');
+  if(badge){ badge.hidden = n === 0; badge.textContent = n > 99 ? '99+' : String(n); }
+  const box = $('#radar-notice');
+  if(box){
+    if(!n){ box.innerHTML = ''; }
+    else {
+      const rows = _radarPending.slice(0,8).filter(p => p.dec).map(({alert, dec}) =>
+        `<li><button type="button" class="radar-open" data-id="${escHtml(String(dec.id))}">${escHtml(dec.ref||dec.id)}</button> <span class="radar-sub">${escHtml(dec.jur||'')} · ${escHtml(alert.kw)}</span></li>`).join('');
+      const more = n > 8 ? `<p class="radar-sub">${escHtml(t('radar_more',{n:n-8}))}</p>` : '';
+      box.innerHTML = `<div class="radar-notice" role="status"><strong>${escHtml(t(n===1?'radar_new_one':'radar_new_many',{n}))}</strong><ul>${rows}</ul>${more}<button type="button" class="btn btn-primary" id="radar-ack">${escHtml(t('radar_ack'))}</button></div>`;
+      $('#radar-ack').addEventListener('click', radarAck);
+      box.querySelectorAll('.radar-open').forEach(b => b.addEventListener('click', () => { openReader(b.dataset.id); showScreen('recherche'); }));
+    }
+  }
+  renderRadarNotifCtl();
+  radarMaybeNotify();
+}
+
 function renderTimeline(){
+  renderRadarNotice();
   const activeAlerts = ALERTS.filter(a => a.on);
   const wrap = $('#timeline-wrap');
 
@@ -3564,14 +3709,7 @@ function renderTimeline(){
     return;
   }
 
-  /* ── Décisions (texte complet + entités + avocats + annotations) ── */
-  function decSearchText(d){
-    const ann  = ANNOTATIONS[d.id];
-    const ann_ = ann ? ann.parties.join(' ')+' '+ann.tags.join(' ')+' '+(ann.notes||'') : '';
-    const socs = d.entities ? d.entities.societes.join(' ') : '';
-    const laws = d.entities && d.entities.lawyers ? d.entities.lawyers.join(' ') : '';
-    return [d.ref, d.jur, d.type, d.fulltext||d.excerpt||'', socs, laws, ann_].join(' ');
-  }
+  /* ── Décisions (texte complet + entités + avocats + annotations) : decSearchText() est globale, partagée avec les notifications du radar ── */
   const decMatches = DECISIONS.filter(d =>
     activeAlerts.some(a => alertMatch(a.kw, decSearchText(d)))
   ).slice(0,8).map(d => {
