@@ -4775,17 +4775,38 @@ async function handleConvocUpload(fileOrFiles){
   }
   statusEl.textContent = `✓ ${allParsed.length} ${isDE?'Verfahren erkannt und geteilt':'affaires reconnues et partagées'} — ${isDE?'hochgeladen von':'déposé par'} ${email||'—'}`;
 
-  const rows = allParsed.map(a => ({ ...a, source_week: sourceWeek, uploaded_by: email, updated_at: new Date().toISOString() }));
+  /* Une même affaire figure dans plusieurs PDF d'un lot (continuation des
+     débats, etc.) mais `num` est la clé primaire : un upsert contenant deux
+     fois le même num est rejeté EN ENTIER par Postgres ("ON CONFLICT DO
+     UPDATE command cannot affect row a second time"). Avec des centaines de
+     PDF, rien n'arrivait donc en base. On garde, par num, la ligne à la date
+     d'audience la plus récente. */
+  const byNumRows = new Map();
+  allParsed.forEach(a => {
+    const prev = byNumRows.get(a.num);
+    if(!prev || (a.date_audience || '') >= (prev.date_audience || '')) byNumRows.set(a.num, a);
+  });
+  const now = new Date().toISOString();
+  const rows = [...byNumRows.values()].map(a => ({ ...a, source_week: sourceWeek, uploaded_by: email, updated_at: now }));
 
   /* Merge local immédiat (retour visuel avant confirmation Supabase) */
   const byNum = new Map(AFFAIRES_DATA.map(a => [a.num, a]));
   rows.forEach(r => byNum.set(r.num, r));
   AFFAIRES_DATA = [...byNum.values()];
-  renderAffaires(); renderStats(); renderWatchlistPanel();
+  renderAffaires(); renderStats(); renderWatchlistPanel(); renderAudiencesArchive();
 
   if(_sb && _currentUser){
-    const { error } = await _sb.from('affaires').upsert(rows);
-    if(error) console.warn('[convocations] upsert Supabase échoué', error);
+    /* Lots de 20 (comme le reste de l'app) : un lot en erreur n'annule pas les autres. */
+    const BATCH = 20;
+    let failed = 0, lastErr = null;
+    for(let i = 0; i < rows.length; i += BATCH){
+      const { error } = await _sb.from('affaires').upsert(rows.slice(i, i + BATCH));
+      if(error){ failed += Math.min(BATCH, rows.length - i); lastErr = error; console.warn('[convocations] upsert Supabase échoué', error); }
+    }
+    if(failed){
+      statusEl.textContent = (isDE ? '⚠ Nicht gespeichert: ' : '⚠ Non enregistré en base : ') + failed + '/' + rows.length
+        + (isDE ? ' Verfahren — ' : ' affaires — ') + (lastErr.message || lastErr);
+    }
   }
 }
 
