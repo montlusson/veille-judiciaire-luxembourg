@@ -4566,7 +4566,7 @@ function renderConvocFilesList(){
       <div class="archive-pdf-icon">PDF</div>
       <div class="archive-pdf-main">
         <div class="archive-pdf-name">${escHtml(entry.file.name)}</div>
-        <div class="archive-pdf-meta">${escHtml(entry.jur)}${entry.chambre?' · '+escHtml(entry.chambre):''} · ${entry.parsed.length} ${isDE?'Verfahren':'affaires'}</div>
+        <div class="archive-pdf-meta">${escHtml(entry.jur)}${entry.chambre?' · '+escHtml(entry.chambre):''} · ${entry.kind==='feuille' ? entry.feuille.prevenus.length+' '+(isDE?'Angeklagte':'prévenus') : entry.parsed.length+' '+(isDE?'Verfahren':'affaires')}</div>
       </div>
     </div>`;
   }).join('');
@@ -4585,6 +4585,10 @@ function openConvocFileDetail(idx){
   _convocDetailBlobUrl = blobUrl;
 
   const annotId = 'convoc:' + entry.file.name;
+  const feuilleRows = entry.kind === 'feuille' ? entry.feuille.prevenus.map(p => `<div class="watchlist-item"><div>
+        <span style="font-weight:700;font-size:13px;">${escHtml(p.nom)}</span>${p.heure?`<span style="font-size:12px;color:var(--text-muted);margin-left:10px;">${escHtml(p.heure)}</span>`:''}
+        <div style="font-size:12px;color:var(--text-muted);margin-top:2px;">${escHtml(p.preventions)}</div>
+      </div></div>`).join('') : '';
   const affaireRows = entry.parsed.map(a => {
     const inWL = _watchlist.includes(a.num);
     const avocatHtml = a.avocat
@@ -4619,7 +4623,7 @@ function openConvocFileDetail(idx){
           ${isDE?'Persönliche Notiz':'Annotation personnelle'}
         </button>
       </div>
-      ${entry.parsed.length ? `<div style="margin-bottom:12px;">${affaireRows}</div>` : ''}
+      ${entry.kind==='feuille' ? `<div style="font-size:12px;color:var(--text-muted);margin-bottom:8px;">${entry.feuille.salle?(isDE?'Saal ':'Salle ')+escHtml(entry.feuille.salle)+' · ':''}${isDE?'Nur lokal angezeigt, nicht geteilt':'Affichage local, non partagé'}</div><div style="margin-bottom:12px;">${feuilleRows}</div>` : entry.parsed.length ? `<div style="margin-bottom:12px;">${affaireRows}</div>` : ''}
     </div>
     <iframe id="convoc-detail-iframe" class="viewer-iframe" style="height:60vh;" title="${escHtml(entry.file.name)}" src="${blobUrl}"></iframe>`;
 }
@@ -4707,6 +4711,47 @@ function _detectJurChambre(text, fallbackJur, fallbackChambre){
   return { jur: fallbackJur, chambre: fallbackChambre };
 }
 
+/* Feuille d'audience pénale (greffe du Tribunal d'arrondissement) : un autre document que
+   la convocation administrative — pas de numéro de rôle, pas de "c/", mais des blocs
+   "NOM Prénom  DECISION: HEURE :" suivis de "PREVENTIONS :" et séparés par une ligne "-".
+   Données nominatives de personnes poursuivies : analysées et affichées dans le
+   navigateur uniquement, jamais envoyées à Supabase (voir handleConvocUpload). */
+function _isFeuilleAudience(text){
+  return /feuille d.audience/i.test(text.slice(0, 400));
+}
+function parseFeuilleAudience(text){
+  const lines = text.split('\n')
+    .map(l => l.replace(/\s*\bPage \d+\s*$/i, '').trim())
+    .filter(l => l && !/^Page \d+$/i.test(l));
+  const head = lines.slice(0, 15).join('\n');
+  const mCh  = head.match(/CHAMBRE\s*:\s*(.+)/i);
+  const mSa  = head.match(/Salle\s+n°\s*([A-Za-z0-9.\-]+)/i);
+  const mHe  = head.match(/\b(\d{1,2}[:h.]\d{2})\b/);
+  const meta = { chambre: mCh ? mCh[1].trim() : '', salle: mSa ? mSa[1] : '', heure: mHe ? mHe[1] : '' };
+
+  const prevenus = [];
+  let names = [], prev = [], heure = '', inPrev = false, started = false;
+  const flush = () => {
+    names.forEach(n => prevenus.push({ nom: n, heure, preventions: prev.join(' ').replace(/\s+/g, ' ').trim() }));
+    names = []; prev = []; heure = ''; inPrev = false;
+  };
+  for(const l of lines){
+    if(!started){ if(/^(M\.?P|GREFFIER|LEVEE)\b/i.test(l) || /^CHAMBRE\b/i.test(l)){ started = 'hdr'; } continue; }
+    if(/^-+$/.test(l)){ flush(); continue; }
+    if(/^(M\.?P|GREFFIER|LEVEE)\s*:/i.test(l)) continue;
+    if(/^PREVENTIONS\s*:?/i.test(l)){ inPrev = true; const rest = l.replace(/^PREVENTIONS\s*:?\s*/i, ''); if(rest) prev.push(rest); continue; }
+    if(inPrev){ prev.push(l); continue; }
+    /* Avant "PREVENTIONS :" : lignes de noms (un ou plusieurs prévenus), avec les
+       libellés "DECISION:" / "HEURE :" et l'heure de passage dans la même ligne. */
+    const mh = l.match(/\b(\d{1,2}[:h.]\d{2})\s*$/);
+    if(mh) heure = mh[1];
+    const nom = l.replace(/DECISION\s*:?/i, '').replace(/HEURE\s*:?/i, '').replace(/\b\d{1,2}[:h.]\d{2}\s*$/, '').trim();
+    if(nom) names.push(nom);
+  }
+  flush();
+  return { ...meta, prevenus };
+}
+
 async function parseConvocPdf(file, jur, chambre){
   /* pdf.js est un module ESM chargé depuis le CDN : exposé en global seulement une
      fois téléchargé. On lui laisse quelques secondes avant de conclure qu'il manque. */
@@ -4722,11 +4767,16 @@ async function parseConvocPdf(file, jur, chambre){
     text += lines.map(l => l.text).join('\n') + '\n';
   }
   const textLength = text.replace(/\s/g, '').length;
+  if(_isFeuilleAudience(text)){
+    const feuille = parseFeuilleAudience(text);
+    return { kind: 'feuille', feuille, entries: [], dateAudience: _extractDateAudience(text), textLength,
+             jur: "Feuille d'audience", chambre: feuille.chambre };
+  }
   const detected = _detectJurChambre(text, jur, chambre);
   const dateAudience = _extractDateAudience(text);
   const entries = parseConvocationText(text, detected.jur, detected.chambre);
   entries.forEach(e => { e.date_audience = dateAudience; });
-  return { entries, dateAudience, textLength, jur: detected.jur, chambre: detected.chambre };
+  return { kind: 'convocation', entries, dateAudience, textLength, jur: detected.jur, chambre: detected.chambre };
 }
 
 /* Accepte un fichier unique ou un tableau (PDF et/ou ZIP contenant des PDF).
@@ -4763,13 +4813,19 @@ async function handleConvocUpload(fileOrFiles){
   const email = _currentUser?.email || '';
   const allParsed = [];
   const failed = [], noText = [], noMatch = [];
+  let feuilleCount = 0;
   let firstNewIdx = null;
   for(const file of pdfFiles){
     try {
       // Juridiction/chambre par défaut ("Cour administrative", sans chambre) si
       // jamais l'en-tête du PDF ne permet pas de trancher — voir _detectJurChambre.
-      const { entries, dateAudience, textLength, jur, chambre } = await parseConvocPdf(file, 'Cour administrative', '');
-      depositedConvocFiles.push({ file, jur, chambre, sourceWeek, dateAudience, parsed: entries });
+      const { kind, feuille, entries, dateAudience, textLength, jur, chambre } = await parseConvocPdf(file, 'Cour administrative', '');
+      depositedConvocFiles.push({ file, kind, feuille, jur, chambre, sourceWeek, dateAudience, parsed: entries });
+      if(kind === 'feuille'){
+        if(feuille.prevenus.length) feuilleCount += feuille.prevenus.length; else noMatch.push(file.name);
+        if(firstNewIdx === null) firstNewIdx = depositedConvocFiles.length - 1;
+        continue;
+      }
       if(firstNewIdx === null) firstNewIdx = depositedConvocFiles.length - 1;
       if(entries.length) allParsed.push(...entries);
       else if(textLength < 50) noText.push(file.name);
@@ -4782,6 +4838,13 @@ async function handleConvocUpload(fileOrFiles){
   renderConvocFilesList();
   if(firstNewIdx !== null) openConvocFileDetail(firstNewIdx);
 
+  const feuilleMsg = feuilleCount
+    ? `${feuilleCount} ${isDE?'Angeklagte aus Sitzungsblättern gelesen (nur lokal, nicht geteilt)':'prévenus lus dans des feuilles d\'audience (local au navigateur, non partagés)'}`
+    : '';
+  if(!allParsed.length && feuilleCount){
+    statusEl.textContent = '✓ ' + feuilleMsg;
+    return;
+  }
   if(!allParsed.length){
     /* Cause précise plutôt qu'un message unique : PDF illisible, PDF scanné (image,
        sans couche de texte), ou texte lu mais format de convocation non reconnu. */
@@ -4796,7 +4859,7 @@ async function handleConvocUpload(fileOrFiles){
     if(ignored.length) console.warn('[convocations] fichiers ignorés (pas des PDF)', ignored.map(f => f.name));
     return;
   }
-  statusEl.textContent = `✓ ${allParsed.length} ${isDE?'Verfahren erkannt und geteilt':'affaires reconnues et partagées'} — ${isDE?'hochgeladen von':'déposé par'} ${email||'—'}`;
+  statusEl.textContent = `✓ ${allParsed.length} ${isDE?'Verfahren erkannt und geteilt':'affaires reconnues et partagées'} — ${isDE?'hochgeladen von':'déposé par'} ${email||'—'}` + (feuilleMsg ? ' · ' + feuilleMsg : '');
 
   /* Une même affaire figure dans plusieurs PDF d'un lot (continuation des
      débats, etc.) mais `num` est la clé primaire : un upsert contenant deux
