@@ -4708,6 +4708,9 @@ function _detectJurChambre(text, fallbackJur, fallbackChambre){
 }
 
 async function parseConvocPdf(file, jur, chambre){
+  /* pdf.js est un module ESM chargé depuis le CDN : exposé en global seulement une
+     fois téléchargé. On lui laisse quelques secondes avant de conclure qu'il manque. */
+  for(let i = 0; typeof pdfjsLib === 'undefined' && i < 50; i++) await new Promise(r => setTimeout(r, 100));
   if(typeof pdfjsLib === 'undefined') throw new Error('PDF.js non chargé');
   const arrayBuffer = await file.arrayBuffer();
   const pdf = await pdfjsLib.getDocument({ data: arrayBuffer, isEvalSupported: false }).promise;
@@ -4718,11 +4721,12 @@ async function parseConvocPdf(file, jur, chambre){
     const lines = await extractPageLines(page);
     text += lines.map(l => l.text).join('\n') + '\n';
   }
+  const textLength = text.replace(/\s/g, '').length;
   const detected = _detectJurChambre(text, jur, chambre);
   const dateAudience = _extractDateAudience(text);
   const entries = parseConvocationText(text, detected.jur, detected.chambre);
   entries.forEach(e => { e.date_audience = dateAudience; });
-  return { entries, dateAudience, jur: detected.jur, chambre: detected.chambre };
+  return { entries, dateAudience, textLength, jur: detected.jur, chambre: detected.chambre };
 }
 
 /* Accepte un fichier unique ou un tableau (PDF et/ou ZIP contenant des PDF).
@@ -4736,6 +4740,11 @@ async function handleConvocUpload(fileOrFiles){
   const incoming = Array.isArray(fileOrFiles) ? fileOrFiles : [fileOrFiles];
   const zipFiles = incoming.filter(f => /\.zip$/i.test(f.name));
   let pdfFiles = incoming.filter(f => !/\.zip$/i.test(f.name));
+  /* Le glisser-déposer ignore l'attribut accept de l'input : un .docx, un .DS_Store
+     ou un dossier tombait dans pdf.js, échouait en silence et produisait le même
+     message d'échec que n'importe quelle autre cause. */
+  const ignored = pdfFiles.filter(f => !/\.pdf$/i.test(f.name) && f.type !== 'application/pdf');
+  pdfFiles = pdfFiles.filter(f => !ignored.includes(f));
 
   if(zipFiles.length){
     statusEl.textContent = t('upload_zip_extracting');
@@ -4753,24 +4762,38 @@ async function handleConvocUpload(fileOrFiles){
   const sourceWeek = _isoWeekLabel(new Date());
   const email = _currentUser?.email || '';
   const allParsed = [];
+  const failed = [], noText = [], noMatch = [];
   let firstNewIdx = null;
   for(const file of pdfFiles){
     try {
       // Juridiction/chambre par défaut ("Cour administrative", sans chambre) si
       // jamais l'en-tête du PDF ne permet pas de trancher — voir _detectJurChambre.
-      const { entries, dateAudience, jur, chambre } = await parseConvocPdf(file, 'Cour administrative', '');
+      const { entries, dateAudience, textLength, jur, chambre } = await parseConvocPdf(file, 'Cour administrative', '');
       depositedConvocFiles.push({ file, jur, chambre, sourceWeek, dateAudience, parsed: entries });
       if(firstNewIdx === null) firstNewIdx = depositedConvocFiles.length - 1;
       if(entries.length) allParsed.push(...entries);
+      else if(textLength < 50) noText.push(file.name);
+      else noMatch.push(file.name);
     } catch(e){
       console.warn('[convocations] extraction échouée', file.name, e);
+      failed.push({ name: file.name, msg: e && e.message ? e.message : String(e) });
     }
   }
   renderConvocFilesList();
   if(firstNewIdx !== null) openConvocFileDetail(firstNewIdx);
 
   if(!allParsed.length){
-    statusEl.textContent = isDE?'Extraktion fehlgeschlagen oder keine Verfahren erkannt.':'Échec de l\'extraction ou aucune affaire reconnue.';
+    /* Cause précise plutôt qu'un message unique : PDF illisible, PDF scanné (image,
+       sans couche de texte), ou texte lu mais format de convocation non reconnu. */
+    const why = [];
+    if(failed.length) why.push(failed.some(f => /PDF\.js non chargé/.test(f.msg))
+      ? (isDE?'PDF.js konnte nicht geladen werden (Netzwerk/CDN) — Seite neu laden':'PDF.js n\'a pas pu être chargé (réseau/CDN) — recharger la page')
+      : `${failed.length} ${isDE?'Datei(en) unlesbar':'fichier(s) illisible(s)'} (${failed[0].name} : ${failed[0].msg})`);
+    if(noText.length) why.push(`${noText.length} PDF ${isDE?'ohne Text (Scan/Bild)':'sans texte (scan/image)'}`);
+    if(noMatch.length) why.push(`${noMatch.length} PDF ${isDE?'mit Text, aber ohne erkanntes Verfahren (Format?)':'lu(s) mais aucune affaire reconnue (format ?)'}`);
+    statusEl.textContent = (isDE?'Extraktion fehlgeschlagen':'Échec de l\'extraction')
+      + (why.length ? ' — ' + why.join(' ; ') : '') + '.';
+    if(ignored.length) console.warn('[convocations] fichiers ignorés (pas des PDF)', ignored.map(f => f.name));
     return;
   }
   statusEl.textContent = `✓ ${allParsed.length} ${isDE?'Verfahren erkannt und geteilt':'affaires reconnues et partagées'} — ${isDE?'hochgeladen von':'déposé par'} ${email||'—'}`;
@@ -5715,7 +5738,7 @@ function parseConvocationText(text, court, chambre){
     }
 
     // Détection numéro d'affaire : "N) 54997" ou "N) 53891C" — digits, lettre optionnelle
-    const numMatch = line.match(/^\d+\)\s+(\d+[A-Z]?)\b/);
+    const numMatch = line.match(/^\d+\s?[).]\s*(\d{4,6}[A-Z]?)\b/);
     if(!numMatch) continue;
 
     const num = numMatch[1];
@@ -5742,7 +5765,7 @@ function parseConvocationText(text, court, chambre){
     // (juges, propres aux convocations de la Cour) qui referment ce recollage.
     for(let j = i + 1; j < Math.min(i + 8, lines.length); j++){
       const l = lines[j].trim();
-      if(/^\d+\)\s+\d+[A-Z]?\b/.test(l)) break;
+      if(/^\d+\s?[).]\s*\d{4,6}[A-Z]?\b/.test(l)) break;
       if(!l) continue;
       if(l.startsWith("c/")){ defendeur = l.replace(/^c\/\s*/, "").trim(); lastField = 'defendeur'; }
       else if(l.startsWith("en matière de :")){ matiere = l.replace(/^en matière de :\s*/, "").trim(); lastField = 'matiere'; }
