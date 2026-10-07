@@ -4566,7 +4566,7 @@ function renderConvocFilesList(){
       <div class="archive-pdf-icon">PDF</div>
       <div class="archive-pdf-main">
         <div class="archive-pdf-name">${escHtml(entry.file.name)}</div>
-        <div class="archive-pdf-meta">${escHtml(entry.jur)}${entry.chambre?' · '+escHtml(entry.chambre):''} · ${entry.kind==='feuille' ? entry.feuille.prevenus.length+' '+(isDE?'Angeklagte':'prévenus') : entry.parsed.length+' '+(isDE?'Verfahren':'affaires')}</div>
+        <div class="archive-pdf-meta">${escHtml(entry.jur)}${entry.chambre?' · '+escHtml(entry.chambre):''} · ${entry.kind==='feuille' ? entry.feuille.nb+' '+(isDE?'Angeklagte':'prévenus') : entry.parsed.length+' '+(isDE?'Verfahren':'affaires')}</div>
       </div>
     </div>`;
   }).join('');
@@ -4585,10 +4585,14 @@ function openConvocFileDetail(idx){
   _convocDetailBlobUrl = blobUrl;
 
   const annotId = 'convoc:' + entry.file.name;
-  const feuilleRows = entry.kind === 'feuille' ? entry.feuille.prevenus.map(p => `<div class="watchlist-item"><div>
+  const feuilleRows = entry.kind === 'feuille' ? entry.feuille.audiences.map(au => {
+    const d = au.dateAudience ? new Date(au.dateAudience+'T00:00:00').toLocaleDateString(isDE?'de-DE':'fr-FR', { weekday:'long', day:'numeric', month:'long' }) : '';
+    return `<div style="font-size:12px;font-weight:700;margin:10px 0 4px;">${escHtml([d, au.heure, au.salle?(isDE?'Saal ':'Salle ')+au.salle:'', au.chambre].filter(Boolean).join(' · '))}</div>`
+      + au.prevenus.map(p => `<div class="watchlist-item"><div>
         <span style="font-weight:700;font-size:13px;">${escHtml(p.nom)}</span>${p.heure?`<span style="font-size:12px;color:var(--text-muted);margin-left:10px;">${escHtml(p.heure)}</span>`:''}
         <div style="font-size:12px;color:var(--text-muted);margin-top:2px;">${escHtml(p.preventions)}</div>
-      </div></div>`).join('') : '';
+      </div></div>`).join('');
+  }).join('') : '';
   const affaireRows = entry.parsed.map(a => {
     const inWL = _watchlist.includes(a.num);
     const avocatHtml = a.avocat
@@ -4623,7 +4627,7 @@ function openConvocFileDetail(idx){
           ${isDE?'Persönliche Notiz':'Annotation personnelle'}
         </button>
       </div>
-      ${entry.kind==='feuille' ? `<div style="font-size:12px;color:var(--text-muted);margin-bottom:8px;">${entry.feuille.salle?(isDE?'Saal ':'Salle ')+escHtml(entry.feuille.salle)+' · ':''}${isDE?'Nur lokal angezeigt, nicht geteilt':'Affichage local, non partagé'}</div><div style="margin-bottom:12px;">${feuilleRows}</div>` : entry.parsed.length ? `<div style="margin-bottom:12px;">${affaireRows}</div>` : ''}
+      ${entry.kind==='feuille' ? `<div style="font-size:12px;color:var(--text-muted);margin-bottom:8px;">${isDE?'Nur lokal angezeigt, nicht geteilt':'Affichage local, non partagé'}</div><div style="margin-bottom:12px;">${feuilleRows}</div>` : entry.parsed.length ? `<div style="margin-bottom:12px;">${affaireRows}</div>` : ''}
     </div>
     <iframe id="convoc-detail-iframe" class="viewer-iframe" style="height:60vh;" title="${escHtml(entry.file.name)}" src="${blobUrl}"></iframe>`;
 }
@@ -4719,15 +4723,15 @@ function _detectJurChambre(text, fallbackJur, fallbackChambre){
 function _isFeuilleAudience(text){
   return /feuille d.audience/i.test(text.slice(0, 400));
 }
-function parseFeuilleAudience(text){
-  const lines = text.split('\n')
-    .map(l => l.replace(/\s*\bPage \d+\s*$/i, '').trim())
-    .filter(l => l && !/^Page \d+$/i.test(l));
-  const head = lines.slice(0, 15).join('\n');
+/* Un PDF peut enchaîner plusieurs feuilles (une par audience de la semaine) : on
+   découpe sur chaque en-tête "FEUILLE D'AUDIENCE" et on analyse chaque feuille. */
+function _parseUneFeuille(lines){
+  const head = lines.slice(0, 12).join('\n');
   const mCh  = head.match(/CHAMBRE\s*:\s*(.+)/i);
   const mSa  = head.match(/Salle\s+n°\s*([A-Za-z0-9.\-]+)/i);
   const mHe  = head.match(/\b(\d{1,2}[:h.]\d{2})\b/);
-  const meta = { chambre: mCh ? mCh[1].trim() : '', salle: mSa ? mSa[1] : '', heure: mHe ? mHe[1] : '' };
+  const meta = { dateAudience: _extractDateAudience(head), chambre: mCh ? mCh[1].trim() : '',
+                 salle: mSa ? mSa[1] : '', heure: mHe ? mHe[1] : '' };
 
   const prevenus = [];
   let names = [], prev = [], heure = '', inPrev = false, started = false;
@@ -4736,9 +4740,12 @@ function parseFeuilleAudience(text){
     names = []; prev = []; heure = ''; inPrev = false;
   };
   for(const l of lines){
-    if(!started){ if(/^(M\.?P|GREFFIER|LEVEE)\b/i.test(l) || /^CHAMBRE\b/i.test(l)){ started = 'hdr'; } continue; }
+    if(!started){ if(/^CHAMBRE\b/i.test(l)) started = true; continue; }
     if(/^-+$/.test(l)){ flush(); continue; }
     if(/^(M\.?P|GREFFIER|LEVEE)\s*:/i.test(l)) continue;
+    /* Le tiret séparateur n'est pas toujours restitué par pdf.js (6 sur 17 dans un lot
+       réel) : "DECISION:" ouvre de toute façon chaque nouveau bloc. */
+    if(/DECISION\s*:/i.test(l)) flush();
     if(/^PREVENTIONS\s*:?/i.test(l)){ inPrev = true; const rest = l.replace(/^PREVENTIONS\s*:?\s*/i, ''); if(rest) prev.push(rest); continue; }
     if(inPrev){ prev.push(l); continue; }
     /* Avant "PREVENTIONS :" : lignes de noms (un ou plusieurs prévenus), avec les
@@ -4751,6 +4758,18 @@ function parseFeuilleAudience(text){
   flush();
   return { ...meta, prevenus };
 }
+function parseFeuilleAudience(text){
+  const lines = text.split('\n')
+    .map(l => l.replace(/\s*\bPage \d+\s*$/i, '').trim())
+    .filter(l => l && !/^Page \d+$/i.test(l));
+  const sheets = [];
+  lines.forEach(l => {
+    if(/^FEUILLE D.AUDIENCE/i.test(l)) sheets.push([]);
+    else if(sheets.length) sheets[sheets.length - 1].push(l);
+  });
+  const audiences = sheets.map(_parseUneFeuille).filter(a => a.prevenus.length);
+  return { audiences, nb: audiences.reduce((n, a) => n + a.prevenus.length, 0) };
+}
 
 async function parseConvocPdf(file, jur, chambre){
   /* pdf.js est un module ESM chargé depuis le CDN : exposé en global seulement une
@@ -4759,7 +4778,7 @@ async function parseConvocPdf(file, jur, chambre){
   if(typeof pdfjsLib === 'undefined') throw new Error('PDF.js non chargé');
   const arrayBuffer = await file.arrayBuffer();
   const pdf = await pdfjsLib.getDocument({ data: arrayBuffer, isEvalSupported: false }).promise;
-  const maxPages = Math.min(pdf.numPages, 10);
+  const maxPages = Math.min(pdf.numPages, 60);   // une feuille hebdomadaire dépasse vite 10 pages
   let text = '';
   for(let p = 1; p <= maxPages; p++){
     const page  = await pdf.getPage(p);
@@ -4769,8 +4788,9 @@ async function parseConvocPdf(file, jur, chambre){
   const textLength = text.replace(/\s/g, '').length;
   if(_isFeuilleAudience(text)){
     const feuille = parseFeuilleAudience(text);
-    return { kind: 'feuille', feuille, entries: [], dateAudience: _extractDateAudience(text), textLength,
-             jur: "Feuille d'audience", chambre: feuille.chambre };
+    const first = feuille.audiences[0] || {};
+    return { kind: 'feuille', feuille, entries: [], dateAudience: first.dateAudience || null, textLength,
+             jur: "Feuille d'audience", chambre: first.chambre || '' };
   }
   const detected = _detectJurChambre(text, jur, chambre);
   const dateAudience = _extractDateAudience(text);
@@ -4822,7 +4842,7 @@ async function handleConvocUpload(fileOrFiles){
       const { kind, feuille, entries, dateAudience, textLength, jur, chambre } = await parseConvocPdf(file, 'Cour administrative', '');
       depositedConvocFiles.push({ file, kind, feuille, jur, chambre, sourceWeek, dateAudience, parsed: entries });
       if(kind === 'feuille'){
-        if(feuille.prevenus.length) feuilleCount += feuille.prevenus.length; else noMatch.push(file.name);
+        if(feuille.nb) feuilleCount += feuille.nb; else noMatch.push(file.name);
         if(firstNewIdx === null) firstNewIdx = depositedConvocFiles.length - 1;
         continue;
       }
