@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://cdn.sheetjs.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob:; connect-src 'self' https://lhtkvogmkebslihuwfyu.supabase.co https://data.public.lu https://download.data.public.lu https://cdn.jsdelivr.net; frame-src 'self' blob:; worker-src blob: https://cdn.jsdelivr.net; object-src 'none'; base-uri 'none'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://cdn.sheetjs.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob:; connect-src 'self' https://lhtkvogmkebslihuwfyu.supabase.co https://whoswho-lu.pages.dev https://data.public.lu https://download.data.public.lu https://cdn.jsdelivr.net; frame-src 'self' blob:; worker-src blob: https://cdn.jsdelivr.net; object-src 'none'; base-uri 'none'; form-action 'none'">
 <meta name="robots" content="noindex, nofollow">
 <title>Veille judiciaire — Outil de collecte, recherche et radar décisions</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -768,6 +768,14 @@ table.analyse-tbl tbody tr:hover{background:var(--row-sep);}
   transition:background .15s,color .15s;
 }
 .affaire-whoswho-link:hover{background:var(--accent-red);color:#fff;}
+/* Pastille de recoupement : un prévenu dont le nom correspond à une fiche whoswho-lu.
+   Pleine = prénom(s) identique(s) ; contour = même nom, prénom proche (homonymie possible). */
+.ww-pill{display:inline-flex;align-items:center;gap:4px;font-size:10.5px;font-weight:700;line-height:1;
+  padding:3px 7px;border-radius:10px;margin-left:6px;vertical-align:1px;text-decoration:none;
+  background:var(--accent-red);color:#fff;border:1px solid var(--accent-red);}
+.ww-pill.is-probable{background:transparent;color:var(--accent-red);}
+.ww-pill:hover{filter:brightness(.92);}
+.ww-note{font-size:11.5px;color:var(--text-faint);margin:0 0 8px;}
 /* ── Affaires tabs & grouping ── */
 .affaires-tabs{display:flex;gap:0;padding:0 20px;border-bottom:1px solid var(--card-border);background:var(--row-sep);}
 .affaires-tab{padding:10px 16px;font-size:12px;font-weight:600;letter-spacing:.03em;color:var(--text-muted);cursor:pointer;border:none;background:none;border-bottom:2px solid transparent;margin-bottom:-1px;transition:color .15s,border-color .15s;border-radius:0;font-family:inherit;white-space:nowrap;}
@@ -4556,22 +4564,25 @@ let _convocDetailBlobUrl = null;
    IndexedDB du navigateur uniquement, jamais envoyé à Supabase. Conservés 6 mois (même durée
    que le module Rapprochement) puis purgés au chargement ; masqués à la déconnexion, et
    effaçables à la main. À réexaminer lors de la bascule du module vers le NAS. */
-const FEUILLES_DB = 'veille-feuilles', FEUILLES_STORE = 'feuilles';
+const FEUILLES_DB = 'veille-feuilles', FEUILLES_STORE = 'feuilles', WW_STORE = 'ww-index';
 const FEUILLES_RETENTION_MS = 183 * 86400000;
 function _feuillesDb(){
   return new Promise((resolve, reject) => {
-    const req = indexedDB.open(FEUILLES_DB, 1);
-    req.onupgradeneeded = () => req.result.createObjectStore(FEUILLES_STORE, { keyPath: 'key' });
+    const req = indexedDB.open(FEUILLES_DB, 2);
+    req.onupgradeneeded = () => {
+      if(!req.result.objectStoreNames.contains(FEUILLES_STORE)) req.result.createObjectStore(FEUILLES_STORE, { keyPath: 'key' });
+      if(!req.result.objectStoreNames.contains(WW_STORE)) req.result.createObjectStore(WW_STORE, { keyPath: 'key' });
+    };
     req.onsuccess = () => resolve(req.result);
     req.onerror = () => reject(req.error);
   });
 }
 function _feuilleKey(file){ return `${file.name}|${file.size}|${file.lastModified || 0}`; }
-async function _feuillesTx(mode, fn){
+async function _feuillesTx(mode, fn, store = FEUILLES_STORE){
   const db = await _feuillesDb();
   return new Promise((resolve, reject) => {
-    const tx = db.transaction(FEUILLES_STORE, mode);
-    const out = fn(tx.objectStore(FEUILLES_STORE));
+    const tx = db.transaction(store, mode);
+    const out = fn(tx.objectStore(store));
     tx.oncomplete = () => { db.close(); resolve(out && out.result !== undefined ? out.result : undefined); };
     tx.onerror = tx.onabort = () => { db.close(); reject(tx.error); };
   });
@@ -4622,6 +4633,88 @@ function _prevenuSearchName(nom){
   const clean = (nom || '').replace(/\([^)]*\)/g, ' ').replace(/\s+/g, ' ').trim();
   return _invertLawyerName(clean);
 }
+/* ── Index de noms whoswho-lu (GET /api/names-index, jeton Supabase en Bearer) ───────────
+   13 000 fiches réduites à id / nom / prénom / catégorie / intitulé court. Gardé 24 h dans
+   IndexedDB ; la correspondance est calculée ICI, dans le navigateur : aucun nom de prévenu
+   ne part vers whoswho. Ne s'applique qu'aux prévenus (feuilles pénales, relevé d'appel),
+   jamais au champ « Avocat(s) » : un avocat poursuivi est trouvé, un avocat plaidant non. */
+const WW_INDEX_URL = 'https://whoswho-lu.pages.dev/api/names-index';
+const WW_INDEX_TTL_MS = 24 * 3600 * 1000;
+let _wwByLast = null, _wwState = 'idle';   // idle | loading | ready | unavailable
+
+function _wwNorm(s){
+  return (s || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim();
+}
+function _wwBuild(payload){
+  const base = payload && payload.base, extra = (payload && payload.extra) || { rows: [], hidden: [] };
+  if(!base || !Array.isArray(base.rows)) return null;
+  const byId = new Map();
+  base.rows.forEach(r => byId.set(r[0], { id: r[0], last: r[1], first: r[2], cat: base.cats[r[3]] || '', headline: r[4] || '' }));
+  (extra.hidden || []).forEach(id => byId.delete(id));
+  (extra.rows || []).forEach(r => byId.set(r[0], { id: r[0], last: r[1], first: r[2], cat: r[3] || '', headline: r[4] || '' }));
+  const map = new Map();
+  byId.forEach(f => {
+    const k = _wwNorm(f.last);
+    if(!k) return;
+    f._first = _wwNorm(f.first).split(' ').filter(Boolean);
+    (map.get(k) || map.set(k, []).get(k)).push(f);
+  });
+  return map;
+}
+async function loadWhoswhoIndex(){
+  if(_wwState === 'loading' || _wwState === 'ready') return;
+  _wwState = 'loading';
+  let payload = null, cached = null;
+  try { cached = await _feuillesTx('readonly', s => s.get('wwIndex'), WW_STORE); } catch(e){ /* cache absent */ }
+  if(cached && Date.now() - cached.savedAt < WW_INDEX_TTL_MS) payload = cached.data;
+  if(!payload){
+    try {
+      const { data: { session } } = await _sb.auth.getSession();
+      if(!session) throw new Error('pas de session');
+      const res = await fetch(WW_INDEX_URL, { headers: { Authorization: 'Bearer ' + session.access_token }, cache: 'no-store' });
+      if(!res.ok) throw new Error('HTTP ' + res.status);
+      payload = await res.json();
+      _feuillesTx('readwrite', s => s.put({ key: 'wwIndex', savedAt: Date.now(), data: payload }), WW_STORE).catch(() => {});
+    } catch(e){
+      console.warn('[whoswho] index de noms indisponible', e);
+      payload = cached ? cached.data : null;   // à défaut, l'index expiré vaut mieux que rien
+    }
+  }
+  _wwByLast = payload ? _wwBuild(payload) : null;
+  _wwState = _wwByLast ? 'ready' : 'unavailable';
+  renderConvocFilesList();
+  if(_selectedConvocFileIdx !== null) openConvocFileDetail(_selectedConvocFileIdx);
+}
+/* "NOM Prénom(s)" des feuilles → { last, first[] }. Une personne morale (tout en capitales,
+   sans prénom) n'est pas recoupée. */
+function _wwSplitPrevenu(nom){
+  const words = (nom || '').replace(/\([^)]*\)/g, ' ').split(/\s+/).filter(Boolean);
+  let i = 0;
+  while(i < words.length && words[i] === words[i].toLocaleUpperCase('fr') && /\p{L}/u.test(words[i])) i++;
+  if(i === 0 || i === words.length) return null;
+  return { last: _wwNorm(words.slice(0, i).join(' ')), first: _wwNorm(words.slice(i).join(' ')).split(' ').filter(Boolean) };
+}
+function whoswhoMatches(nom){
+  if(!_wwByLast) return [];
+  const p = _wwSplitPrevenu(nom);
+  if(!p || !p.first.length) return [];
+  return (_wwByLast.get(p.last) || [])
+    .filter(f => f._first.length && f._first[0] === p.first[0])
+    .map(f => ({ f, exact: f._first.length === p.first.length && f._first.every((t, k) => t === p.first[k]) }));
+}
+function _wwPills(nom){
+  return whoswhoMatches(nom).map(({ f, exact }) => {
+    const label = [f.cat, f.headline].filter(Boolean).join(' — ');
+    const title = (exact ? 'Fiche whoswho-lu : ' : 'Fiche whoswho-lu (prénom proche, homonymie possible) : ') + f.first + ' ' + f.last + (label ? ' — ' + label : '');
+    const href = `${WHOSWHOLU_URL}/?${new URLSearchParams({ cat: 'Justice', q: (f.first + ' ' + f.last).trim() })}`;
+    return `<a class="ww-pill${exact ? '' : ' is-probable'}" href="${escHtml(href)}" target="_blank" rel="noopener" title="${escHtml(title)}">${WHOSWHO_ICON} ${escHtml(f.cat || 'whoswho')}</a>`;
+  }).join('');
+}
+function _wwEntryMatchCount(entry){
+  if(entry.kind !== 'feuille' || _wwState !== 'ready') return 0;
+  return entry.feuille.audiences.reduce((n, a) => n + a.prevenus.filter(p => whoswhoMatches(p.nom).length).length, 0);
+}
+
 function whoswholuPrevenuLink(nom){
   const params = new URLSearchParams({ cat: 'Justice', q: _prevenuSearchName(nom) });
   return `${WHOSWHOLU_URL}/?${params.toString()}`;
@@ -4643,7 +4736,7 @@ function renderConvocFilesList(){
       <div class="archive-pdf-icon">PDF</div>
       <div class="archive-pdf-main">
         <div class="archive-pdf-name">${escHtml(entry.file.name)}</div>
-        <div class="archive-pdf-meta">${escHtml(entry.jur)}${entry.chambre?' · '+escHtml(entry.chambre):''} · ${entry.kind==='feuille' ? entry.feuille.nb+' '+(isDE?'Angeklagte':'prévenus') : entry.parsed.length+' '+(isDE?'Verfahren':'affaires')}</div>
+        <div class="archive-pdf-meta">${escHtml(entry.jur)}${entry.chambre?' · '+escHtml(entry.chambre):''} · ${entry.kind==='feuille' ? entry.feuille.nb+' '+(isDE?'Angeklagte':'prévenus')+(_wwEntryMatchCount(entry)?` · <span class="ww-pill" style="margin-left:0;">${_wwEntryMatchCount(entry)} whoswho</span>`:'') : entry.parsed.length+' '+(isDE?'Verfahren':'affaires')}</div>
       </div>
     </div>`;
   }).join('');
@@ -4666,7 +4759,7 @@ function openConvocFileDetail(idx){
     const d = au.dateAudience ? new Date(au.dateAudience+'T00:00:00').toLocaleDateString(isDE?'de-DE':'fr-FR', { weekday:'long', day:'numeric', month:'long' }) : '';
     return `<div style="font-size:12px;font-weight:700;margin:10px 0 4px;">${escHtml([d, au.heure, au.salle?(isDE?'Saal ':'Salle ')+au.salle:'', au.chambre].filter(Boolean).join(' · '))}</div>`
       + au.prevenus.map(p => `<div class="watchlist-item"><div>
-        <span style="font-weight:700;font-size:13px;">${escHtml(p.nom)}</span> <a href="${escHtml(whoswholuPrevenuLink(p.nom))}" target="_blank" rel="noopener" class="affaire-whoswho-link" title="${isDE?'In whoswho-lu suchen':'Rechercher dans whoswho-lu'}">${WHOSWHO_ICON} whoswho</a>${p.heure?`<span style="font-size:12px;color:var(--text-muted);margin-left:10px;">${escHtml(p.heure)}</span>`:''}
+        <span style="font-weight:700;font-size:13px;">${escHtml(p.nom)}</span> <a href="${escHtml(whoswholuPrevenuLink(p.nom))}" target="_blank" rel="noopener" class="affaire-whoswho-link" title="${isDE?'In whoswho-lu suchen':'Rechercher dans whoswho-lu'}">${WHOSWHO_ICON}</a>${_wwPills(p.nom)}${p.heure?`<span style="font-size:12px;color:var(--text-muted);margin-left:10px;">${escHtml(p.heure)}</span>`:''}
         <div style="font-size:12px;color:var(--text-muted);margin-top:2px;">${escHtml(p.preventions)}</div>
         ${p.jugement?`<div style="font-size:11.5px;color:var(--text-faint);margin-top:2px;">${escHtml(p.jugement)}</div>`:''}
       </div></div>`).join('');
@@ -4705,7 +4798,7 @@ function openConvocFileDetail(idx){
           ${isDE?'Persönliche Notiz':'Annotation personnelle'}
         </button>
       </div>
-      ${entry.kind==='feuille' ? `<div style="font-size:12px;color:var(--text-muted);margin-bottom:8px;">${isDE?'Nur lokal angezeigt, nicht geteilt':'Affichage local, non partagé'}</div><div style="margin-bottom:12px;">${feuilleRows}</div>` : entry.parsed.length ? `<div style="margin-bottom:12px;">${affaireRows}</div>` : ''}
+      ${entry.kind==='feuille' ? `<div style="font-size:12px;color:var(--text-muted);margin-bottom:8px;">${isDE?'Nur lokal angezeigt, nicht geteilt':'Affichage local, non partagé'}</div>${_wwState==='unavailable'?`<p class="ww-note">${isDE?'whoswho-Abgleich nicht verfügbar (Namensindex nicht geladen).':'Recoupement whoswho indisponible (index de noms non chargé).'}</p>`:_wwState==='loading'?`<p class="ww-note">${isDE?'whoswho-Abgleich wird geladen…':'Recoupement whoswho en cours de chargement…'}</p>`:''}<div style="margin-bottom:12px;">${feuilleRows}</div>` : entry.parsed.length ? `<div style="margin-bottom:12px;">${affaireRows}</div>` : ''}
     </div>
     <iframe id="convoc-detail-iframe" class="viewer-iframe" style="height:60vh;" title="${escHtml(entry.file.name)}" src="${blobUrl}"></iframe>`;
 }
@@ -5881,6 +5974,7 @@ async function authOnSession(session){
   loadAnnotationsFromSupabase();
   _logConnexion();
   restoreStoredFeuilles();
+  loadWhoswhoIndex();
 }
 
 async function authSignOut(){
