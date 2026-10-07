@@ -4552,6 +4552,81 @@ let depositedConvocFiles = [];
 let _selectedConvocFileIdx = null;
 let _convocDetailBlobUrl = null;
 
+/* Mémorisation locale des feuilles d'audience / relevés pénaux (noms de personnes poursuivies) :
+   IndexedDB du navigateur uniquement, jamais envoyé à Supabase. Conservés 6 mois (même durée
+   que le module Rapprochement) puis purgés au chargement ; masqués à la déconnexion, et
+   effaçables à la main. À réexaminer lors de la bascule du module vers le NAS. */
+const FEUILLES_DB = 'veille-feuilles', FEUILLES_STORE = 'feuilles';
+const FEUILLES_RETENTION_MS = 183 * 86400000;
+function _feuillesDb(){
+  return new Promise((resolve, reject) => {
+    const req = indexedDB.open(FEUILLES_DB, 1);
+    req.onupgradeneeded = () => req.result.createObjectStore(FEUILLES_STORE, { keyPath: 'key' });
+    req.onsuccess = () => resolve(req.result);
+    req.onerror = () => reject(req.error);
+  });
+}
+function _feuilleKey(file){ return `${file.name}|${file.size}|${file.lastModified || 0}`; }
+async function _feuillesTx(mode, fn){
+  const db = await _feuillesDb();
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(FEUILLES_STORE, mode);
+    const out = fn(tx.objectStore(FEUILLES_STORE));
+    tx.oncomplete = () => { db.close(); resolve(out && out.result !== undefined ? out.result : undefined); };
+    tx.onerror = tx.onabort = () => { db.close(); reject(tx.error); };
+  });
+}
+async function saveFeuilleEntry(entry){
+  try {
+    await _feuillesTx('readwrite', s => s.put({ key: _feuilleKey(entry.file), savedAt: Date.now(),
+      file: entry.file, kind: entry.kind, feuille: entry.feuille, jur: entry.jur, chambre: entry.chambre,
+      dateAudience: entry.dateAudience, sourceWeek: entry.sourceWeek }));
+  } catch(e){ console.warn('[feuilles] mémorisation locale impossible', e); }
+}
+async function restoreStoredFeuilles(){
+  try {
+    const rows = await _feuillesTx('readonly', s => s.getAll());
+    const limit = Date.now() - FEUILLES_RETENTION_MS;
+    const expired = (rows || []).filter(r => r.savedAt < limit);
+    if(expired.length) await _feuillesTx('readwrite', s => expired.forEach(r => s.delete(r.key)));
+    const have = new Set(depositedConvocFiles.map(e => _feuilleKey(e.file)));
+    (rows || []).filter(r => r.savedAt >= limit && !have.has(r.key)).forEach(r => {
+      depositedConvocFiles.push({ file: r.file, kind: r.kind, feuille: r.feuille, jur: r.jur, chambre: r.chambre,
+        sourceWeek: r.sourceWeek, dateAudience: r.dateAudience, parsed: [], stored: true });
+    });
+    renderConvocFilesList();
+  } catch(e){ console.warn('[feuilles] restauration impossible', e); }
+}
+/* Déconnexion : on retire les feuilles de l'écran (poste partagé) mais pas de la base locale —
+   elles reviennent à la prochaine connexion. */
+function hideStoredFeuilles(){
+  depositedConvocFiles = depositedConvocFiles.filter(e => e.kind !== 'feuille');
+  _selectedConvocFileIdx = null;
+  renderConvocFilesList();
+  const zone = $('#convoc-detail-zone');
+  if(zone) zone.innerHTML = '';
+}
+async function clearStoredFeuilles(){
+  const isDE = currentLang==='de';
+  if(!confirm(isDE ? 'Alle gespeicherten Sitzungsblätter auf diesem Gerät löschen?' : 'Effacer toutes les feuilles d\'audience mémorisées sur cet appareil ?')) return;
+  try { await _feuillesTx('readwrite', s => s.clear()); } catch(e){ console.warn('[feuilles] effacement impossible', e); }
+  hideStoredFeuilles();
+}
+
+/* Recoupement avec whoswho-lu : même mécanisme que les liens Avocats des convocations
+   (lien profond, la recherche se fait dans whoswho-lu, connecté), mais sur le NOM DU PRÉVENU
+   — jamais sur l'avocat plaidant. La recherche par nom de whoswho-lu est globale (toutes
+   catégories) dès qu'un nom est saisi : un avocat poursuivi y est donc trouvé comme n'importe
+   qui. L'ordre "NOM Prénom" des feuilles est inversé en "Prénom Nom". */
+function _prevenuSearchName(nom){
+  const clean = (nom || '').replace(/\([^)]*\)/g, ' ').replace(/\s+/g, ' ').trim();
+  return _invertLawyerName(clean);
+}
+function whoswholuPrevenuLink(nom){
+  const params = new URLSearchParams({ cat: 'Justice', q: _prevenuSearchName(nom) });
+  return `${WHOSWHOLU_URL}/?${params.toString()}`;
+}
+
 function renderConvocFilesList(){
   const el = $('#convoc-files-list');
   if(!el) return;
@@ -4560,7 +4635,9 @@ function renderConvocFilesList(){
     return;
   }
   const isDE = currentLang==='de';
-  el.innerHTML = depositedConvocFiles.map((entry, i) => {
+  const nStored = depositedConvocFiles.filter(e => e.kind === 'feuille').length;
+  const clearBtn = nStored ? `<div style="padding:8px 14px;border-bottom:1px solid var(--row-sep);"><button class="btn btn-secondary" style="font-size:11.5px;padding:4px 10px;" onclick="clearStoredFeuilles()" title="${isDE?'Nur auf diesem Gerät gespeichert, 6 Monate':'Mémorisées sur cet appareil uniquement, 6 mois'}">${isDE?'Gespeicherte Sitzungsblätter löschen':'Effacer les feuilles mémorisées'} (${nStored})</button></div>` : '';
+  el.innerHTML = clearBtn + depositedConvocFiles.map((entry, i) => {
     const sel = i === _selectedConvocFileIdx;
     return `<div class="archive-pdf-row" style="cursor:pointer;${sel?'background:var(--row-sep);':''}" onclick="openConvocFileDetail(${i})">
       <div class="archive-pdf-icon">PDF</div>
@@ -4589,7 +4666,7 @@ function openConvocFileDetail(idx){
     const d = au.dateAudience ? new Date(au.dateAudience+'T00:00:00').toLocaleDateString(isDE?'de-DE':'fr-FR', { weekday:'long', day:'numeric', month:'long' }) : '';
     return `<div style="font-size:12px;font-weight:700;margin:10px 0 4px;">${escHtml([d, au.heure, au.salle?(isDE?'Saal ':'Salle ')+au.salle:'', au.chambre].filter(Boolean).join(' · '))}</div>`
       + au.prevenus.map(p => `<div class="watchlist-item"><div>
-        <span style="font-weight:700;font-size:13px;">${escHtml(p.nom)}</span>${p.heure?`<span style="font-size:12px;color:var(--text-muted);margin-left:10px;">${escHtml(p.heure)}</span>`:''}
+        <span style="font-weight:700;font-size:13px;">${escHtml(p.nom)}</span> <a href="${escHtml(whoswholuPrevenuLink(p.nom))}" target="_blank" rel="noopener" class="affaire-whoswho-link" title="${isDE?'In whoswho-lu suchen':'Rechercher dans whoswho-lu'}">${WHOSWHO_ICON} whoswho</a>${p.heure?`<span style="font-size:12px;color:var(--text-muted);margin-left:10px;">${escHtml(p.heure)}</span>`:''}
         <div style="font-size:12px;color:var(--text-muted);margin-top:2px;">${escHtml(p.preventions)}</div>
         ${p.jugement?`<div style="font-size:11.5px;color:var(--text-faint);margin-top:2px;">${escHtml(p.jugement)}</div>`:''}
       </div></div>`).join('');
@@ -4901,7 +4978,14 @@ async function handleConvocUpload(fileOrFiles){
       // Juridiction/chambre par défaut ("Cour administrative", sans chambre) si
       // jamais l'en-tête du PDF ne permet pas de trancher — voir _detectJurChambre.
       const { kind, feuille, entries, dateAudience, textLength, jur, chambre } = await parseConvocPdf(file, 'Cour administrative', '');
-      depositedConvocFiles.push({ file, kind, feuille, jur, chambre, sourceWeek, dateAudience, parsed: entries });
+      const newEntry = { file, kind, feuille, jur, chambre, sourceWeek, dateAudience, parsed: entries };
+      if(kind === 'feuille'){
+        /* Même fichier redéposé : on remplace, on n'empile pas de doublon. */
+        const dupIdx = depositedConvocFiles.findIndex(e => e.kind === 'feuille' && _feuilleKey(e.file) === _feuilleKey(file));
+        if(dupIdx >= 0) depositedConvocFiles.splice(dupIdx, 1);
+        if(feuille.nb) saveFeuilleEntry(newEntry);
+      }
+      depositedConvocFiles.push(newEntry);
       if(kind === 'feuille'){
         if(feuille.nb) feuilleCount += feuille.nb; else noMatch.push(file.name);
         if(firstNewIdx === null) firstNewIdx = depositedConvocFiles.length - 1;
@@ -5796,11 +5880,13 @@ async function authOnSession(session){
   loadWatchlistFromSupabase();
   loadAnnotationsFromSupabase();
   _logConnexion();
+  restoreStoredFeuilles();
 }
 
 async function authSignOut(){
   if(_sb) await _sb.auth.signOut();
   _currentUser = null;
+  hideStoredFeuilles();
   $('#sidebar-user').style.display = 'none';
   showAuthOverlay();
 }
