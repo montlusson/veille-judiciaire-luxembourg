@@ -4651,7 +4651,11 @@ function _wwBuild(payload){
   const byId = new Map();
   base.rows.forEach(r => byId.set(r[0], { id: r[0], last: r[1], first: r[2], cat: base.cats[r[3]] || '', headline: r[4] || '' }));
   (extra.hidden || []).forEach(id => byId.delete(id));
-  (extra.rows || []).forEach(r => byId.set(r[0], { id: r[0], last: r[1], first: r[2], cat: r[3] || '', headline: r[4] || '' }));
+  /* Fiche modifiée : les champs que l'édition ne renseigne pas gardent leur valeur de base. */
+  (extra.rows || []).forEach(r => {
+    const prev = byId.get(r[0]) || {};
+    byId.set(r[0], { id: r[0], last: r[1], first: r[2], cat: r[3] || prev.cat || '', headline: r[4] || prev.headline || '' });
+  });
   const map = new Map();
   byId.forEach(f => {
     const k = _wwNorm(f.last);
