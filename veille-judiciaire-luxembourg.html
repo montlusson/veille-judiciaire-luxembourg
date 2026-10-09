@@ -6859,30 +6859,41 @@ function computeStadeCounts(data){
   return counts;
 }
 
-/* Dernier code de semaine présent dans les données ("2026-W25"), ou null
-   si aucune donnée de semaine (démo, ancien format). */
-function _latestSourceWeek(data){
-  const weeks = [...new Set(data.map(a => a.source_week).filter(Boolean))];
-  return weeks.length ? weeks.sort().slice(-1)[0] : null;
+/* Semaine ISO d'une affaire = celle de son AUDIENCE (date_audience, extraite du PDF). Le repli sur
+   source_week — semaine où le PDF a été DÉPOSÉ — ne vaut que pour les anciennes lignes sans date.
+   Se baser sur source_week seul faussait tout dépôt en lot : des centaines de convocations
+   déposées la même semaine recevaient toutes le même code, et « la semaine » ≈ « l'année ». */
+function _affaireWeek(a){
+  if(a.date_audience) return _isoWeekLabel(new Date(a.date_audience + 'T00:00:00'));
+  return a.source_week || null;
 }
 
-/* Affaires de la semaine la plus récente parmi les convocations déposées
-   (champ source_week). Sans donnée de semaine (démo, ancien format), on
-   retombe sur l'ensemble des affaires. */
+/* Semaine « en cours » des statistiques : la semaine d'aujourd'hui si des audiences y tombent, sinon
+   la dernière semaine déjà écoulée qui a des affaires, sinon (tout est dans le futur) la prochaine.
+   null si aucune donnée de semaine (démo, ancien format). */
+function _latestSourceWeek(data){
+  const weeks = [...new Set(data.map(_affaireWeek).filter(Boolean))].sort();
+  if(!weeks.length) return null;
+  const today = _isoWeekLabel(new Date());
+  if(weeks.includes(today)) return today;
+  const past = weeks.filter(w => w <= today);
+  return past.length ? past[past.length - 1] : weeks[0];
+}
+
+/* Affaires dont l'audience tombe dans la semaine « en cours ». Sans donnée de semaine, on retombe sur
+   l'ensemble des affaires. */
 function _currentWeekAffaires(data){
   const latest = _latestSourceWeek(data);
-  return latest ? data.filter(a => a.source_week === latest) : data;
+  return latest ? data.filter(a => _affaireWeek(a) === latest) : data;
 }
 
-/* Affaires de l'année en cours (préfixe année du champ source_week).
-   Sert à l'analyse de tendances annuelles dans les statistiques
-   agrégées. Même repli que _currentWeekAffaires en l'absence de
-   source_week. */
+/* Affaires de l'année de la semaine « en cours » (année de l'audience). Sert à l'analyse de tendances
+   annuelles dans les statistiques agrégées. Même repli que _currentWeekAffaires. */
 function _currentYearAffaires(data){
   const latest = _latestSourceWeek(data);
   if(!latest) return data;
   const year = latest.split('-')[0];
-  return data.filter(a => a.source_week && a.source_week.startsWith(year + '-'));
+  return data.filter(a => (_affaireWeek(a) || '').startsWith(year + '-'));
 }
 
 function renderAffaireRow(a, hideJur){
