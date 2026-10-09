@@ -4560,10 +4560,13 @@ let depositedConvocFiles = [];
 let _selectedConvocFileIdx = null;
 let _convocDetailBlobUrl = null;
 
-/* Mémorisation locale des feuilles d'audience / relevés pénaux (noms de personnes poursuivies) :
-   IndexedDB du navigateur uniquement, jamais envoyé à Supabase. Conservés 6 mois (même durée
-   que le module Rapprochement) puis purgés au chargement ; masqués à la déconnexion, et
-   effaçables à la main. À réexaminer lors de la bascule du module vers le NAS. */
+/* Feuilles d'audience / relevés pénaux (noms de personnes poursuivies) : le contenu ANALYSÉ
+   (jamais le PDF) est partagé avec la rédaction dans la table Supabase `feuilles_penales`
+   (feuilles-penales-schema.sql : comptes @reporter.lu, rétention 6 mois, purge par
+   keepalive.yml). Une copie locale (IndexedDB, avec le PDF) sert de cache et garde le PDF de
+   ceux qui l'ont déposé. Si la table n'existe pas ou est injoignable, les feuilles restent
+   locales et le message de dépôt le dit. Masquées à la déconnexion. À réexaminer lors de la
+   bascule du module vers le NAS. */
 const FEUILLES_DB = 'veille-feuilles', FEUILLES_STORE = 'feuilles', WW_STORE = 'ww-index';
 const FEUILLES_RETENTION_MS = 183 * 86400000;
 function _feuillesDb(){
@@ -4590,7 +4593,7 @@ async function _feuillesTx(mode, fn, store = FEUILLES_STORE){
 async function saveFeuilleEntry(entry){
   try {
     await _feuillesTx('readwrite', s => s.put({ key: _feuilleKey(entry.file), savedAt: Date.now(),
-      file: entry.file, kind: entry.kind, feuille: entry.feuille, jur: entry.jur, chambre: entry.chambre,
+      file: entry.file, hash: entry.hash || null, kind: entry.kind, feuille: entry.feuille, jur: entry.jur, chambre: entry.chambre,
       dateAudience: entry.dateAudience, sourceWeek: entry.sourceWeek }));
   } catch(e){ console.warn('[feuilles] mémorisation locale impossible', e); }
 }
@@ -4600,13 +4603,63 @@ async function restoreStoredFeuilles(){
     const limit = Date.now() - FEUILLES_RETENTION_MS;
     const expired = (rows || []).filter(r => r.savedAt < limit);
     if(expired.length) await _feuillesTx('readwrite', s => expired.forEach(r => s.delete(r.key)));
-    const have = new Set(depositedConvocFiles.map(e => _feuilleKey(e.file)));
+    const have = new Set(depositedConvocFiles.filter(e => e.file).map(e => _feuilleKey(e.file)));
+    const added = [];
     (rows || []).filter(r => r.savedAt >= limit && !have.has(r.key)).forEach(r => {
-      depositedConvocFiles.push({ file: r.file, kind: r.kind, feuille: r.feuille, jur: r.jur, chambre: r.chambre,
-        sourceWeek: r.sourceWeek, dateAudience: r.dateAudience, parsed: [], stored: true });
+      const e = { file: r.file, name: r.file.name, hash: r.hash || null, kind: r.kind, feuille: r.feuille, jur: r.jur,
+        chambre: r.chambre, sourceWeek: r.sourceWeek, dateAudience: r.dateAudience, parsed: [], stored: true };
+      depositedConvocFiles.push(e); added.push(e);
     });
+    for(const e of added.filter(x => !x.hash)){ try { e.hash = await _sha256Hex(e.file); } catch(_){} }
     renderConvocFilesList();
   } catch(e){ console.warn('[feuilles] restauration impossible', e); }
+}
+async function _sha256Hex(file){
+  const buf = await crypto.subtle.digest('SHA-256', await file.arrayBuffer());
+  return [...new Uint8Array(buf)].map(b => b.toString(16).padStart(2, '0')).join('');
+}
+/* Partage d'une feuille (contenu analysé, pas le PDF). Insertion seule, sans écraser : le même
+   PDF déposé par un autre compte ne crée pas de doublon (clé = SHA-256). Retourne '' si tout va
+   bien, sinon le message d'erreur (table absente, droits, réseau…). */
+async function shareFeuilleEntry(entry){
+  if(!_sb || !_currentUser) return 'non connecté';
+  if(!entry.hash) return 'empreinte du PDF indisponible';
+  try {
+    const { error } = await _sb.from('feuilles_penales').upsert({
+      hash: entry.hash, file_name: entry.name, jur: entry.jur || null, chambre: entry.chambre || null,
+      date_audience: entry.dateAudience || null, source_week: entry.sourceWeek || null,
+      nb_prevenus: entry.feuille.nb, contenu: entry.feuille, uploaded_by: _currentUser.email
+    }, { onConflict: 'hash', ignoreDuplicates: true });
+    if(error){ console.warn('[feuilles] partage Supabase échoué', error); return error.message || String(error); }
+    return '';
+  } catch(e){ return e && e.message ? e.message : String(e); }
+}
+/* Lit les feuilles partagées de toute la rédaction (non expirées : filtre appliqué par la base)
+   et ajoute celles que ce navigateur n'a pas. Envoie aussi, une fois, les feuilles gardées
+   localement que la table ne connaît pas encore (déposées avant la création de la table). */
+async function loadSharedFeuilles(){
+  if(!_sb || !_currentUser) return;
+  try {
+    const PAGE = 100;
+    let rows = [], from = 0;
+    for(;;){
+      const { data, error } = await _sb.from('feuilles_penales')
+        .select('hash,file_name,jur,chambre,date_audience,source_week,contenu,uploaded_by,created_at')
+        .order('created_at', { ascending: false }).range(from, from + PAGE - 1);
+      if(error) throw error;
+      rows = rows.concat(data || []);
+      if(!data || data.length < PAGE) break;
+      from += PAGE;
+    }
+    const remoteHashes = new Set(rows.map(r => r.hash));
+    const localHashes = new Set(depositedConvocFiles.filter(e => e.hash).map(e => e.hash));
+    rows.filter(r => !localHashes.has(r.hash)).forEach(r => depositedConvocFiles.push({
+      file: null, name: r.file_name, hash: r.hash, kind: 'feuille', feuille: r.contenu, jur: r.jur || '', chambre: r.chambre || '',
+      sourceWeek: r.source_week, dateAudience: r.date_audience, parsed: [], remote: true, uploadedBy: r.uploaded_by }));
+    const toPush = depositedConvocFiles.filter(e => e.kind === 'feuille' && !e.remote && e.hash && !remoteHashes.has(e.hash) && e.feuille.nb);
+    for(const e of toPush) await shareFeuilleEntry(e);
+    renderConvocFilesList();
+  } catch(e){ console.warn('[feuilles] lecture partagée impossible', e); }
 }
 /* Déconnexion : on retire les feuilles de l'écran (poste partagé) mais pas de la base locale —
    elles reviennent à la prochaine connexion. */
@@ -4619,9 +4672,14 @@ function hideStoredFeuilles(){
 }
 async function clearStoredFeuilles(){
   const isDE = currentLang==='de';
-  if(!confirm(isDE ? 'Alle gespeicherten Sitzungsblätter auf diesem Gerät löschen?' : 'Effacer toutes les feuilles d\'audience mémorisées sur cet appareil ?')) return;
+  if(!confirm(isDE ? 'Ihre Sitzungsblätter für die ganze Redaktion löschen (und die lokale Kopie)? Die Blätter anderer Konten bleiben.' : 'Retirer vos feuilles d\'audience pour toute la rédaction (et la copie locale) ? Celles déposées par d\'autres comptes restent.')) return;
+  if(_sb && _currentUser){
+    const { error } = await _sb.from('feuilles_penales').delete().eq('uploaded_by', _currentUser.email);
+    if(error) console.warn('[feuilles] suppression partagée impossible', error);
+  }
   try { await _feuillesTx('readwrite', s => s.clear()); } catch(e){ console.warn('[feuilles] effacement impossible', e); }
   hideStoredFeuilles();
+  loadSharedFeuilles();
 }
 
 /* Recoupement avec whoswho-lu : même mécanisme que les liens Avocats des convocations
@@ -4732,14 +4790,14 @@ function renderConvocFilesList(){
     return;
   }
   const isDE = currentLang==='de';
-  const nStored = depositedConvocFiles.filter(e => e.kind === 'feuille').length;
-  const clearBtn = nStored ? `<div style="padding:8px 14px;border-bottom:1px solid var(--row-sep);"><button class="btn btn-secondary" style="font-size:11.5px;padding:4px 10px;" onclick="clearStoredFeuilles()" title="${isDE?'Nur auf diesem Gerät gespeichert, 6 Monate':'Mémorisées sur cet appareil uniquement, 6 mois'}">${isDE?'Gespeicherte Sitzungsblätter löschen':'Effacer les feuilles mémorisées'} (${nStored})</button></div>` : '';
+  const nStored = depositedConvocFiles.filter(e => e.kind === 'feuille' && !e.remote).length;
+  const clearBtn = nStored ? `<div style="padding:8px 14px;border-bottom:1px solid var(--row-sep);"><button class="btn btn-secondary" style="font-size:11.5px;padding:4px 10px;" onclick="clearStoredFeuilles()" title="${isDE?'Für die ganze Redaktion gelöscht; 6 Monate Aufbewahrung':'Retirées pour toute la rédaction ; conservation de 6 mois'}">${isDE?'Meine Sitzungsblätter entfernen':'Retirer mes feuilles'} (${nStored})</button></div>` : '';
   el.innerHTML = clearBtn + depositedConvocFiles.map((entry, i) => {
     const sel = i === _selectedConvocFileIdx;
     return `<div class="archive-pdf-row" style="cursor:pointer;${sel?'background:var(--row-sep);':''}" onclick="openConvocFileDetail(${i})">
       <div class="archive-pdf-icon">PDF</div>
       <div class="archive-pdf-main">
-        <div class="archive-pdf-name">${escHtml(entry.file.name)}</div>
+        <div class="archive-pdf-name">${escHtml(entry.name)}</div>
         <div class="archive-pdf-meta">${escHtml(entry.jur)}${entry.chambre?' · '+escHtml(entry.chambre):''} · ${entry.kind==='feuille' ? entry.feuille.nb+' '+(isDE?'Angeklagte':'prévenus')+(_wwEntryMatchCount(entry)?` · <span class="ww-pill" style="margin-left:0;">${_wwEntryMatchCount(entry)} whoswho</span>`:'') : entry.parsed.length+' '+(isDE?'Verfahren':'affaires')}</div>
       </div>
     </div>`;
@@ -4755,10 +4813,11 @@ function openConvocFileDetail(idx){
   const isDE = currentLang==='de';
   const zone = $('#convoc-detail-zone');
   if(_convocDetailBlobUrl) URL.revokeObjectURL(_convocDetailBlobUrl);
-  const blobUrl = URL.createObjectURL(entry.file);
+  /* Feuille déposée par un autre compte : seul le contenu analysé est partagé, pas le PDF. */
+  const blobUrl = entry.file ? URL.createObjectURL(entry.file) : null;
   _convocDetailBlobUrl = blobUrl;
 
-  const annotId = 'convoc:' + entry.file.name;
+  const annotId = 'convoc:' + entry.name;
   const feuilleRows = entry.kind === 'feuille' ? entry.feuille.audiences.map(au => {
     const d = au.dateAudience ? new Date(au.dateAudience+'T00:00:00').toLocaleDateString(isDE?'de-DE':'fr-FR', { weekday:'long', day:'numeric', month:'long' }) : '';
     return `<div style="font-size:12px;font-weight:700;margin:10px 0 4px;">${escHtml([d, au.heure, au.salle?(isDE?'Saal ':'Salle ')+au.salle:'', au.chambre].filter(Boolean).join(' · '))}</div>`
@@ -4786,25 +4845,25 @@ function openConvocFileDetail(idx){
 
   zone.innerHTML = `
     <div style="padding:16px 20px 0;">
-      <div style="font-weight:700;font-size:14px;margin-bottom:2px;">${escHtml(entry.file.name)}</div>
+      <div style="font-weight:700;font-size:14px;margin-bottom:2px;">${escHtml(entry.name)}</div>
       <div style="font-size:12px;color:var(--text-muted);margin-bottom:10px;">${escHtml(entry.jur)}${entry.chambre?' · '+escHtml(entry.chambre):''}${entry.dateAudience?' · '+new Date(entry.dateAudience+'T00:00:00').toLocaleDateString(isDE?'de-LU':'fr-LU'):''}</div>
       <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;">
-        <button class="btn btn-secondary" style="font-size:12.5px;padding:7px 13px;" onclick="${escHtml(`openPdfViewer(${JSON.stringify(blobUrl)}, ${JSON.stringify(entry.file.name)})`)}">
+        ${blobUrl ? `<button class="btn btn-secondary" style="font-size:12.5px;padding:7px 13px;" onclick="${escHtml(`openPdfViewer(${JSON.stringify(blobUrl)}, ${JSON.stringify(entry.name)})`)}">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 3H5a2 2 0 00-2 2v3m18-5h-3a2 2 0 00-2 2v3M3 16v3a2 2 0 002 2h3m11-5v3a2 2 0 01-2 2h-3"/></svg>
           ${isDE?'Vollbild':'Plein écran'}
-        </button>
-        <button class="btn btn-secondary" style="font-size:12.5px;padding:7px 13px;" onclick="printConvocIframe()">
+        </button>` : ''}
+        ${blobUrl ? `<button class="btn btn-secondary" style="font-size:12.5px;padding:7px 13px;" onclick="printConvocIframe()">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9V2h12v7M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2"/><path d="M6 14h12v8H6z"/></svg>
           ${isDE?'Drucken':'Imprimer'}
-        </button>
+        </button>` : ''}
         <button class="btn btn-secondary" style="font-size:12.5px;padding:7px 13px;" onclick="${escHtml(`openAnnotModal(${JSON.stringify(annotId)})`)}">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
           ${isDE?'Persönliche Notiz':'Annotation personnelle'}
         </button>
       </div>
-      ${entry.kind==='feuille' ? `<div style="font-size:12px;color:var(--text-muted);margin-bottom:8px;">${isDE?'Nur lokal angezeigt, nicht geteilt':'Affichage local, non partagé'}</div>${_wwState==='unavailable'?`<p class="ww-note">${isDE?'whoswho-Abgleich nicht verfügbar (Namensindex nicht geladen).':'Recoupement whoswho indisponible (index de noms non chargé).'}</p>`:_wwState==='loading'?`<p class="ww-note">${isDE?'whoswho-Abgleich wird geladen…':'Recoupement whoswho en cours de chargement…'}</p>`:''}<div style="margin-bottom:12px;">${feuilleRows}</div>` : entry.parsed.length ? `<div style="margin-bottom:12px;">${affaireRows}</div>` : ''}
+      ${entry.kind==='feuille' ? `<div style="font-size:12px;color:var(--text-muted);margin-bottom:8px;">${isDE?'Mit der Redaktion geteilt (6 Monate Aufbewahrung)':'Partagé avec la rédaction (conservé 6 mois)'}${entry.remote?` · ${isDE?'PDF nicht gespeichert, nur der analysierte Inhalt wird geteilt — hochgeladen von':'PDF non conservé, seul le contenu analysé est partagé — déposé par'} ${escHtml(entry.uploadedBy||'—')}`:''}</div>${_wwState==='unavailable'?`<p class="ww-note">${isDE?'whoswho-Abgleich nicht verfügbar (Namensindex nicht geladen).':'Recoupement whoswho indisponible (index de noms non chargé).'}</p>`:_wwState==='loading'?`<p class="ww-note">${isDE?'whoswho-Abgleich wird geladen…':'Recoupement whoswho en cours de chargement…'}</p>`:''}<div style="margin-bottom:12px;">${feuilleRows}</div>` : entry.parsed.length ? `<div style="margin-bottom:12px;">${affaireRows}</div>` : ''}
     </div>
-    <iframe id="convoc-detail-iframe" class="viewer-iframe" style="height:60vh;" title="${escHtml(entry.file.name)}" src="${blobUrl}"></iframe>`;
+    ${blobUrl ? `<iframe id="convoc-detail-iframe" class="viewer-iframe" style="height:60vh;" title="${escHtml(entry.name)}" src="${blobUrl}"></iframe>` : ''}`;
 }
 
 function printConvocIframe(){
@@ -5068,19 +5127,26 @@ async function handleConvocUpload(fileOrFiles){
   const email = _currentUser?.email || '';
   const allParsed = [];
   const failed = [], noText = [], noMatch = [];
-  let feuilleCount = 0;
+  let feuilleCount = 0, shareErr = '';
   let firstNewIdx = null;
   for(const file of pdfFiles){
     try {
       // Juridiction/chambre par défaut ("Cour administrative", sans chambre) si
       // jamais l'en-tête du PDF ne permet pas de trancher — voir _detectJurChambre.
       const { kind, feuille, entries, dateAudience, textLength, jur, chambre } = await parseConvocPdf(file, 'Cour administrative', '');
-      const newEntry = { file, kind, feuille, jur, chambre, sourceWeek, dateAudience, parsed: entries };
+      const newEntry = { file, name: file.name, kind, feuille, jur, chambre, sourceWeek, dateAudience, parsed: entries };
       if(kind === 'feuille'){
-        /* Même fichier redéposé : on remplace, on n'empile pas de doublon. */
-        const dupIdx = depositedConvocFiles.findIndex(e => e.kind === 'feuille' && _feuilleKey(e.file) === _feuilleKey(file));
+        newEntry.hash = await _sha256Hex(file).catch(() => null);
+        /* Même fichier redéposé (même empreinte, ou à défaut même nom/taille/date) : on remplace
+           l'entrée — locale ou partagée — au lieu d'empiler un doublon. */
+        const dupIdx = depositedConvocFiles.findIndex(e => e.kind === 'feuille' &&
+          ((newEntry.hash && e.hash === newEntry.hash) || (e.file && _feuilleKey(e.file) === _feuilleKey(file))));
         if(dupIdx >= 0) depositedConvocFiles.splice(dupIdx, 1);
-        if(feuille.nb) saveFeuilleEntry(newEntry);
+        if(feuille.nb){
+          saveFeuilleEntry(newEntry);
+          const err = await shareFeuilleEntry(newEntry);
+          if(err && !shareErr) shareErr = err;
+        }
       }
       depositedConvocFiles.push(newEntry);
       if(kind === 'feuille'){
@@ -5101,7 +5167,10 @@ async function handleConvocUpload(fileOrFiles){
   if(firstNewIdx !== null) openConvocFileDetail(firstNewIdx);
 
   const feuilleMsg = feuilleCount
-    ? `${feuilleCount} ${isDE?'Angeklagte aus Sitzungsblättern gelesen (nur lokal, nicht geteilt)':'prévenus lus dans des feuilles d\'audience (local au navigateur, non partagés)'}`
+    ? `${feuilleCount} ${isDE?'Angeklagte aus Sitzungsblättern gelesen':'prévenus lus dans des feuilles d\'audience'}`
+      + (shareErr
+        ? ` — ⚠ ${isDE?'nicht geteilt, nur auf diesem Gerät':'non partagés, gardés sur cet appareil seulement'} (${shareErr})`
+        : ` — ${isDE?'mit der Redaktion geteilt (6 Monate)':'partagés avec la rédaction (6 mois)'}`)
     : '';
   if(!allParsed.length && feuilleCount){
     statusEl.textContent = '✓ ' + feuilleMsg;
@@ -5977,7 +6046,7 @@ async function authOnSession(session){
   loadWatchlistFromSupabase();
   loadAnnotationsFromSupabase();
   _logConnexion();
-  restoreStoredFeuilles();
+  restoreStoredFeuilles().then(loadSharedFeuilles);
   loadWhoswhoIndex();
 }
 

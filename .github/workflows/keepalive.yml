@@ -50,3 +50,17 @@ jobs:
           echo "Purge rapprochement — HTTP $CODE"
           # Ne fait pas échouer le job : la table peut ne pas encore exister
           # tant que rapprochement-schema.sql n'a pas été exécuté manuellement.
+
+      - name: Purger les feuilles d'audience pénales expirées (rétention 6 mois)
+        env:
+          SUPABASE_KEY: ${{ secrets.SUPABASE }}
+        run: |
+          NOW=$(date -u +%FT%TZ)
+          URL="https://lhtkvogmkebslihuwfyu.supabase.co/rest/v1/feuilles_penales?expires_at=lt.$NOW"
+          CODE=$(curl -s -m 20 -o /dev/null -w '%{http_code}' "$URL" \
+            -X DELETE \
+            -H "apikey: $SUPABASE_KEY" \
+            -H "Authorization: Bearer $SUPABASE_KEY")
+          echo "Purge feuilles_penales — HTTP $CODE"
+          # Ne fait pas échouer le job : la table peut ne pas encore exister
+          # tant que feuilles-penales-schema.sql n'a pas été exécuté manuellement.
