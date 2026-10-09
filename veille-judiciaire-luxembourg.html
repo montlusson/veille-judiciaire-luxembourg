@@ -4659,7 +4659,20 @@ async function loadSharedFeuilles(){
     const toPush = depositedConvocFiles.filter(e => e.kind === 'feuille' && !e.remote && e.hash && !remoteHashes.has(e.hash) && e.feuille.nb);
     for(const e of toPush) await shareFeuilleEntry(e);
     renderConvocFilesList();
+    syncWhoswhoMatches();
+    openFeuilleFromHash();
   } catch(e){ console.warn('[feuilles] lecture partagée impossible', e); }
+}
+/* Lien depuis une fiche whoswho-lu : …veille-judiciaire-luxembourg.html#feuille=<sha256>. Ouvre
+   Audiences → Déposer les convocations sur la bonne feuille, une fois les feuilles chargées. */
+function openFeuilleFromHash(){
+  const m = /^#feuille=([0-9a-f]{64})$/.exec(window.location.hash);
+  if(!m) return;
+  const idx = depositedConvocFiles.findIndex(e => e.hash === m[1]);
+  if(idx < 0) return;
+  try { showScreen('audiences'); switchAgendaTab('deposit'); } catch(e){ console.warn('[feuilles] ouverture par lien impossible', e); }
+  openConvocFileDetail(idx);
+  history.replaceState(null, '', window.location.pathname + window.location.search);
 }
 /* Déconnexion : on retire les feuilles de l'écran (poste partagé) mais pas de la base locale —
    elles reviennent à la prochaine connexion. */
@@ -4761,6 +4774,7 @@ async function loadWhoswhoIndex(){
   _wwState = _wwByLast ? 'ready' : 'unavailable';
   renderConvocFilesList();
   if(_selectedConvocFileIdx !== null) openConvocFileDetail(_selectedConvocFileIdx);
+  syncWhoswhoMatches();
 }
 /* "NOM Prénom(s)" des feuilles → { last, first[] }. Une personne morale (tout en capitales,
    sans prénom) n'est pas recoupée. */
@@ -4785,7 +4799,7 @@ function _wwPills(nom){
   return whoswhoMatches(nom).map(({ f, exact }) => {
     const label = [f.cat, f.headline].filter(Boolean).join(' — ');
     const title = (exact ? 'Fiche whoswho-lu : ' : 'Fiche whoswho-lu (prénom proche, homonymie possible) : ') + f.first + ' ' + f.last + (label ? ' — ' + label : '');
-    const href = `${WHOSWHOLU_URL}/?${new URLSearchParams({ cat: 'Justice', q: (f.first + ' ' + f.last).trim() })}`;
+    const href = `${WHOSWHOLU_URL}/#personne=${encodeURIComponent(f.id)}`;
     return `<a class="ww-pill${exact ? '' : ' is-probable'}" href="${escHtml(href)}" target="_blank" rel="noopener" title="${escHtml(title)}">${WHOSWHO_ICON} ${escHtml(f.cat || 'whoswho')}</a>`;
   }).join('');
 }
@@ -4797,6 +4811,46 @@ function _wwEntryMatchCount(entry){
 /* ── Synthèse des correspondances whoswho sur TOUTES les feuilles (locales et partagées) ───
    Regroupée par fiche whoswho : qui, et où il apparaît (date, salle, fichier). Évite d'ouvrir
    les feuilles une à une quand il y en a des centaines. */
+/* Pont vers whoswho-lu : chaque correspondance possible est déposée dans `veille_matches`
+   (veille-matches-schema.sql). whoswho-lu affiche alors une notification « à vérifier » sur la
+   fiche ; la confirmation ou l'écartement (homonyme) se décide là-bas. Idempotent : l'identifiant
+   d'une ligne est déterministe, seules les lignes absentes sont ajoutées. */
+let _wwSyncRunning = false;
+function _wwMatchId(ficheId, hash, date, nom){ return [ficheId, hash, date || '', _wwNorm(nom)].join('|'); }
+async function syncWhoswhoMatches(){
+  if(_wwSyncRunning || _wwState !== 'ready' || !_sb || !_currentUser) return;
+  _wwSyncRunning = true;
+  try {
+    const wanted = new Map();
+    depositedConvocFiles.forEach(entry => {
+      if(entry.kind !== 'feuille' || !entry.hash) return;
+      entry.feuille.audiences.forEach(au => au.prevenus.forEach(p => whoswhoMatches(p.nom).forEach(({ f, exact }) => {
+        const id = _wwMatchId(f.id, entry.hash, au.dateAudience, p.nom);
+        if(wanted.has(id)) return;
+        wanted.set(id, { id, fiche_id: f.id, fiche_nom: (f.first + ' ' + f.last).trim(), prevenu_nom: p.nom, exact,
+          feuille_hash: entry.hash, file_name: entry.name, date_audience: au.dateAudience || null,
+          heure: au.heure || p.heure || null, salle: au.salle || null, chambre: au.chambre || null, juridiction: entry.jur || null,
+          preventions: (p.preventions || '').slice(0, 400), jugement: (p.jugement || '').slice(0, 200), created_by: _currentUser.email });
+      })));
+    });
+    if(!wanted.size) return;
+    const have = new Set();
+    for(let from = 0;; from += 1000){
+      const { data, error } = await _sb.from('veille_matches').select('id').range(from, from + 999);
+      if(error) throw error;
+      (data || []).forEach(r => have.add(r.id));
+      if(!data || data.length < 1000) break;
+    }
+    const missing = [...wanted.values()].filter(r => !have.has(r.id));
+    for(let i = 0; i < missing.length; i += 100){
+      const { error } = await _sb.from('veille_matches').upsert(missing.slice(i, i + 100), { onConflict: 'id', ignoreDuplicates: true });
+      if(error) throw error;
+    }
+    if(missing.length) console.info('[whoswho] ' + missing.length + ' correspondance(s) transmise(s) à whoswho-lu');
+  } catch(e){ console.warn('[whoswho] transmission des correspondances impossible', e); }
+  finally { _wwSyncRunning = false; }
+}
+
 let _wwSummaryExactOnly = false;
 function _wwSummary(){
   const byFiche = new Map();
@@ -4829,7 +4883,7 @@ function openWhoswhoSummary(){
   const nFiles = new Set(groups.flatMap(g => g.occ.map(o => o.idx))).size;
   const rows = groups.map(g => {
     const f = g.f;
-    const href = `${WHOSWHOLU_URL}/?${new URLSearchParams({ cat: 'Justice', q: (f.first + ' ' + f.last).trim() })}`;
+    const href = `${WHOSWHOLU_URL}/#personne=${encodeURIComponent(f.id)}`;
     return `<div class="watchlist-item" style="display:block;">
       <div style="margin-bottom:4px;"><span style="font-weight:700;font-size:13px;">${escHtml((f.first + ' ' + f.last).trim())}</span>
         <a class="ww-pill${g.exact ? '' : ' is-probable'}" href="${escHtml(href)}" target="_blank" rel="noopener">${WHOSWHO_ICON} ${escHtml(f.cat || 'whoswho')}</a>
@@ -5243,6 +5297,7 @@ async function handleConvocUpload(fileOrFiles){
   }
   renderConvocFilesList();
   if(firstNewIdx !== null) openConvocFileDetail(firstNewIdx);
+  syncWhoswhoMatches();
 
   const feuilleMsg = feuilleCount
     ? `${feuilleCount} ${isDE?'Angeklagte aus Sitzungsblättern gelesen':'prévenus lus dans des feuilles d\'audience'}`
