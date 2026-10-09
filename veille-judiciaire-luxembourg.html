@@ -776,6 +776,41 @@ table.analyse-tbl tbody tr:hover{background:var(--row-sep);}
 .ww-pill.is-probable{background:transparent;color:var(--accent-red);}
 .ww-pill:hover{filter:brightness(.92);}
 .ww-note{font-size:11.5px;color:var(--text-faint);margin:0 0 8px;}
+/* Recoupement whoswho : bloc d'état + synthèse */
+.ww-card{display:flex;gap:16px 24px;align-items:center;justify-content:space-between;flex-wrap:wrap;
+  border:1px solid var(--card-border);background:var(--card-bg);border-radius:var(--radius-lg);padding:16px 20px;margin:0 0 16px;}
+.ww-card.has-hits{border-color:var(--accent-red);background:var(--accent-red-tint);}
+.ww-card-title{font-size:11.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--text-muted);margin-bottom:4px;}
+.ww-card-main{font-size:19px;font-weight:700;line-height:1.3;color:var(--text);}
+.ww-card-sub{font-size:13px;line-height:1.45;color:var(--text-muted);margin-top:3px;max-width:62ch;}
+.ww-card-actions{display:flex;gap:10px;flex-wrap:wrap;}
+.ww-btn{display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:0 18px;border-radius:var(--radius-sm);
+  font:600 14px/1 inherit;font-family:inherit;cursor:pointer;text-decoration:none;border:1px solid var(--accent-red);background:var(--accent-red);color:#fff;
+  transition:background .15s,color .15s;}
+.ww-btn:hover{background:var(--accent-red-hover);}
+.ww-btn.secondary{background:transparent;color:var(--accent-red);}
+.ww-btn.secondary:hover{background:var(--accent-red);color:#fff;}
+.ww-btn:focus-visible,.ww-seg button:focus-visible,.ww-link:focus-visible{outline:3px solid #005fcc;outline-offset:2px;}
+.ww-spin{display:inline-block;width:14px;height:14px;border:2px solid var(--card-border);border-top-color:var(--accent-red);border-radius:50%;
+  animation:ww-spin .8s linear infinite;vertical-align:-2px;margin-right:8px;}
+@keyframes ww-spin{to{transform:rotate(360deg)}}
+@media (prefers-reduced-motion:reduce){.ww-spin{animation:none;border-top-color:var(--accent-red);}}
+.ww-panel{padding:18px 22px 28px;}
+.ww-panel h2{font-size:17px;margin:0 0 2px;}
+.ww-seg{display:inline-flex;border:1px solid var(--card-border);border-radius:var(--radius-sm);overflow:hidden;margin:10px 0 4px;}
+.ww-seg button{min-height:40px;padding:0 14px;border:0;background:var(--card-bg);font:600 13px/1 inherit;font-family:inherit;color:var(--text-muted);cursor:pointer;}
+.ww-seg button[aria-pressed="true"]{background:var(--accent-red);color:#fff;}
+.ww-section{font-size:11.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--text-muted);margin:20px 0 8px;}
+.ww-person{border:1px solid var(--card-border);border-radius:var(--radius-md,10px);padding:14px 16px;margin-bottom:10px;background:var(--card-bg);}
+.ww-person h3{font-size:15px;margin:0;display:inline;}
+.ww-person-head{display:flex;flex-wrap:wrap;align-items:center;gap:4px 10px;margin-bottom:4px;}
+.ww-headline{font-size:12.5px;color:var(--text-muted);}
+.ww-compare{font-size:12.5px;color:var(--text-muted);margin:2px 0 8px;}
+.ww-compare strong{color:var(--text);font-weight:600;}
+.ww-occ{list-style:none;margin:0 0 10px;padding:0;font-size:12.5px;color:var(--text-muted);}
+.ww-occ li{padding:4px 0;border-top:1px solid var(--row-sep);line-height:1.45;}
+.ww-link{background:none;border:0;padding:4px 2px;min-height:28px;font:inherit;font-weight:600;color:var(--accent-red);cursor:pointer;text-decoration:underline;}
+.ww-person details summary{cursor:pointer;font-size:12.5px;color:var(--accent-red);padding:4px 0;font-weight:600;}
 /* ── Affaires tabs & grouping ── */
 .affaires-tabs{display:flex;gap:0;padding:0 20px;border-bottom:1px solid var(--card-border);background:var(--row-sep);}
 .affaires-tab{padding:10px 16px;font-size:12px;font-weight:600;letter-spacing:.03em;color:var(--text-muted);cursor:pointer;border:none;background:none;border-bottom:2px solid transparent;margin-bottom:-1px;transition:color .15s,border-color .15s;border-radius:0;font-family:inherit;white-space:nowrap;}
@@ -1500,7 +1535,8 @@ body.printing-decision #print-decision-area{display:block!important;color:#000;b
           <p data-i18n="convoc_drop_cta">Glissez-déposez un ou plusieurs PDF de convocation ici (ou un ZIP les contenant), ou cliquez pour parcourir</p>
         </div>
         <p class="status-line" id="convoc-upload-status" role="status"></p>
-        <div class="recherche-split" style="height:calc(100vh - 380px);">
+        <div id="ww-card" aria-live="polite"></div>
+        <div class="recherche-split" style="height:max(440px, calc(100vh - 500px));">
           <div class="recherche-left" id="convoc-files-list">
             <div class="empty-state" style="padding:32px 18px;">
               <p data-i18n="convoc_files_empty" style="font-size:12.5px;">Les fichiers déposés apparaîtront ici.</p>
@@ -4670,7 +4706,7 @@ function openFeuilleFromHash(){
   if(!m) return;
   const idx = depositedConvocFiles.findIndex(e => e.hash === m[1]);
   if(idx < 0) return;
-  try { showScreen('audiences'); switchAgendaTab('deposit'); } catch(e){ console.warn('[feuilles] ouverture par lien impossible', e); }
+  try { showScreen('agenda'); switchAgendaTab('deposit'); } catch(e){ console.warn('[feuilles] ouverture par lien impossible', e); }
   openConvocFileDetail(idx);
   history.replaceState(null, '', window.location.pathname + window.location.search);
 }
@@ -4816,10 +4852,12 @@ function _wwEntryMatchCount(entry){
    fiche ; la confirmation ou l'écartement (homonyme) se décide là-bas. Idempotent : l'identifiant
    d'une ligne est déterministe, seules les lignes absentes sont ajoutées. */
 let _wwSyncRunning = false;
+let _wwSyncInfo = { state: 'idle', sent: 0, total: 0, msg: '' };   // pour le bloc d'état
 function _wwMatchId(ficheId, hash, date, nom){ return [ficheId, hash, date || '', _wwNorm(nom)].join('|'); }
 async function syncWhoswhoMatches(){
   if(_wwSyncRunning || _wwState !== 'ready' || !_sb || !_currentUser) return;
   _wwSyncRunning = true;
+  _wwSyncInfo = { state: 'running', sent: 0, total: 0, msg: '' };
   try {
     const wanted = new Map();
     depositedConvocFiles.forEach(entry => {
@@ -4833,7 +4871,7 @@ async function syncWhoswhoMatches(){
           preventions: (p.preventions || '').slice(0, 400), jugement: (p.jugement || '').slice(0, 200), created_by: _currentUser.email });
       })));
     });
-    if(!wanted.size) return;
+    if(!wanted.size){ _wwSyncInfo = { state: 'done', sent: 0, total: 0, msg: '' }; return; }
     const have = new Set();
     for(let from = 0;; from += 1000){
       const { data, error } = await _sb.from('veille_matches').select('id').range(from, from + 999);
@@ -4846,19 +4884,23 @@ async function syncWhoswhoMatches(){
       const { error } = await _sb.from('veille_matches').upsert(missing.slice(i, i + 100), { onConflict: 'id', ignoreDuplicates: true });
       if(error) throw error;
     }
+    _wwSyncInfo = { state: 'done', sent: missing.length, total: wanted.size, msg: '' };
     if(missing.length) console.info('[whoswho] ' + missing.length + ' correspondance(s) transmise(s) à whoswho-lu');
-  } catch(e){ console.warn('[whoswho] transmission des correspondances impossible', e); }
-  finally { _wwSyncRunning = false; }
+  } catch(e){
+    console.warn('[whoswho] transmission des correspondances impossible', e);
+    _wwSyncInfo = { state: 'error', sent: 0, total: 0, msg: e && e.message ? e.message : String(e) };
+  }
+  finally { _wwSyncRunning = false; renderWhoswhoCard(); }
 }
 
-let _wwSummaryExactOnly = false;
-function _wwSummary(){
+let _wwSummaryFilter = 'all';   // all | exact
+function _wwSummary(exactOnly = false){
   const byFiche = new Map();
   depositedConvocFiles.forEach((entry, idx) => {
     if(entry.kind !== 'feuille') return;
     entry.feuille.audiences.forEach(au => au.prevenus.forEach(p => {
       whoswhoMatches(p.nom).forEach(({ f, exact }) => {
-        if(_wwSummaryExactOnly && !exact) return;
+        if(exactOnly && !exact) return;
         const g = byFiche.get(f.id) || byFiche.set(f.id, { f, exact: false, occ: [] }).get(f.id);
         if(exact) g.exact = true;
         g.occ.push({ idx, file: entry.name, nom: p.nom, exact, date: au.dateAudience, heure: au.heure || p.heure,
@@ -4871,39 +4913,88 @@ function _wwSummary(){
   groups.sort((a, b) => (b.exact - a.exact) || (b.occ.length - a.occ.length) || (a.f.last + a.f.first).localeCompare(b.f.last + b.f.first, 'fr'));
   return groups;
 }
-function toggleWhoswhoExact(v){ _wwSummaryExactOnly = !!v; openWhoswhoSummary(); }
+function setWhoswhoFilter(v){ _wwSummaryFilter = v === 'exact' ? 'exact' : 'all'; openWhoswhoSummary(); }
+function retryWhoswhoIndex(){ _wwState = 'idle'; renderWhoswhoCard(); loadWhoswhoIndex(); }
+const _wwFicheUrl = id => `${WHOSWHOLU_URL}/#personne=${encodeURIComponent(id)}`;
+const _wwFmtDate = (iso, isDE) => iso ? new Date(iso + 'T00:00:00').toLocaleDateString(isDE ? 'de-LU' : 'fr-LU') : '';
+
+/* Bloc d'état permanent, au-dessus de la liste des fichiers : dit en une phrase où en est le
+   recoupement et propose l'action utile — jamais de bouton caché ni de symbole sans sens. */
+function renderWhoswhoCard(){
+  const el = $('#ww-card');
+  if(!el) return;
+  const isDE = currentLang === 'de';
+  const feuilles = depositedConvocFiles.filter(e => e.kind === 'feuille');
+  const title = `<div class="ww-card-title">${isDE ? 'Abgleich mit dem whoswho-Verzeichnis' : 'Recoupement avec l\'annuaire whoswho'}</div>`;
+  const card = (cls, body, actions = '') => { el.innerHTML = `<div class="ww-card ${cls}"><div>${title}${body}</div>${actions ? `<div class="ww-card-actions">${actions}</div>` : ''}</div>`; };
+  if(!feuilles.length){
+    return card('', `<div class="ww-card-sub" style="font-size:13.5px;">${isDE
+      ? 'Legen Sie Sitzungsblätter (Strafsachen) oder eine Berufungsliste ab: die Namen der Angeklagten werden mit den rund 13 000 Profilen von whoswho verglichen.'
+      : 'Déposez des feuilles d\'audience pénales ou un relevé d\'appel : les noms des prévenus sont comparés aux quelque 13 000 fiches de l\'annuaire whoswho.'}</div>`);
+  }
+  if(_wwState === 'idle' || _wwState === 'loading'){
+    return card('', `<div class="ww-card-main"><span class="ww-spin" aria-hidden="true"></span>${isDE ? 'Verzeichnis wird geladen…' : 'Chargement de l\'annuaire…'}</div>
+      <div class="ww-card-sub">${isDE ? 'Einen Moment: Der Abgleich startet automatisch.' : 'Un instant : le recoupement démarre automatiquement.'}</div>`);
+  }
+  if(_wwState === 'unavailable'){
+    return card('', `<div class="ww-card-main">${isDE ? 'whoswho ist nicht erreichbar' : 'L\'annuaire whoswho est injoignable'}</div>
+      <div class="ww-card-sub">${isDE ? 'Der Abgleich ist nicht möglich, Ihre Blätter bleiben unberührt.' : 'Le recoupement est impossible pour le moment ; vos feuilles ne sont pas affectées.'}</div>`,
+      `<button type="button" class="ww-btn" onclick="retryWhoswhoIndex()">${isDE ? 'Erneut versuchen' : 'Réessayer'}</button>`);
+  }
+  const groups = _wwSummary(false);
+  const nPersons = new Set(feuilles.flatMap(e => e.feuille.audiences.flatMap(a => a.prevenus.map(p => p.nom))).filter(n => _wwSplitPrevenu(n))).size;
+  const sync = _wwSyncInfo.state === 'running' ? (isDE ? 'Übermittlung an whoswho…' : 'Transmission à whoswho…')
+    : _wwSyncInfo.state === 'error' ? `⚠ ${isDE ? 'Nicht an whoswho übermittelt' : 'Non transmis à whoswho'} (${escHtml(_wwSyncInfo.msg)})`
+    : _wwSyncInfo.state === 'done' && groups.length ? `✓ ${isDE ? 'In whoswho signalisiert: dort als „zu prüfen“ markiert' : 'Signalé dans whoswho : les fiches y sont marquées « à vérifier »'}` : '';
+  if(!groups.length){
+    return card('', `<div class="ww-card-main">✓ ${isDE ? 'Keine Übereinstimmung' : 'Aucune correspondance'}</div>
+      <div class="ww-card-sub">${isDE ? `Keine der ${nPersons} genannten Personen hat ein whoswho-Profil.` : `Parmi les ${nPersons} personnes citées, aucune n'a de fiche dans l'annuaire whoswho.`}</div>`);
+  }
+  const nStrong = groups.filter(g => g.exact).length, nWeak = groups.length - nStrong;
+  const nFiles = new Set(groups.flatMap(g => g.occ.map(o => o.idx))).size;
+  card('has-hits', `<div class="ww-card-main">${groups.length} ${isDE ? 'whoswho-Profile betroffen' : (groups.length > 1 ? 'fiches de l\'annuaire concernées' : 'fiche de l\'annuaire concernée')}</div>
+      <div class="ww-card-sub">${nStrong} ${isDE ? 'mit gleichem Vornamen' : 'avec le même prénom'}${nWeak ? ` · ${nWeak} ${isDE ? 'mit abweichendem Vornamen' : 'avec un prénom différent'}` : ''} — ${isDE ? 'in' : 'dans'} ${nFiles} ${isDE ? 'Blättern' : 'feuille' + (nFiles > 1 ? 's' : '')}.${sync ? `<br>${sync}` : ''}</div>`,
+    `<button type="button" class="ww-btn" onclick="openWhoswhoSummary()">${isDE ? 'Übereinstimmungen ansehen' : 'Voir les correspondances'}</button>
+     <a class="ww-btn secondary" href="${escHtml(WHOSWHOLU_URL + '/?cat=Justice&sub=__veille_a_verifier__')}" target="_blank" rel="noopener">${isDE ? 'In whoswho öffnen' : 'Ouvrir dans whoswho'}</a>`);
+}
+
 function openWhoswhoSummary(){
   _selectedConvocFileIdx = null;
   renderConvocFilesList();
-  const isDE = currentLang==='de';
+  const isDE = currentLang === 'de';
   const zone = $('#convoc-detail-zone');
   if(_convocDetailBlobUrl){ URL.revokeObjectURL(_convocDetailBlobUrl); _convocDetailBlobUrl = null; }
-  const groups = _wwSummary();
-  const nOcc = groups.reduce((n, g) => n + g.occ.length, 0);
-  const nFiles = new Set(groups.flatMap(g => g.occ.map(o => o.idx))).size;
-  const rows = groups.map(g => {
-    const f = g.f;
-    const href = `${WHOSWHOLU_URL}/#personne=${encodeURIComponent(f.id)}`;
-    return `<div class="watchlist-item" style="display:block;">
-      <div style="margin-bottom:4px;"><span style="font-weight:700;font-size:13px;">${escHtml((f.first + ' ' + f.last).trim())}</span>
-        <a class="ww-pill${g.exact ? '' : ' is-probable'}" href="${escHtml(href)}" target="_blank" rel="noopener">${WHOSWHO_ICON} ${escHtml(f.cat || 'whoswho')}</a>
-        <span style="font-size:12px;color:var(--text-muted);margin-left:6px;">${escHtml(f.headline || '')}</span>
-        <span style="font-size:11.5px;color:var(--text-faint);margin-left:6px;">${g.occ.length} ${isDE?'Vorkommen':'occurrence'+(g.occ.length > 1 ? 's' : '')}${g.exact ? '' : ' · ' + (isDE?'ähnlicher Vorname':'prénom proche')}</span></div>
-      ${g.occ.map(o => `<div style="font-size:12px;color:var(--text-muted);padding:2px 0 2px 10px;">
-        ${escHtml([o.date ? new Date(o.date+'T00:00:00').toLocaleDateString(isDE?'de-LU':'fr-LU') : '', o.heure, o.salle, o.chambre].filter(Boolean).join(' · '))}
-        — ${escHtml(o.nom)}${o.exact ? '' : ' ≈'} — ${escHtml((o.preventions || '').slice(0, 110))}${o.jugement ? ' · ' + escHtml(o.jugement) : ''}
-        <a href="#" onclick="openConvocFileDetail(${o.idx});return false;" style="margin-left:4px;">${escHtml(o.file)}</a></div>`).join('')}
-    </div>`;
-  }).join('');
-  const state = _wwState === 'ready' ? '' : `<p class="ww-note">${_wwState === 'loading'
-    ? (isDE?'whoswho-Abgleich wird geladen…':'Recoupement whoswho en cours de chargement…')
-    : (isDE?'whoswho-Abgleich nicht verfügbar (Namensindex nicht geladen).':'Recoupement whoswho indisponible (index de noms non chargé).')}</p>`;
-  zone.innerHTML = `<div style="padding:16px 20px;">
-    <div style="font-weight:700;font-size:14px;margin-bottom:2px;">${isDE?'whoswho-Treffer':'Correspondances whoswho'}</div>
-    <div style="font-size:12px;color:var(--text-muted);margin-bottom:8px;">${groups.length} ${isDE?'Profile':'fiche'+(groups.length > 1 ? 's' : '')} · ${nOcc} ${isDE?'Vorkommen in':'occurrence'+(nOcc > 1 ? 's' : '')+' dans'} ${nFiles} ${isDE?'Dateien':'feuille'+(nFiles > 1 ? 's' : '')}
-      · <label style="cursor:pointer;"><input type="checkbox" ${_wwSummaryExactOnly ? 'checked' : ''} onchange="toggleWhoswhoExact(this.checked)"> ${isDE?'nur identischer Vorname':'prénom identique seulement'}</label></div>
-    <p class="ww-note">${isDE?'Gleicher Nachname und Vorname = mögliche Person, nicht bestätigt: Homonyme sind möglich. Immer prüfen.':'Même nom et même prénom = personne possible, jamais confirmée : les homonymes existent. À vérifier avant toute conclusion.'}</p>
-    ${state}${rows || `<p class="ww-note">${isDE?'Keine Übereinstimmung.':'Aucune correspondance.'}</p>`}</div>`;
+  const all = _wwSummary(false);
+  const strong = all.filter(g => g.exact), weak = all.filter(g => !g.exact);
+  const person = g => {
+    const f = g.f, name = (f.first + ' ' + f.last).trim();
+    const sheetNames = [...new Set(g.occ.map(o => o.nom))];
+    const compare = `${isDE ? 'Im Blatt' : 'Dans la feuille'} : <strong>${escHtml(sheetNames.join(' · '))}</strong>${g.exact ? '' : ` — ${isDE ? 'im Verzeichnis' : 'dans l\'annuaire'} : <strong>${escHtml(name)}</strong>`}`;
+    const occ = o => `<li>${escHtml([_wwFmtDate(o.date, isDE), o.heure, o.salle, o.chambre].filter(Boolean).join(' · '))}${o.preventions ? ` — ${escHtml(o.preventions.slice(0, 120))}` : ''}${o.jugement ? ` · ${escHtml(o.jugement)}` : ''}
+      <button type="button" class="ww-link" onclick="openConvocFileDetail(${o.idx})">${isDE ? 'Blatt ansehen' : 'Voir la feuille'}</button></li>`;
+    const first = g.occ.slice(0, 3), rest = g.occ.slice(3);
+    return `<article class="ww-person">
+      <div class="ww-person-head"><h3>${escHtml(name)}</h3><a class="ww-pill${g.exact ? '' : ' is-probable'}" style="margin-left:0;" href="${escHtml(_wwFicheUrl(f.id))}" target="_blank" rel="noopener">${WHOSWHO_ICON} ${escHtml(f.cat || 'whoswho')}</a>
+        ${f.headline ? `<span class="ww-headline">${escHtml(f.headline)}</span>` : ''}</div>
+      <p class="ww-compare">${compare}</p>
+      <ul class="ww-occ">${first.map(occ).join('')}</ul>
+      ${rest.length ? `<details><summary>+ ${rest.length} ${isDE ? 'weitere' : 'autre' + (rest.length > 1 ? 's' : '')}</summary><ul class="ww-occ">${rest.map(occ).join('')}</ul></details>` : ''}
+      <a class="ww-btn secondary" href="${escHtml(_wwFicheUrl(f.id))}" target="_blank" rel="noopener">${isDE ? 'Profil in whoswho prüfen' : 'Vérifier la fiche dans whoswho'} ↗</a>
+    </article>`;
+  };
+  const sec = (label, list) => list.length ? `<div class="ww-section">${label} (${list.length})</div>${list.map(person).join('')}` : '';
+  const showWeak = _wwSummaryFilter !== 'exact';
+  const body = !all.length ? `<p class="ww-card-sub">${isDE ? 'Keine Übereinstimmung.' : 'Aucune correspondance.'}</p>`
+    : sec(isDE ? 'Gleicher Name und Vorname' : 'Même nom et même prénom', strong)
+      + (showWeak ? sec(isDE ? 'Gleicher Name, anderer Vorname — genau prüfen' : 'Même nom, prénom différent — à vérifier de près', weak) : '');
+  zone.innerHTML = `<div class="ww-panel">
+    <h2>${isDE ? 'Übereinstimmungen mit whoswho' : 'Correspondances avec whoswho'}</h2>
+    <p class="ww-card-sub">${isDE ? 'Jede Zeile ist eine mögliche Person, nicht bestätigt: derselbe Name beweist keine Identität. Prüfen Sie das Profil (Funktion, Beruf, Geburtsdatum) bevor Sie etwas verknüpfen.'
+      : 'Chaque ligne est une personne possible, jamais confirmée : un même nom ne prouve pas une même identité. Ouvrez la fiche pour vérifier (fonction, profession, date de naissance) avant de lier quoi que ce soit.'}</p>
+    ${weak.length ? `<div class="ww-seg" role="group" aria-label="${isDE ? 'Filter' : 'Filtre'}">
+      <button type="button" aria-pressed="${showWeak}" onclick="setWhoswhoFilter('all')">${isDE ? 'Alle' : 'Toutes'} (${all.length})</button>
+      <button type="button" aria-pressed="${!showWeak}" onclick="setWhoswhoFilter('exact')">${isDE ? 'Gleicher Vorname' : 'Même prénom'} (${strong.length})</button></div>` : ''}
+    ${body}</div>`;
 }
 
 function whoswholuPrevenuLink(nom){
@@ -4912,6 +5003,7 @@ function whoswholuPrevenuLink(nom){
 }
 
 function renderConvocFilesList(){
+  renderWhoswhoCard();
   const el = $('#convoc-files-list');
   if(!el) return;
   if(!depositedConvocFiles.length){
@@ -4921,10 +5013,7 @@ function renderConvocFilesList(){
   const isDE = currentLang==='de';
   const nStored = depositedConvocFiles.filter(e => e.kind === 'feuille' && !e.remote).length;
   const clearBtn = nStored ? `<div style="padding:8px 14px;border-bottom:1px solid var(--row-sep);"><button class="btn btn-secondary" style="font-size:11.5px;padding:4px 10px;" onclick="clearStoredFeuilles()" title="${isDE?'Für die ganze Redaktion gelöscht; 6 Monate Aufbewahrung':'Retirées pour toute la rédaction ; conservation de 6 mois'}">${isDE?'Meine Sitzungsblätter entfernen':'Retirer mes feuilles'} (${nStored})</button></div>` : '';
-  const nFeuilles = depositedConvocFiles.filter(e => e.kind === 'feuille').length;
-  const wwCount = nFeuilles && _wwState === 'ready' ? _wwSummary().length : 0;
-  const wwBtn = nFeuilles ? `<div style="padding:8px 14px;border-bottom:1px solid var(--row-sep);"><button class="btn btn-secondary" style="font-size:11.5px;padding:4px 10px;" onclick="openWhoswhoSummary()">${isDE?'whoswho-Treffer':'Correspondances whoswho'}${_wwState==='ready' ? ` (${wwCount})` : _wwState==='loading' ? '…' : ' —'}</button></div>` : '';
-  el.innerHTML = wwBtn + clearBtn + depositedConvocFiles.map((entry, i) => {
+  el.innerHTML = clearBtn + depositedConvocFiles.map((entry, i) => {
     const sel = i === _selectedConvocFileIdx;
     return `<div class="archive-pdf-row" style="cursor:pointer;${sel?'background:var(--row-sep);':''}" onclick="openConvocFileDetail(${i})">
       <div class="archive-pdf-icon">PDF</div>
