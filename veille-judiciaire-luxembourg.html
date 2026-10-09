@@ -4717,12 +4717,25 @@ function _wwBuild(payload){
   });
   const map = new Map();
   byId.forEach(f => {
-    const k = _wwNorm(f.last);
-    if(!k) return;
-    f._first = _wwNorm(f.first).split(' ').filter(Boolean);
-    (map.get(k) || map.set(k, []).get(k)).push(f);
+    f._first = _wwNorm(f.first.replace(/\([^)]*\)/g, ' ')).split(' ').filter(Boolean);
+    _wwLastKeys(f.last).forEach(k => (map.get(k) || map.set(k, []).get(k)).push(f));
   });
   return map;
+}
+/* Noms de famille de whoswho-lu à plusieurs formes ("Janssen (Schummer)", "Chouchane ép. Mlik
+   (Mlik)", "Meisch (dit Fränz)") : la fiche est cherchable sous chaque forme — nom, nom de
+   naissance ou d'épouse — mais pas sous un surnom ("dit …"). Sans cela, ces fiches (6 % de
+   l'annuaire) ne seraient jamais trouvées. */
+function _wwLastKeys(last){
+  const parts = [last.replace(/\([^)]*\)/g, ' ')];
+  (last.match(/\(([^)]*)\)/g) || []).forEach(g => parts.push(g.slice(1, -1)));
+  const keys = new Set();
+  parts.forEach(part => part.split(/\s+(?:ép\.|épouse|née?)(?=\s|$)/i).forEach(piece => {
+    if(/^\s*dit\b/i.test(piece)) return;
+    const k = _wwNorm(piece);
+    if(k) keys.add(k);
+  }));
+  return keys;
 }
 async function loadWhoswhoIndex(){
   if(_wwState === 'loading' || _wwState === 'ready') return;
