@@ -20,7 +20,9 @@ SOURCES = [
      "zip2025": "https://download.data.public.lu/resources/cour-superieure-de-justice-1e-chambre-1/20260608-114955/2025.zip",
      "zip2024": "https://download.data.public.lu/resources/cour-superieure-de-justice-1e-chambre-1/20260608-114954/2024.zip"},
     {"group": "Cour supérieure de justice", "name": "CSJ – Chambre du Conseil", "type": "Chambre du Conseil",
-     "zip2026": "https://download.data.public.lu/resources/cour-superieure-de-justice-chambre-du-conseil-2/20260608-114907/2026.zip",
+     # Pas de 2026.zip sur data.public.lu pour ce jeu (dernier fichier : 2025) :
+     # l'ancien lien en dur renvoyait 404 à chaque run. Si l'API en publie un,
+     # resolve_zip_urls() le détecte sans entrée ici.
      "zip2025": "https://download.data.public.lu/resources/cour-superieure-de-justice-chambre-du-conseil-2/20260608-114906/2025.zip",
      "zip2024": "https://download.data.public.lu/resources/cour-superieure-de-justice-chambre-du-conseil-2/20260608-114905/2024.zip"},
     {"group": "Cour supérieure de justice", "name": "CSJ – Chambre de l'application des peines", "type": "Pénal",
