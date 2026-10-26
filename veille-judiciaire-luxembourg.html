@@ -4689,7 +4689,9 @@ async function loadSharedFeuilles(){
     }
     const remoteHashes = new Set(rows.map(r => r.hash));
     const localHashes = new Set(depositedConvocFiles.filter(e => e.hash).map(e => e.hash));
-    rows.filter(r => !localHashes.has(r.hash)).forEach(r => depositedConvocFiles.push({
+    // contenu vient d'une table écrite par d'autres comptes : on rejette toute ligne mal formée
+    const feuilleValide = r => r.contenu && typeof r.contenu.nb === 'number' && Array.isArray(r.contenu.audiences);
+    rows.filter(r => !localHashes.has(r.hash) && feuilleValide(r)).forEach(r => depositedConvocFiles.push({
       file: null, name: r.file_name, hash: r.hash, kind: 'feuille', feuille: r.contenu, jur: r.jur || '', chambre: r.chambre || '',
       sourceWeek: r.source_week, dateAudience: r.date_audience, parsed: [], remote: true, uploadedBy: r.uploaded_by }));
     const toPush = depositedConvocFiles.filter(e => e.kind === 'feuille' && !e.remote && e.hash && !remoteHashes.has(e.hash) && e.feuille.nb);
@@ -5019,7 +5021,7 @@ function renderConvocFilesList(){
       <div class="archive-pdf-icon">PDF</div>
       <div class="archive-pdf-main">
         <div class="archive-pdf-name">${escHtml(entry.name)}</div>
-        <div class="archive-pdf-meta">${escHtml(entry.jur)}${entry.chambre?' · '+escHtml(entry.chambre):''} · ${entry.kind==='feuille' ? entry.feuille.nb+' '+(isDE?'Angeklagte':'prévenus')+(_wwEntryMatchCount(entry)?` · <span class="ww-pill" style="margin-left:0;">${_wwEntryMatchCount(entry)} whoswho</span>`:'') : entry.parsed.length+' '+(isDE?'Verfahren':'affaires')}</div>
+        <div class="archive-pdf-meta">${escHtml(entry.jur)}${entry.chambre?' · '+escHtml(entry.chambre):''} · ${entry.kind==='feuille' ? escHtml(String(Number(entry.feuille.nb)||0))+' '+(isDE?'Angeklagte':'prévenus')+(_wwEntryMatchCount(entry)?` · <span class="ww-pill" style="margin-left:0;">${_wwEntryMatchCount(entry)} whoswho</span>`:'') : entry.parsed.length+' '+(isDE?'Verfahren':'affaires')}</div>
       </div>
     </div>`;
   }).join('');
