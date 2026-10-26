@@ -64,3 +64,37 @@ jobs:
             git pull --rebase origin main || true
           done
           echo "::warning::Le cache d'extraction n'a pas pu être poussé après 3 tentatives — sans impact sur les données (déjà envoyées à Supabase), mais l'extraction incrémentale re-téléchargera davantage d'archives au prochain run."
+
+  # Alerte de fraîcheur : l'extraction peut réussir sans rien trouver si data.public.lu
+  # ne publie plus (cas constaté après le 27/09/2026). Le dernier commit
+  # "chore: cache extraction" marque le dernier run qui a téléchargé de nouvelles
+  # archives. Au-delà de 14 jours, ce job échoue : GitHub envoie alors un e-mail
+  # d'échec de workflow (et il continue de le faire chaque dimanche tant que la source
+  # reste muette). Les commits "backfill" sont ignorés, ils ne marquent pas de
+  # nouveautés. Historique observé : l'écart normal maximal est de 14 jours.
+  fraicheur:
+    name: Alerte si aucune nouvelle décision depuis plus de 14 jours
+    needs: extract
+    if: always()
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+    steps:
+      - name: Mesurer l'âge de la dernière nouveauté
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+        run: |
+          LAST=$(gh api "repos/$REPO/commits?path=zip_cache.json&per_page=50" \
+            --jq '[.[] | select(.commit.message | startswith("chore: cache extraction"))][0].commit.committer.date')
+          if [ -z "$LAST" ] || [ "$LAST" = "null" ]; then
+            echo "::error::Aucun commit de cache trouvé — impossible de mesurer la fraîcheur."
+            exit 1
+          fi
+          AGE=$(( ( $(date -u +%s) - $(date -u -d "$LAST" +%s) ) / 86400 ))
+          echo "Dernière nouveauté : $LAST ($AGE jours)"
+          if [ "$AGE" -gt 14 ]; then
+            echo "::error::Aucune nouvelle décision depuis $AGE jours (dernier run avec nouveautés : $LAST). Vérifier la publication sur data.public.lu."
+            exit 1
+          fi
