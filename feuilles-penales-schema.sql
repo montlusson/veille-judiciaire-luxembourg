@@ -76,4 +76,21 @@ DROP POLICY IF EXISTS "Service delete feuilles_penales" ON feuilles_penales;
 CREATE POLICY "Service delete feuilles_penales" ON feuilles_penales
   FOR DELETE USING (auth.role() = 'service_role');
 
+-- Défense en profondeur contre le XSS stocké : le client injecte contenu.nb dans le HTML,
+-- donc la base refuse tout contenu mal formé. NOT VALID = ne bloque pas les lignes déjà
+-- présentes ; lancer ensuite la VALIDATE (échoue en listant le problème si une ligne
+-- existante est malformée : la supprimer ou la corriger avant de revalider).
+DO $$
+BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'feuilles_penales_contenu_forme') THEN
+    ALTER TABLE feuilles_penales ADD CONSTRAINT feuilles_penales_contenu_forme CHECK (
+      jsonb_typeof(contenu) = 'object'
+      AND jsonb_typeof(contenu->'nb') = 'number'
+      AND jsonb_typeof(contenu->'audiences') = 'array'
+    ) NOT VALID;
+  END IF;
+END
+$$;
+-- ALTER TABLE feuilles_penales VALIDATE CONSTRAINT feuilles_penales_contenu_forme;
+
 SELECT 'Schéma feuilles_penales créé avec succès ✓' AS status;
