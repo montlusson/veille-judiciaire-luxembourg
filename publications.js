@@ -328,8 +328,7 @@
     var el = e.target.closest ? e.target.closest('[data-pubs-id],[data-pubs-win],[data-pubs-more],[data-pubs-refresh],[data-pubs-filter],[data-pubs-goto],.navbtn[data-target="publications"],.action-tile[data-target="publications"]') : null;
     if(!el) return;
     if(el.hasAttribute('data-pubs-id')){
-      showScreen('recherche');
-      openReader(el.getAttribute('data-pubs-id'));
+      openDecisionFocus(el.getAttribute('data-pubs-id'), 'publications');
     } else if(el.hasAttribute('data-pubs-win')){
       _days = el.getAttribute('data-pubs-win') === '7' ? 7 : 30;
       try { localStorage.setItem(WINDOW_KEY, String(_days)); } catch(err){}

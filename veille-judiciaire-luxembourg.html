@@ -1445,6 +1445,7 @@ body.printing-decision #print-decision-area{display:block!important;color:#000;b
 
     <!-- RECHERCHE -->
     <section class="screen" data-screen="recherche" aria-labelledby="h-recherche">
+      <button class="focus-back" data-focus-back></button>
       <button class="back-dash" data-target="dashboard"><span aria-hidden="true">←</span> <span data-i18n="back_dashboard">Tableau de bord</span></button>
       <div class="eyebrow" data-i18n="recherche_eyebrow">Moteur de recherche plein texte</div>
       <h1 id="h-recherche" class="title" data-i18n="recherche_title">Recherche &amp; entités</h1>
@@ -2707,6 +2708,10 @@ function $(sel){ return document.querySelector(sel); }
 function $all(sel){ return Array.from(document.querySelectorAll(sel)); }
 
 function showScreen(target){
+  /* Le mode « lecture isolée » (decision-focus.js) ne survit à aucune navigation : ouvrir
+     « Recherche & entités » volontairement donne toujours l'écran complet. */
+  const _rsec = document.querySelector('.screen[data-screen="recherche"]');
+  if(_rsec) _rsec.classList.remove('focus-mode');
   $all('.screen').forEach(s => s.classList.toggle('active', s.dataset.screen === target));
   $all('.navbtn').forEach(b => {
     const active = b.dataset.target === target;
@@ -3301,7 +3306,7 @@ function applyDecisionHashRoute(){
   if(!m) return;
   const d = DECISIONS.find(x => x.id===decodeURIComponent(m[1]) && !x._demo);
   if(d){
-    showScreen('recherche'); openReader(d.id);
+    if(typeof openDecisionFocus === 'function') openDecisionFocus(d.id, 'liste'); else { showScreen('recherche'); openReader(d.id); }
     // Lien consommé une fois : on nettoie l'URL pour qu'un simple rafraîchissement de la
     // page ne rejoue pas indéfiniment la même décision au lieu du dashboard par défaut.
     history.replaceState(null,'',window.location.pathname+window.location.search);
@@ -3767,7 +3772,7 @@ function renderRadarNotice(){
       const more = n > 8 ? `<p class="radar-sub">${escHtml(t('radar_more',{n:n-8}))}</p>` : '';
       box.innerHTML = `<div class="radar-notice" role="status"><strong>${escHtml(t(n===1?'radar_new_one':'radar_new_many',{n}))}</strong><ul>${rows}</ul>${more}<button type="button" class="btn btn-primary" id="radar-ack">${escHtml(t('radar_ack'))}</button></div>`;
       $('#radar-ack').addEventListener('click', radarAck);
-      box.querySelectorAll('.radar-open').forEach(b => b.addEventListener('click', () => { openReader(b.dataset.id); showScreen('recherche'); }));
+      box.querySelectorAll('.radar-open').forEach(b => b.addEventListener('click', () => { if(typeof openDecisionFocus === 'function') openDecisionFocus(b.dataset.id, 'veille'); else { openReader(b.dataset.id); showScreen('recherche'); } }));
     }
   }
   renderRadarNotifCtl();
@@ -3793,7 +3798,7 @@ function renderTimeline(){
     activeAlerts.some(a => alertMatch(a.kw, decSearchText(d)) || radarFtsHas(a, d))
   ).slice(0,8).map(d => {
     const a = activeAlerts.find(a => alertMatch(a.kw, decSearchText(d)) || radarFtsHas(a, d));
-    return { type:'decision', date:d.date, label:d.ref, sub:d.jur, kw:a.kw, action:`openReader(${JSON.stringify(String(d.id))});showScreen('recherche')` };
+    return { type:'decision', date:d.date, label:d.ref, sub:d.jur, kw:a.kw, action:`openDecisionFocus(${JSON.stringify(String(d.id))},'veille')` };
   });
 
   const all = [...decMatches]
@@ -7309,6 +7314,7 @@ initAuth();
 <script src="decisions-admin.js"></script>
 <script src="plein-texte.js"></script>
 <script src="radar-themes.js"></script>
+<script src="decision-focus.js"></script>
 <script src="publications.js"></script>
 <script>
 (function(){
