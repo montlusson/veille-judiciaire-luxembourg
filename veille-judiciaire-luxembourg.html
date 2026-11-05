@@ -1597,6 +1597,7 @@ body.printing-decision #print-decision-area{display:block!important;color:#000;b
       <div class="eyebrow" data-i18n="pubs_eyebrow">Nouveautés</div>
       <h1 id="h-publications" class="title" data-i18n="pubs_title">Publications récentes</h1>
       <p class="intro" data-i18n="pubs_intro">Décisions arrivées dans la base ces derniers jours, par juridiction. La date retenue est celle de leur publication dans le module, pas celle du jugement.</p>
+      <div id="pubs-admin-root"></div>
       <div id="pubs-root"></div>
     </section>
 
@@ -1749,7 +1750,7 @@ body.printing-decision #print-decision-area{display:block!important;color:#000;b
             <p>Surveiller des affaires d'intérêt éditorial. Quand une décision portant leur numéro est ajoutée à la base, elle est signalée dans « Publications récentes » (filtre « Affaires suivies »).</p>
           </div>
           <div class="affaires-section-body">
-            <p style="font-size:12.5px;color:var(--text-muted);margin:0 0 14px;">Utilisez le bouton "Surveiller" dans les tableaux Cour adm. / Tribunal adm. pour ajouter des affaires à votre liste de suivi. Les décisions des juridictions administratives ne sont pas encore alimentées automatiquement.</p>
+            <p style="font-size:12.5px;color:var(--text-muted);margin:0 0 14px;">Utilisez le bouton "Surveiller" dans les tableaux Cour adm. / Tribunal adm. pour ajouter des affaires à votre liste de suivi. Les décisions des juridictions administratives s'ajoutent par collage dans « Publications récentes » (elles ne sont pas dans les données ouvertes).</p>
             <div id="watchlist-container"></div>
             <div style="display:flex;gap:10px;margin-top:16px;flex-wrap:wrap;align-items:center;background:var(--card-bg);border:1px dashed var(--card-border);border-radius:var(--radius-lg);padding:14px 16px;">
               <input class="input" id="watchlist-add-input" placeholder="Ajouter un numéro manuellement (ex. 54533C)…" style="flex:1;min-width:220px;">
@@ -3236,6 +3237,7 @@ function openReader(id){
     textZone.innerHTML = `
       <div class="detail-full-ref">${escHtml(d.ref)} — ${escHtml(d.type)}</div>
       <div class="detail-full-meta">${escHtml(d.jur)} · ${escHtml(d.date)}</div>
+      ${typeof adminPdfLinkHtml === 'function' ? adminPdfLinkHtml(d) : ''}
       <div style="display:flex;gap:8px;flex-wrap:wrap;">
         <button class="btn btn-secondary" style="font-size:12.5px;padding:8px 14px;margin-top:10px;" onclick="openFulltextModal()">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 3H5a2 2 0 00-2 2v3m18-5h-3a2 2 0 00-2 2v3M3 16v3a2 2 0 002 2h3m11-5v3a2 2 0 01-2 2h-3"/></svg>
@@ -3834,6 +3836,7 @@ function renderTimeline(){
 
 /* ===================== RENDER ALL ===================== */
 function renderAll(){
+  if(typeof adminMerge === 'function') adminMerge();   /* décisions administratives collées → DECISIONS */
   renderDashboard();
   renderSources();
   renderPipeline();
@@ -3850,6 +3853,7 @@ function renderAll(){
   renderWatchlistPanel();
   renderStats();
   applyI18n();
+  if(typeof renderAdminPaste === 'function') renderAdminPaste();
   if(typeof renderPublications === 'function') renderPublications();
   renderDashboard(); renderAlerts(); renderTimeline(); renderResults();
   if(selectedDecisionId) openReader(selectedDecisionId);
@@ -7087,6 +7091,11 @@ function lookupAffaire(){
       <div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--card-border);">
         <a href="https://justice.public.lu/fr/jurisprudence/juridictions-administratives.html" target="_blank" rel="noopener" style="font-size:12.5px;color:var(--accent-red);">Vérifier manuellement sur justice.public.lu</a>
         ${(() => {
+          /* Lien construit à partir du numéro de rôle, ouvert par un clic : le module n'interroge jamais ja.public.lu (robots.txt). */
+          const pdf = typeof AdminParse !== 'undefined' ? AdminParse.probableUrl(found.num) : null;
+          return pdf ? `<a href="${escHtml(pdf)}" target="_blank" rel="noopener noreferrer" style="font-size:12.5px;color:var(--accent-red);margin-left:12px;">Ouvrir le PDF probable sur ja.public.lu</a>` : '';
+        })()}
+        ${(() => {
           const hits = typeof decisionsForRole === 'function' ? decisionsForRole(found.num) : [];
           return hits.length
             ? `<button class="btn btn-secondary" style="font-size:12px;margin-left:8px;" onclick="${escHtml(`openSearchFor(${JSON.stringify(String(found.num))})`)}">${hits.length} décision${hits.length>1?'s':''} dans la base — ouvrir dans la recherche</button>`
@@ -7296,6 +7305,8 @@ initAuth();
 <p class="rpt-message">Ce module est actuellement indisponible&hellip;</p>
 <p class="rpt-message-strong">Nous travaillons au r&eacute;tablissement de l'acc&egrave;s.</p>
 </div>
+<script src="admin-parse.js"></script>
+<script src="decisions-admin.js"></script>
 <script src="plein-texte.js"></script>
 <script src="radar-themes.js"></script>
 <script src="publications.js"></script>
