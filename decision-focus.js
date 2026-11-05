@@ -47,8 +47,7 @@
 
   var style = document.createElement('style');
   style.textContent =
-    '.focus-back{display:none;align-items:center;gap:6px;background:none;border:0;padding:0;margin:0 0 14px;font:inherit;font-size:13px;color:var(--text-muted);cursor:pointer;}' +
-    '.focus-back:hover,.focus-back:focus-visible{color:var(--accent-blue);}' +
+    '.focus-back{display:none;}' +   /* aspect partagé avec .back-dash : voir la feuille de style principale */
     '.screen[data-screen="recherche"].focus-mode .focus-back{display:inline-flex;}' +
     '.screen[data-screen="recherche"].focus-mode .back-dash,' +
     '.screen[data-screen="recherche"].focus-mode .eyebrow,' +
