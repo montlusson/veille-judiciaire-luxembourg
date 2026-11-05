@@ -1105,6 +1105,11 @@ body.printing-decision #print-decision-area{display:block!important;color:#000;b
         <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
         <span data-i18n="nav_recherche">Recherche &amp; entités</span>
       </button>
+      <button class="navbtn" data-target="publications">
+        <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>
+        <span data-i18n="nav_publications">Publications récentes</span>
+        <span class="navbadge" id="pubs-badge" hidden></span>
+      </button>
       <button class="navbtn" data-target="veille">
         <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5.5"/><circle cx="12" cy="12" r="1.4" fill="currentColor" stroke="none"/><path d="M12 12L18 6"/><circle cx="16.6" cy="8.4" r="1" fill="currentColor" stroke="none"/></svg>
         <span data-i18n="nav_veille">Radar décisions</span>
@@ -1128,7 +1133,7 @@ body.printing-decision #print-decision-area{display:block!important;color:#000;b
       <button class="sidebar-user-btn" onclick="authSignOut()" id="sidebar-logout-btn" data-i18n="auth_logout">Se déconnecter</button>
     </div>
     <div class="sidebar-footer" id="sidebar-footer-el">
-      Sources officielles : Administration judiciaire — data.public.lu · Licence CC BY-ND 4.0. Nouvelles décisions indexées chaque semaine.
+      Sources officielles : Administration judiciaire — data.public.lu · Licence CC BY-ND 4.0. Nouvelles décisions indexées dès leur publication.
     </div>
   </aside>
 
@@ -1600,6 +1605,13 @@ body.printing-decision #print-decision-area{display:block!important;color:#000;b
     </section>
 
     <!-- VEILLE -->
+    <section class="screen" data-screen="publications" aria-labelledby="h-publications">
+      <div class="eyebrow" data-i18n="pubs_eyebrow">Nouveautés</div>
+      <h1 id="h-publications" class="title" data-i18n="pubs_title">Publications récentes</h1>
+      <p class="intro" data-i18n="pubs_intro">Décisions arrivées dans la base ces derniers jours, par juridiction. La date retenue est celle de leur publication dans le module, pas celle du jugement.</p>
+      <div id="pubs-root"></div>
+    </section>
+
     <section class="screen" data-screen="veille" aria-labelledby="h-veille">
       <div class="eyebrow" data-i18n="veille_eyebrow">Recherches sauvegardées</div>
       <h1 id="h-veille" class="title" data-i18n="veille_title">Radar décisions</h1>
@@ -1846,9 +1858,13 @@ const TRANSLATIONS = {
     nav_recherche: "Recherche & entités",
     nav_agenda: "Audiences",
     nav_veille: "Radar décisions",
+    nav_publications: "Publications récentes",
+    pubs_eyebrow: "Nouveautés",
+    pubs_title: "Publications récentes",
+    pubs_intro: "Décisions arrivées dans la base ces derniers jours, par juridiction. La date retenue est celle de leur publication dans le module, pas celle du jugement.",
     brand_name: "Veille judiciaire",
     brand_sub: "des décisions prises ou en cours",
-    sidebar_footer: "Sources officielles : Administration judiciaire — data.public.lu · Licence CC BY-ND 4.0. Nouvelles décisions indexées chaque semaine.",
+    sidebar_footer: "Sources officielles : Administration judiciaire — data.public.lu · Licence CC BY-ND 4.0. Nouvelles décisions indexées dès leur publication.",
     skip_link: "Aller au contenu principal",
     dashboard_eyebrow: "Vue d'ensemble",
     dashboard_title: "Bonjour",
@@ -2109,9 +2125,13 @@ const TRANSLATIONS = {
     nav_recherche: "Suche & Entitäten",
     nav_agenda: "Anhörungen",
     nav_veille: "Entscheidungsradar",
+    nav_publications: "Neue Veröffentlichungen",
+    pubs_eyebrow: "Neuigkeiten",
+    pubs_title: "Neue Veröffentlichungen",
+    pubs_intro: "In den letzten Tagen in die Datenbank eingegangene Entscheidungen, nach Gericht. Maßgeblich ist das Datum der Veröffentlichung im Modul, nicht das des Urteils.",
     brand_name: "Rechtsüberwachung",
     brand_sub: "Entscheidungen Luxemburg",
-    sidebar_footer: "Offizielle Quellen: Justizverwaltung — data.public.lu · Lizenz CC BY-ND 4.0. Neue Entscheidungen werden wöchentlich indexiert.",
+    sidebar_footer: "Offizielle Quellen: Justizverwaltung — data.public.lu · Lizenz CC BY-ND 4.0. Neue Entscheidungen werden nach ihrer Veröffentlichung indexiert.",
     skip_link: "Zum Hauptinhalt springen",
     dashboard_eyebrow: "Überblick",
     dashboard_title: "Willkommen",
@@ -3817,6 +3837,7 @@ function renderAll(){
   renderWatchlistPanel();
   renderStats();
   applyI18n();
+  if(typeof renderPublications === 'function') renderPublications();
   renderDashboard(); renderAlerts(); renderTimeline(); renderResults();
   if(selectedDecisionId) openReader(selectedDecisionId);
   else applyDecisionHashRoute();
@@ -4311,7 +4332,7 @@ async function _sbFetchAllDecisions(){
        sans ce départage, la pagination peut faire apparaître/disparaître des
        lignes d'un appel à l'autre et fausser le calcul des "nouvelles décisions". */
     const { data, error } = await _sb.from('decisions')
-      .select('id,ref,date,jur,group,type,excerpt,entities,source_year')
+      .select('id,ref,date,jur,group,type,excerpt,entities,source_year,created_at')
       .order('date', { ascending: false })
       .order('id', { ascending: true })
       .range(from, from + PAGE - 1);
@@ -7266,6 +7287,7 @@ initAuth();
 <p class="rpt-message">Ce module est actuellement indisponible&hellip;</p>
 <p class="rpt-message-strong">Nous travaillons au r&eacute;tablissement de l'acc&egrave;s.</p>
 </div>
+<script src="publications.js"></script>
 <script>
 (function(){
   var overlay = document.getElementById('rpt-offline-overlay');

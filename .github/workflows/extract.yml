@@ -2,8 +2,11 @@ name: Extraction hebdomadaire des décisions
 
 on:
   schedule:
-    # Chaque dimanche à 4h UTC (6h Luxembourg)
-    - cron: '0 4 * * 0'
+    # Tous les jours à 6h UTC (7h/8h Luxembourg). La source data.public.lu publie à
+    # des jours variables (lundi 00h UTC le 02/11/2026, dimanche le 27/09) : un run
+    # hebdomadaire du dimanche pouvait retarder une publication de près d'une semaine.
+    # Sans nouveauté, un run dure ~20 s (archives inchangées sautées).
+    - cron: '0 6 * * *'
   workflow_dispatch:
     # Déclenchement manuel depuis l'onglet Actions de GitHub
 
@@ -86,6 +89,12 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           REPO: ${{ github.repository }}
         run: |
+          # Run quotidien : l'alerte ne s'évalue que le dimanche (ou à la main), sinon un
+          # e-mail d'échec partirait chaque jour pendant un silence de la source.
+          if [ "$GITHUB_EVENT_NAME" = "schedule" ] && [ "$(date -u +%u)" != "7" ]; then
+            echo "Contrôle de fraîcheur évalué le dimanche uniquement — ignoré aujourd'hui."
+            exit 0
+          fi
           LAST=$(gh api "repos/$REPO/commits?path=zip_cache.json&per_page=50" \
             --jq '[.[] | select(.commit.message | startswith("chore: cache extraction"))][0].commit.committer.date')
           if [ -z "$LAST" ] || [ "$LAST" = "null" ]; then
