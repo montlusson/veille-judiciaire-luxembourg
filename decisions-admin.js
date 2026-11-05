@@ -54,7 +54,22 @@
   }
 
   /* ── Lignes → objets « décision » ordinaires ── */
+  /* Affaire connue (convocations déposées) portant les mêmes chiffres : une décision enregistrée
+     par son seul lien PDF n'a ni résumé ni parties, on emprunte alors ceux de l'affaire. */
+  function knownAffaire(role){
+    var list = (typeof AFFAIRES_DATA !== 'undefined' && Array.isArray(AFFAIRES_DATA)) ? AFFAIRES_DATA : [];
+    var d = digits(role);
+    return list.filter(function(a){ return a && a.num && digits(String(a.num).toUpperCase()) === d; })[0] || null;
+  }
+  function affaireText(a){
+    if(!a) return '';
+    var parties = [a.demandeur, a.defendeur].filter(Boolean).join(' c/ ');
+    return [a.matiere, parties].filter(Boolean).join(' — ');
+  }
+
   function toDecision(r){
+    var aff = rich(r) ? null : knownAffaire(r.role_num);
+    var affTxt = affaireText(aff);
     var url = (r.url && RE_PDF.test(r.url)) ? r.url : null;
     var pdf = url || AdminParse.probableUrl(r.role_num);
     var year = r.date_audience ? +String(r.date_audience).slice(0, 4) : 0;
@@ -64,10 +79,11 @@
       date: r.date_audience || '',
       jur: r.juridiction,
       group: 'Juridictions administratives',
-      type: r.instance === 'Référé' ? 'Référé' : 'Jugement',
-      excerpt: (r.resume || '').slice(0, 200),
-      fulltext: r.resume || tx('Décision enregistrée à partir de son numéro de rôle. Ouvrez le PDF pour la lire.',
-                               'Entscheidung anhand ihrer Rollennummer erfasst. Öffnen Sie das PDF, um sie zu lesen.'),
+      type: r.instance === 'Référé' ? 'Référé' : r.instance ? 'Jugement' : 'Décision',
+      excerpt: (r.resume || affTxt).slice(0, 200),
+      fulltext: r.resume || ((affTxt ? affTxt + '. ' : '') +
+        tx('Décision enregistrée à partir de son lien PDF. Ouvrez le PDF pour la lire.',
+           'Entscheidung anhand ihres PDF-Links erfasst. Öffnen Sie das PDF, um sie zu lesen.')),
       entities: { societes: [], lawyers: [], montants: [], dates: [], articles: [] },
       source_year: year,
       created_at: r.created_at,
@@ -144,8 +160,8 @@
         counts.new + ' ' + escHtml(tx('nouvelle(s)', 'neu')) + ' · ' + counts.complete + ' ' + escHtml(tx('à compléter', 'zu ergänzen')) + ' · ' +
         counts.same + ' ' + escHtml(tx('déjà en base', 'bereits vorhanden')) +
         (_pending.ignored ? ' · ' + _pending.ignored + ' ' + escHtml(tx('illisible(s)', 'unlesbar')) : '') + '</p>'
-      : '<p class="admin-sum">' + escHtml(tx('Rien de reconnu. Collez la liste copiée de justice.public.lu ou des adresses de PDF ja.public.lu.',
-                                           'Nichts erkannt. Fügen Sie die kopierte Liste von justice.public.lu oder PDF-Adressen von ja.public.lu ein.')) + '</p>';
+      : '<p class="admin-sum">' + escHtml(tx('Aucun lien reconnu. Un lien ressemble à https://ja.public.lu/45001-50000/49856.pdf',
+                                           'Kein Link erkannt. Ein Link sieht so aus: https://ja.public.lu/45001-50000/49856.pdf')) + '</p>';
     var table = list.length
       ? '<table class="admin-table"><thead><tr><th>' + escHtml(tx('Rôle', 'Rolle')) + '</th><th>' + escHtml(tx('Détail', 'Detail')) + '</th><th>' +
         escHtml(tx('Résumé', 'Zusammenfassung')) + '</th><th></th></tr></thead><tbody>' + rows + '</tbody></table>' : '';
@@ -183,10 +199,9 @@
     root.innerHTML = '<details class="pubs-admin"' + (open ? ' open' : '') + '><summary>' +
       escHtml(tx('Ajouter des décisions administratives', 'Verwaltungsentscheidungen hinzufügen')) + '</summary>' +
       '<p>' + escHtml(tx(
-        'Ces décisions ne sont pas dans les données ouvertes et ja.public.lu interdit les robots : collez ici la liste copiée de justice.public.lu (Décisions des juridictions administratives) et/ou des adresses de PDF. Rien n\'est enregistré avant votre validation.',
-        'Diese Entscheidungen sind nicht in den offenen Daten und ja.public.lu verbietet Roboter: Fügen Sie hier die von justice.public.lu kopierte Liste und/oder PDF-Adressen ein. Nichts wird vor Ihrer Bestätigung gespeichert.')) + '</p>' +
-      '<textarea id="admin-paste" maxlength="60000" aria-label="' + escHtml(tx('Texte à analyser', 'Zu analysierender Text')) + '"></textarea>' +
-      '<div class="admin-actions"><button class="btn btn-secondary" data-admin-analyze>' + escHtml(tx('Analyser', 'Analysieren')) + '</button></div>' +
+        'Collez un ou plusieurs liens de PDF des juridictions administratives (ja.public.lu). L\'aperçu apparaît tout seul et rien n\'est enregistré avant votre validation.',
+        'Fügen Sie einen oder mehrere PDF-Links der Verwaltungsgerichte ein (ja.public.lu). Die Vorschau erscheint automatisch, gespeichert wird erst nach Ihrer Bestätigung.')) + '</p>' +
+      '<textarea id="admin-paste" maxlength="60000" placeholder="https://ja.public.lu/45001-50000/49856.pdf" aria-label="' + escHtml(tx('Liens de PDF', 'PDF-Links')) + '"></textarea>' +
       '<div id="admin-msg" class="admin-msg" role="status"></div><div id="admin-preview">' + previewHtml() + '</div></details>';
     $('#admin-paste').value = prev;
     root.setAttribute('data-ready', lang);
@@ -238,6 +253,16 @@
       _loaded = false; load();           /* recharge puis renderAll() */
     } else if(btn) btn.disabled = false;
   }
+
+  var _autoTimer = null;
+  document.addEventListener('input', function(e){
+    if(!e.target || e.target.id !== 'admin-paste') return;
+    clearTimeout(_autoTimer);
+    _autoTimer = setTimeout(function(){
+      if(!(e.target.value || '').trim()){ _pending = null; say(''); refreshPreview(); return; }
+      analyze();
+    }, 250);
+  });
 
   document.addEventListener('click', function(e){
     var el = e.target.closest ? e.target.closest('[data-admin-analyze],[data-admin-save],[data-admin-clear]') : null;

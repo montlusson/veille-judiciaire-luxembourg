@@ -299,7 +299,7 @@
           '<span class="pubs-ref">' + escHtml(d.ref || d.id) + '</span>' +
           '<span>' + escHtml(d.type || '') + '</span>' + tagHtml(tagsOf[d.id]) +
           '<span class="pubs-meta">' + escHtml(tx('arrivée le ', 'eingegangen ')) + escHtml(fmtDay(ts(d))) +
-          ' · ' + escHtml(d.date || '') + '</span></button>';
+          (d.date ? ' · ' + escHtml(d.date) : '') + '</span></button>';
       });
       if(items.length > PER_GROUP){
         html += '<button class="pubs-more" data-pubs-more="' + escHtml(name) + '">' +

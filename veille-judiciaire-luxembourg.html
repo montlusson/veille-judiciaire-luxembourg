@@ -3236,7 +3236,7 @@ function openReader(id){
   function renderTextZone(){
     textZone.innerHTML = `
       <div class="detail-full-ref">${escHtml(d.ref)} — ${escHtml(d.type)}</div>
-      <div class="detail-full-meta">${escHtml(d.jur)} · ${escHtml(d.date)}</div>
+      <div class="detail-full-meta">${escHtml(d.jur)}${d.date ? ' · ' + escHtml(d.date) : ''}</div>
       ${typeof adminPdfLinkHtml === 'function' ? adminPdfLinkHtml(d) : ''}
       <div style="display:flex;gap:8px;flex-wrap:wrap;">
         <button class="btn btn-secondary" style="font-size:12.5px;padding:8px 14px;margin-top:10px;" onclick="openFulltextModal()">
