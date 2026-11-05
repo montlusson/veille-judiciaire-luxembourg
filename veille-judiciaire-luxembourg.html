@@ -1292,11 +1292,11 @@ body.printing-decision #print-decision-area{display:block!important;color:#000;b
             <svg class="kpi-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
           </div>
         </button>
-        <button class="kpi-card kpi-blue" onclick="showScreen('collecte');switchSubtab('sources')" aria-label="Voir la collecte automatique">
+        <button class="kpi-card kpi-blue" onclick="showScreen('publications')" aria-label="Voir les publications récentes">
           <div class="kpi-num" id="kpi-new">—</div>
           <div class="kpi-label" id="kpi-new-label">Nouvelles décisions</div>
           <div class="kpi-foot">
-            <span id="kpi-new-foot" data-i18n="kpi_new_foot">Depuis la dernière mise à jour</span>
+            <span id="kpi-new-foot">Sur les 7 derniers jours</span>
             <svg class="kpi-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
           </div>
         </button>
@@ -1618,6 +1618,8 @@ body.printing-decision #print-decision-area{display:block!important;color:#000;b
         </span>
       </div>
 
+      <div id="radar-themes"></div>
+
       <div class="section-h"><h2 data-i18n="alerts_configured">Recherches sauvegardées</h2></div>
       <div id="alerts-list"></div>
 
@@ -1726,7 +1728,7 @@ body.printing-decision #print-decision-area{display:block!important;color:#000;b
         <div class="affaires-section">
           <div class="affaires-section-head">
             <h2>Recherche de décision par numéro d'affaire</h2>
-            <p>Vérifier si une décision a été publiée sur justice.public.lu pour un numéro de rôle donné. Permet de croiser les affaires en cours avec la base de décisions rendues.</p>
+            <p>Retrouver une affaire par son numéro de rôle et voir si une décision portant ce numéro figure dans la base.</p>
           </div>
           <div class="affaires-section-body">
             <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
@@ -1744,10 +1746,10 @@ body.printing-decision #print-decision-area{display:block!important;color:#000;b
         <div class="affaires-section">
           <div class="affaires-section-head">
             <h2>Alertes par numéro d'affaire</h2>
-            <p>Surveiller des affaires spécifiques d'intérêt éditorial. Une notification peut être déclenchée lorsqu'une affaire change de stade ou qu'une décision est publiée.</p>
+            <p>Surveiller des affaires d'intérêt éditorial. Quand une décision portant leur numéro est ajoutée à la base, elle est signalée dans « Publications récentes » (filtre « Affaires suivies »).</p>
           </div>
           <div class="affaires-section-body">
-            <p style="font-size:12.5px;color:var(--text-muted);margin:0 0 14px;">Utilisez le bouton "Surveiller" dans les tableaux Cour adm. / Tribunal adm. pour ajouter des affaires à votre liste de suivi.</p>
+            <p style="font-size:12.5px;color:var(--text-muted);margin:0 0 14px;">Utilisez le bouton "Surveiller" dans les tableaux Cour adm. / Tribunal adm. pour ajouter des affaires à votre liste de suivi. Les décisions des juridictions administratives ne sont pas encore alimentées automatiquement.</p>
             <div id="watchlist-container"></div>
             <div style="display:flex;gap:10px;margin-top:16px;flex-wrap:wrap;align-items:center;background:var(--card-bg);border:1px dashed var(--card-border);border-radius:var(--radius-lg);padding:14px 16px;">
               <input class="input" id="watchlist-add-input" placeholder="Ajouter un numéro manuellement (ex. 54533C)…" style="flex:1;min-width:220px;">
@@ -1862,7 +1864,6 @@ const TRANSLATIONS = {
     kpi_total: "Décisions indexées",
     kpi_total_foot: "28 sources · 96 datasets",
     kpi_new: "Nouvelles cette semaine",
-    kpi_new_foot: "Collecte des données",
     kpi_alerts: "Recherches actives",
     kpi_alerts_foot: "Radar en cours",
     kpi_entities: "Entités extraites",
@@ -2131,7 +2132,6 @@ const TRANSLATIONS = {
     kpi_total: "Indizierte Entscheidungen",
     kpi_total_foot: "28 Quellen · 96 Datensätze",
     kpi_new: "Neu diese Woche",
-    kpi_new_foot: "Automatische Erfassung",
     kpi_alerts: "Aktive Suchen",
     kpi_alerts_foot: "Radar aktiv",
     kpi_entities: "Extrahierte Entitäten",
@@ -2775,28 +2775,19 @@ function renderDashboard(){
   }
 
   $('#kpi-total').textContent   = DECISIONS.length;
-  const delta      = parseInt(localStorage.getItem('vj_delta') ?? '-1');
+  /* « Nouvelles » = décisions arrivées en base ces 7 jours (même source que la rubrique
+     Publications récentes) — plus la comparaison avec le cache de cet appareil, qui se
+     remettait à zéro à chaque rafraîchissement. */
   const kpiNew      = $('#kpi-new');
   const kpiNewLabel = $('#kpi-new-label');
   const kpiNewFoot  = $('#kpi-new-foot');
   if(kpiNew){
-    if(delta < 0){
-      kpiNew.textContent = '—';
-      if(kpiNewLabel) kpiNewLabel.textContent = currentLang==='de' ? 'Neue Entscheidungen' : 'Nouvelles décisions';
-      if(kpiNewFoot)  kpiNewFoot.textContent  = currentLang==='de' ? 'Noch kein Vergleich' : 'Pas encore de comparaison';
-    } else if(delta === 0){
-      kpiNew.textContent = '0';
-      if(kpiNewLabel) kpiNewLabel.textContent = currentLang==='de' ? 'Neue Entscheidung' : 'Nouvelle décision';
-      if(kpiNewFoot)  kpiNewFoot.textContent  = currentLang==='de' ? 'Bereits aktuell' : 'Déjà à jour';
-    } else if(delta === 1){
-      kpiNew.textContent = '+1';
-      if(kpiNewLabel) kpiNewLabel.textContent = currentLang==='de' ? 'Neue Entscheidung' : 'Nouvelle décision';
-      if(kpiNewFoot)  kpiNewFoot.textContent  = currentLang==='de' ? 'Seit letzter Aktualisierung' : 'Depuis la dernière mise à jour';
-    } else {
-      kpiNew.textContent = '+' + delta.toLocaleString(currentLang==='de' ? 'de-DE' : 'fr-LU');
-      if(kpiNewLabel) kpiNewLabel.textContent = currentLang==='de' ? 'Neue Entscheidungen' : 'Nouvelles décisions';
-      if(kpiNewFoot)  kpiNewFoot.textContent  = currentLang==='de' ? 'Seit letzter Aktualisierung' : 'Depuis la dernière mise à jour';
-    }
+    const n = typeof publicationsCount === 'function' ? publicationsCount(7) : null;
+    kpiNew.textContent = n === null ? '—' : (n > 0 ? '+' : '') + n.toLocaleString(currentLang==='de' ? 'de-DE' : 'fr-LU');
+    if(kpiNewLabel) kpiNewLabel.textContent = currentLang==='de' ? 'Neue Veröffentlichungen' : 'Publications récentes';
+    if(kpiNewFoot)  kpiNewFoot.textContent  = n === null
+      ? (currentLang==='de' ? 'Index aktualisieren' : 'Mettre à jour l\'index')
+      : (currentLang==='de' ? 'In den letzten 7 Tagen' : 'Sur les 7 derniers jours');
   }
   const alertCount = ALERTS.filter(a => a.on).length;
   $('#kpi-alerts').textContent = alertCount;
@@ -3169,7 +3160,11 @@ function filteredDecisions(){
       const socs    = d.entities ? d.entities.societes.join(' ') : '';
       const laws    = d.entities && d.entities.lawyers ? d.entities.lawyers.join(' ') : '';
       const hay = (d.ref+' '+d.type+' '+d.jur+' '+(d.fulltext||d.excerpt||'')+' '+socs+' '+laws+' '+annText).toLowerCase();
-      if(!hay.includes(q)) return false;
+      if(!hay.includes(q)){
+        /* Le texte intégral n'est pas chargé : l'index plein texte de Supabase complète. */
+        const ftsIdsHit = typeof ftsSearchIds === 'function' ? ftsSearchIds() : null;
+        if(!(ftsIdsHit && ftsIdsHit.has(String(d.id)))) return false;
+      }
     }
     return true;
   });
@@ -3577,6 +3572,7 @@ function closeConnexionsModal(){
   const update = () => {
     searchState = { q:$('#search-input').value, jur:$('#filter-juridiction').value, year:$('#filter-annee').value, type:$('#filter-type').value };
     if(id === 'filter-juridiction') populateTypeFilter();
+    if(typeof ftsSearchTrigger === 'function') ftsSearchTrigger();
     renderResults();
   };
   el.addEventListener('input', update);
@@ -3597,13 +3593,14 @@ function renderAlerts(){
         ? 'Keine gespeicherten Suchen. Erstellen Sie unten eine neue.'
         : 'Aucune recherche sauvegardée. Créez-en une ci-dessous.'}</p>
     </div>`;
+    if(typeof renderRadarThemes === 'function') renderRadarThemes();
     return;
   }
   el.innerHTML = ALERTS.map((a,i) => `
     <div class="alert-card">
       <button class="switch ${a.on?'on':''}" data-i="${i}" aria-pressed="${a.on}" aria-label="${a.on?t('alert_disable'):t('alert_enable')} ${escHtml(a.kw)}"></button>
       <div class="alert-main">
-        <div class="alert-kw">${escHtml(a.kw)}</div>
+        <div class="alert-kw">${escHtml((a.theme && typeof radarThemeLabel === 'function' && radarThemeLabel(a.theme)) || a.kw)}</div>
         <div class="alert-meta">${freqLabel(a.freq)} · ${a.matches===1?t('alert_matches',{n:a.matches}):t('alert_matches_pl',{n:a.matches})}</div>
       </div>
       <button class="btn-icon del" onclick="deleteAlert(${i})" aria-label="${t('upload_delete')} ${escHtml(a.kw)}">
@@ -3613,6 +3610,7 @@ function renderAlerts(){
   $all('.switch').forEach(btn => btn.addEventListener('click', () => {
     const i = +btn.dataset.i; ALERTS[i].on = !ALERTS[i].on; saveAlerts(); renderAlerts(); renderDashboard(); renderTimeline();
   }));
+  if(typeof renderRadarThemes === 'function') renderRadarThemes();
 }
 
 /* saveAlerts défini plus haut avec sync Supabase */
@@ -3622,15 +3620,16 @@ function deleteAlert(i){ ALERTS.splice(i,1); saveAlerts(); renderAlerts(); rende
 $('#add-alert-btn').addEventListener('click', () => {
   const kw = $('#new-alert-kw').value.trim(); if(!kw) return;
   /* seen/ack : base silencieuse, les décisions déjà indexées ne comptent pas comme nouvelles (voir NOTIFICATIONS DU RADAR) */
-  ALERTS.unshift({ kw, freq: $('#new-alert-freq').value, on:true, matches:0, seen: radarMatchingIds(kw), ack: Date.now() });
+  ALERTS.unshift({ kw, freq: $('#new-alert-freq').value, on:true, matches:0, seen: radarMatchingIds(kw), ack: Date.now(), ftsSince: new Date().toISOString() });
   $('#new-alert-kw').value = '';
   saveAlerts(); renderAlerts(); renderDashboard(); renderTimeline();
 });
 
 /* ===================== TIMELINE (correspondances) ===================== */
 function alertMatch(kw, ...fields){
-  const needle = kw.toLowerCase();
-  return fields.some(f => f && f.toLowerCase().includes(needle));
+  /* « a|b|c » = a OU b OU c (thèmes du Radar) ; sans « | », comportement inchangé. */
+  const needles = String(kw).toLowerCase().split('|').map(n => n.trim()).filter(Boolean);
+  return fields.some(f => { const low = f && f.toLowerCase(); return low && needles.some(n => low.includes(n)); });
 }
 
 /* ===================== NOTIFICATIONS DU RADAR (personnelles) =====================
@@ -3660,6 +3659,28 @@ function radarMatchingIds(kw){
   return DECISIONS.filter(d => !d._demo && alertMatch(kw, decSearchText(d))).map(d => String(d.id));
 }
 
+/* Correspondances plein texte (index Supabase) : kw → ids arrivés depuis a.ftsSince.
+   `var` : renderAll() peut tourner avant cette ligne. */
+var _radarFts = {};
+var _radarFtsBusy = false;
+function radarFtsRefresh(){
+  if(_radarFtsBusy || typeof ftsIds !== 'function') return;
+  const todo = ALERTS.filter(a => a.on && a.ftsSince);
+  if(!todo.length) return;
+  _radarFtsBusy = true;
+  Promise.all(todo.map(async a => [a.kw, await ftsIds(a.kw, a.ftsSince)])).then(rs => {
+    let changed = false;
+    rs.forEach(([kw, ids]) => {
+      if(!ids) return;
+      if(!_radarFts[kw] || _radarFts[kw].size !== ids.size) changed = true;
+      _radarFts[kw] = ids;
+    });
+    _radarFtsBusy = false;
+    if(changed){ _radarSig = ''; renderTimeline(); renderDashboard(); }
+  }).catch(() => { _radarFtsBusy = false; });
+}
+function radarFtsHas(a, d){ return !!(_radarFts[a.kw] && _radarFts[a.kw].has(String(d.id))); }
+
 function radarCompute(){
   const sig = DECISIONS.length+'|'+JSON.stringify(ALERTS.map(a => [a.kw, a.on, a.freq, a.ack||0, (a.seen||[]).length]));
   if(sig === _radarSig) return;
@@ -3670,13 +3691,17 @@ function radarCompute(){
   let baselined = false;
   ALERTS.filter(a => a.on).forEach(a => {
     const ids = radarMatchingIds(a.kw);
+    if(!a.ftsSince){ a.ftsSince = new Date().toISOString(); baselined = true; }   /* base silencieuse du plein texte */
     if(!Array.isArray(a.seen)){ a.seen = ids; a.ack = Date.now(); baselined = true; return; }
     const seen  = new Set(a.seen);
-    const fresh = ids.filter(id => !seen.has(id));
+    const ftsSet = _radarFts[a.kw];
+    const allIds = ftsSet ? [...new Set([...ids, ...[...ftsSet].filter(id => byId.has(id))])] : ids;
+    const fresh = allIds.filter(id => !seen.has(id));
     const due   = Date.now() - (a.ack || 0) >= (RADAR_FREQ_MS[a.freq] ?? 0);
     if(fresh.length && due) fresh.forEach(id => _radarPending.push({ alert:a, dec:byId.get(id) }));
   });
   if(baselined) saveAlerts();
+  radarFtsRefresh();
 }
 
 function radarAck(){
@@ -3763,9 +3788,9 @@ function renderTimeline(){
 
   /* ── Décisions (texte complet + entités + avocats + annotations) : decSearchText() est globale, partagée avec les notifications du radar ── */
   const decMatches = DECISIONS.filter(d =>
-    activeAlerts.some(a => alertMatch(a.kw, decSearchText(d)))
+    activeAlerts.some(a => alertMatch(a.kw, decSearchText(d)) || radarFtsHas(a, d))
   ).slice(0,8).map(d => {
-    const a = activeAlerts.find(a => alertMatch(a.kw, decSearchText(d)));
+    const a = activeAlerts.find(a => alertMatch(a.kw, decSearchText(d)) || radarFtsHas(a, d));
     return { type:'decision', date:d.date, label:d.ref, sub:d.jur, kw:a.kw, action:`openReader(${JSON.stringify(String(d.id))});showScreen('recherche')` };
   });
 
@@ -4525,15 +4550,6 @@ async function loadDecisionsJSON(forceRefresh = false){
     ];
 
     localStorage.setItem(LAST_KEY, fetchedGenerated);
-    /* Sans base locale préexistante (premier chargement, cache vidé), toute
-       décision serveur paraîtrait "nouvelle" à tort — on n'affiche alors
-       aucune comparaison plutôt qu'un delta trompeur proche du total. */
-    if(hadBaseline){
-      localStorage.setItem('vj_delta', newCount);
-    } else {
-      localStorage.removeItem('vj_delta');
-    }
-
     /* Persister dans IndexedDB en arrière-plan pour les prochaines ouvertures */
     _vjOpenDB()
       .then(db => _vjIDBPut(db, 'decisions', DECISIONS))
@@ -7070,12 +7086,17 @@ function lookupAffaire(){
       </div>
       <div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--card-border);">
         <a href="https://justice.public.lu/fr/jurisprudence/juridictions-administratives.html" target="_blank" rel="noopener" style="font-size:12.5px;color:var(--accent-red);">Vérifier manuellement sur justice.public.lu</a>
-        <span style="font-size:11.5px;color:var(--text-faint);margin-left:8px;">(pas encore de décision publiée dans les données locales)</span>
+        ${(() => {
+          const hits = typeof decisionsForRole === 'function' ? decisionsForRole(found.num) : [];
+          return hits.length
+            ? `<button class="btn btn-secondary" style="font-size:12px;margin-left:8px;" onclick="${escHtml(`openSearchFor(${JSON.stringify(String(found.num))})`)}">${hits.length} décision${hits.length>1?'s':''} dans la base — ouvrir dans la recherche</button>`
+            : `<span style="font-size:11.5px;color:var(--text-faint);margin-left:8px;">(aucune décision portant ce numéro dans la base)</span>`;
+        })()}
       </div>
     </div>`;
   } else {
     out.innerHTML = `<div style="margin-top:12px;padding:12px 14px;background:var(--accent-red-tint);border-radius:var(--radius-lg);font-size:12.5px;color:#7A2420;">
-      Affaire <strong>${escHtml(q)}</strong> introuvable dans les données du W25 (25/06/2026). Elle ne figurait peut-être pas au rôle cette semaine-là.
+      Affaire <strong>${escHtml(q)}</strong> introuvable parmi les affaires chargées. Elle ne figure peut-être pas dans les convocations déposées.
     </div>`;
   }
 }
@@ -7275,6 +7296,8 @@ initAuth();
 <p class="rpt-message">Ce module est actuellement indisponible&hellip;</p>
 <p class="rpt-message-strong">Nous travaillons au r&eacute;tablissement de l'acc&egrave;s.</p>
 </div>
+<script src="plein-texte.js"></script>
+<script src="radar-themes.js"></script>
 <script src="publications.js"></script>
 <script>
 (function(){
