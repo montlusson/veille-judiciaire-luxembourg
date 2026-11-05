@@ -133,8 +133,7 @@ h1.title{font-size:28px;}
 
 .action-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:18px;}
 /* Tuiles de navigation simplifiées : gros pictogramme + nom, description en infobulle (title).
-   Hauteur fixe (166px), identique à .action-card, pour une grille visuellement cohérente
-   quelle que soit la ligne où tombe la carte "Mon compte" (plus de contenu que les autres). */
+   Hauteur fixe (166px) pour une grille visuellement cohérente. */
 .action-tile{
   height:166px;border:1px solid var(--card-border);border-radius:var(--radius-lg);background:var(--card-bg);
   padding:20px 18px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:12px;
@@ -143,17 +142,11 @@ h1.title{font-size:28px;}
 .action-tile:hover{border-color:var(--accent-blue);transform:translateY(-2px);}
 .action-tile svg{width:40px;height:40px;stroke:var(--text);}
 .action-tile h3{font-family:'Roboto Condensed','Arial Narrow',sans-serif;font-weight:700;font-size:14.5px;text-transform:uppercase;letter-spacing:.02em;color:var(--text);}
-/* Carte "Mon compte" : reste une carte détaillée (contrôles réels, pas une simple navigation) */
-.action-card{
-  height:166px;border-radius:var(--radius-lg);padding:16px 18px;display:flex;flex-direction:column;gap:6px;justify-content:center;
-  background:var(--card-bg);border:1px solid var(--card-border);
-}
-.action-icon{width:30px;height:30px;border-radius:7px;display:flex;align-items:center;justify-content:center;background:#EAEEF5;color:var(--accent-blue);}
-.action-card h3{font-size:14.5px;margin-bottom:2px;}
-.action-card p{color:var(--text-muted);font-size:12.5px;line-height:1.4;}
-.dash-lang-btn{padding:5px 11px;border:1px solid var(--card-border);background:var(--card-bg);color:var(--text-muted);border-radius:var(--radius-sm);cursor:pointer;font-size:11.5px;font-weight:700;letter-spacing:.03em;}
-.dash-lang-btn.active{background:var(--accent-blue);border-color:var(--accent-blue);color:#fff;}
-.action-card button{margin-top:auto;align-self:flex-start;}
+.action-tile{position:relative;}
+.action-tile .navbadge{position:absolute;top:10px;right:12px;margin:0;}
+.brand[data-target]{cursor:pointer;}
+.back-dash{display:inline-flex;align-items:center;gap:6px;background:none;border:0;padding:0;margin:0 0 14px;font:inherit;font-size:13px;color:var(--text-muted);cursor:pointer;}
+.back-dash:hover,.back-dash:focus-visible{color:var(--accent-blue);}
 
 .btn{display:inline-flex;align-items:center;gap:8px;border-radius:var(--radius-sm);padding:9px 16px;min-height:40px;font-weight:700;font-size:13.5px;cursor:pointer;border:1px solid transparent;}
 .btn-primary{background:var(--accent-blue);color:#fff;}
@@ -1081,7 +1074,7 @@ body.printing-decision #print-decision-area{display:block!important;color:#000;b
 <div id="json-banner" style="display:none;background:#1A7F3C;color:#fff;font-size:11px;font-weight:600;padding:4px 0;text-align:center;letter-spacing:.02em;width:100%;transition:background 1s ease,color 1s ease;"></div>
 <div class="app">
   <aside class="sidebar" aria-label="Navigation principale" id="sidebar-el">
-    <div class="brand">
+    <div class="brand" data-target="dashboard" title="Tableau de bord">
       <div class="brand-badge" aria-hidden="true"><img src="data:image/jpeg;base64,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o37dNZXlpZa2TiGRGzlPKNl+D/8A/8QAKhABAAECAwcDBQEAAAAAAAAAAREAITFBURBAYXGBsfAwocEgcJHR8eH/2gAIAQEAAT8h+zi1xhQiCxlf6mrVq1ayThavuK/35x07KW3sSA4m8tGcUwbv3o24UnFCDCHSy7vyHrwjLoY9zKY+r/8A/wD/AM6ZkU/h7lNLEhYXdzlslBkWegcRucqxXSwscjgkPXdg7JVgWZUXUuDDe5E8nZYkDmdLxw3d6lNcn7Z2IzlOTD2d2f58BgGaZDWoCjCYkZ6yuy4bzMMfu0EwC8vWDSkEpOR+a85+a85+a85+a85+a85+aMlmY7nc+9JMMFnmN3q7Jr4OxdU8MM6YIVGVGVagBGKwDHuUynI2YVy2FKbjMziRe2e5tMBmDH1aTVgin65eycax9QZJkGAcCjC8FIzeKD8Y9ZAtRILpNgucqusOyhe7pPrNLdRcmEptcOLadBqwgcDOGOWw16T9NTRMR1KmUDBwP/B4ju7R5FYkLc++Byh12SDmdbiT4MOVOTSHAmETdmjxzwR9dHUcE0ajFxylP+hwTZlmgGJgfDodd3aPIVwkvBkDXskoHB0ZRcRppwjZRZEp6ILb8TdfcR659HlViExFrbDCGTWIBDHX9SzNZOzK2X72GE1zFY8FXDidX7P/AP/aAAwDAQACAAMAAAAQ888888888888888888888888888888888888888888U88s888888888888M8888888888888U08888888kMM8o3F888888U08cw88888888UU8Mo888888888c88c88888888888888888888888888888888888888888888//EABkRAQACAwAAAAAAAAAAAAAAAAEAYBFBUf/aAAgBAwEBPxCrEiTM3ypf/8QAGhEAAgIDAAAAAAAAAAAAAAAAATFg8QAhcf/aAAgBAgEBPxCLCOjbNozdCqJf/8QAJhABAQABAwQBBAMBAAAAAAAAAREhADFBQFFhcRAgMKHxcIGR8P/aAAgBAQABPxD+HFPGuGlCgRUFnD9RMmTJk0ro2SP8350N3Fv30zW06ToDcQEfD1KUBHZzskDAc5FytIrndILJgwU4Ipt0AUxCnPja8Gxl2dfuGv7hr+4a/uGv7hrXUsOzwfoBR80sNKExUBcvwSuMxTdrsYThGi+pGgLRd2PgdMkkgrCiH/O2plqbFyhwIE4E+AqCsG/S/sOnCoKlzIzxP5/A4SUcwfy6YFuEJzzhLKrB7hoX8kcnS8CgOxDj4AwgLUX+0VedV3G7xdIiiROH7o9g7KcThQqPb6lChQoUMbW+nMQeg+dQM9cYbLWeZSXE+CS+aGOe9CvLBmirEkjS3Kqq+dIZJMIUqlIDiaJtpGgSFuZe+lFYo84AIIKZ26NLE2V/VgKBVwG64NTnF8U8aB4BNx6emGbAtgw7gAND2a1EiG+9KoN1JilyrMFmjfD3EMQpWmb4m+hvljYMEsGUrw2aSKO/3Up5HcAQkcMQw/LFjJCdaTkgU+wKBUaa3OHxK2TkADICZNDC3uqmPZwhwDJF0KbM6VLux4DxdBl7Fcu4R/BStm6jxQgPYcwXkWrZkmRERPHTJd23FGIG4cBUYUHfTzD7Gor4yJyjFhrZytgSDDtjxdh9Ol3IR+9yffavlbyID305QCYRERO+hC1bKKTCIojvdURahG1rmSLuLeh94kKJhpKSkUEZcnwGBTZYlZLBilH19S9x1iLApagilFgBoMyjPHuFEHIIgJH+H//Z" alt="Reporter.lu"></div>
       <div>
         <div class="brand-name" id="brand-name-el">Veille judiciaire</div>
@@ -1326,6 +1319,11 @@ body.printing-decision #print-decision-area{display:block!important;color:#000;b
       </div>
 
       <div class="action-grid">
+        <div class="action-tile" data-target="publications" data-i18n-title="action_pubs_desc" title="Consultez les décisions qui viennent d'être publiées, par juridiction.">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path stroke-width="2" d="M5 9a6 6 0 0 1 12 0c0 7 3 9 3 9H2s3-2 3-9"/><path stroke-width="2" d="M9.3 21a1.94 1.94 0 0 0 3.4 0"/><circle cx="18.5" cy="4.5" r="3" fill="var(--accent-red)" stroke="none"/></svg>
+          <h3 data-i18n="action_pubs_title">Publications récentes</h3>
+          <span class="navbadge" id="pubs-tile-badge" hidden></span>
+        </div>
         <div class="action-tile" data-target="affaires" data-i18n-title="action_affaires_desc" title="Suivez l'avancement des affaires en cours devant la Cour administrative.">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path stroke-width="1.5" transform="translate(3,-3) scale(0.86)" d="M3 7a2 2 0 012-2h4l2 2h8a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2V7z"/><path stroke-width="2" fill="var(--card-bg,#fff)" d="M3 7a2 2 0 012-2h4l2 2h8a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2V7z"/></svg>
           <h3 data-i18n="action_affaires_title">Affaires en cours</h3>
@@ -1346,26 +1344,13 @@ body.printing-decision #print-decision-area{display:block!important;color:#000;b
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><g stroke-width="1.3" transform="scale(0.6)"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></g><g stroke-width="2.4"><circle cx="18" cy="18" r="4.3"/><path d="M21.3 21.3L23.5 23.5"/></g></svg>
           <h3 data-i18n="action_rappr_title">Qui est concerné ?</h3>
         </div>
-        <div class="action-card">
-          <div class="action-icon" aria-hidden="true">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 00-4-4H9a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-          </div>
-          <h3 data-i18n="action_account_title">Mon compte</h3>
-          <p id="dashboard-account-email">—</p>
-          <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:2px;">
-            <div style="display:flex;gap:4px;">
-              <button class="dash-lang-btn" id="dash-lang-fr" onclick="setLang('fr')">FR</button>
-              <button class="dash-lang-btn" id="dash-lang-de" onclick="setLang('de')">DE</button>
-            </div>
-            <button class="btn btn-secondary" style="font-size:12px;padding:6px 12px;" onclick="authSetPassword()" data-i18n="auth_set_password">Définir un mot de passe</button>
-          </div>
-        </div>
       </div>
 
     </section>
 
     <!-- COLLECTE -->
     <section class="screen" data-screen="collecte" aria-labelledby="h-collecte">
+      <button class="back-dash" data-target="dashboard"><span aria-hidden="true">←</span> <span data-i18n="back_dashboard">Tableau de bord</span></button>
       <div class="eyebrow" data-i18n="collecte_eyebrow">Récupération automatique</div>
       <h1 id="h-collecte" class="title" data-i18n="collecte_title">Collecte des données</h1>
       <p class="intro" data-i18n="collecte_intro">Les archives hebdomadaires publiées par chaque juridiction sur data.public.lu sont téléchargées, dézippées, et leur contenu est extrait puis indexé sans intervention manuelle.</p>
@@ -1460,6 +1445,7 @@ body.printing-decision #print-decision-area{display:block!important;color:#000;b
 
     <!-- RECHERCHE -->
     <section class="screen" data-screen="recherche" aria-labelledby="h-recherche">
+      <button class="back-dash" data-target="dashboard"><span aria-hidden="true">←</span> <span data-i18n="back_dashboard">Tableau de bord</span></button>
       <div class="eyebrow" data-i18n="recherche_eyebrow">Moteur de recherche plein texte</div>
       <h1 id="h-recherche" class="title" data-i18n="recherche_title">Recherche &amp; entités</h1>
       <p class="intro" data-i18n="recherche_intro">Recherchez dans le texte intégral des décisions indexées. Chaque résultat affiche les entités automatiquement extraites : sociétés citées, montants, dates et articles de loi.</p>
@@ -1509,6 +1495,7 @@ body.printing-decision #print-decision-area{display:block!important;color:#000;b
 
     <!-- AGENDA AUDIENCES -->
     <section class="screen" data-screen="agenda" aria-labelledby="h-agenda">
+      <button class="back-dash" data-target="dashboard"><span aria-hidden="true">←</span> <span data-i18n="back_dashboard">Tableau de bord</span></button>
       <div class="eyebrow" data-i18n="agenda_eyebrow">Calendrier judiciaire</div>
       <h1 id="h-agenda" class="title" data-i18n="agenda_title">Audiences & agenda</h1>
       <p class="intro" data-i18n="agenda_intro">Séances hebdomadaires récurrentes de toutes les juridictions luxembourgeoises. Données issues de <strong>justice.public.lu</strong>. Exportez vers votre agenda ou filtrez par juridiction.</p>
@@ -1606,6 +1593,7 @@ body.printing-decision #print-decision-area{display:block!important;color:#000;b
 
     <!-- VEILLE -->
     <section class="screen" data-screen="publications" aria-labelledby="h-publications">
+      <button class="back-dash" data-target="dashboard"><span aria-hidden="true">←</span> <span data-i18n="back_dashboard">Tableau de bord</span></button>
       <div class="eyebrow" data-i18n="pubs_eyebrow">Nouveautés</div>
       <h1 id="h-publications" class="title" data-i18n="pubs_title">Publications récentes</h1>
       <p class="intro" data-i18n="pubs_intro">Décisions arrivées dans la base ces derniers jours, par juridiction. La date retenue est celle de leur publication dans le module, pas celle du jugement.</p>
@@ -1613,6 +1601,7 @@ body.printing-decision #print-decision-area{display:block!important;color:#000;b
     </section>
 
     <section class="screen" data-screen="veille" aria-labelledby="h-veille">
+      <button class="back-dash" data-target="dashboard"><span aria-hidden="true">←</span> <span data-i18n="back_dashboard">Tableau de bord</span></button>
       <div class="eyebrow" data-i18n="veille_eyebrow">Recherches sauvegardées</div>
       <h1 id="h-veille" class="title" data-i18n="veille_title">Radar décisions</h1>
       <p class="intro" data-i18n="veille_intro">Enregistrez des mots-clés à surveiller dans le corpus de décisions indexées. Les résultats s'affichent à chaque ouverture de l'outil.</p>
@@ -1666,6 +1655,7 @@ body.printing-decision #print-decision-area{display:block!important;color:#000;b
     </section>
     <!-- AFFAIRES EN COURS -->
     <section class="screen" data-screen="affaires" aria-labelledby="h-affaires">
+      <button class="back-dash" data-target="dashboard"><span aria-hidden="true">←</span> <span data-i18n="back_dashboard">Tableau de bord</span></button>
       <div class="eyebrow">Exploitation des convocations d'audience</div>
       <h1 id="h-affaires" class="title">Affaires en cours</h1>
       <p class="intro">Suivi des affaires devant la Cour administrative et le Tribunal administratif (6 chambres), à partir des convocations déposées volontairement par la rédaction (onglet Audiences → « Convocations déposées »). Numéros de rôle, matières, avocats et stades extraits des PDF.</p>
@@ -1898,7 +1888,9 @@ const TRANSLATIONS = {
     rappr_eyebrow: "Piste d'identification — mode manuel assisté",
     action_faq_title: "FAQ",
     action_faq_desc: "Comprendre d'où viennent les données (open data anonymisé vs PDF déposés) et comment utiliser les outils d'investigation.",
-    action_account_title: "Mon compte",
+    action_pubs_title: "Publications récentes",
+    action_pubs_desc: "Consultez les décisions qui viennent d'être publiées, par juridiction.",
+    back_dashboard: "Tableau de bord",
     connexions_count_label: "Connexions enregistrées :",
     connexions_detail_btn: "Voir le détail",
     connexions_detail_title: "Détail des connexions",
@@ -2165,7 +2157,9 @@ const TRANSLATIONS = {
     rappr_eyebrow: "Beteiligte Person identifizieren — manuell unterstützter Modus",
     action_faq_title: "FAQ",
     action_faq_desc: "Verstehen, woher die Daten stammen (anonymisierte Open Data vs. hochgeladene PDFs) und wie die Recherchewerkzeuge zu nutzen sind.",
-    action_account_title: "Mein Konto",
+    action_pubs_title: "Neue Veröffentlichungen",
+    action_pubs_desc: "Sehen Sie die soeben veröffentlichten Entscheidungen, nach Gericht.",
+    back_dashboard: "Dashboard",
     connexions_count_label: "Erfasste Verbindungen:",
     connexions_detail_btn: "Details ansehen",
     connexions_detail_title: "Verbindungsdetails",
@@ -2400,8 +2394,6 @@ function setLang(lang) {
   currentLang = lang;
   document.getElementById('lang-fr').classList.toggle('active', lang === 'fr');
   document.getElementById('lang-de').classList.toggle('active', lang === 'de');
-  document.getElementById('dash-lang-fr')?.classList.toggle('active', lang === 'fr');
-  document.getElementById('dash-lang-de')?.classList.toggle('active', lang === 'de');
   document.documentElement.lang = lang;
   localStorage.setItem('vj_lang', lang);
   if(_sb && _currentUser) _sb.auth.updateUser({ data:{ lang } });
@@ -2759,10 +2751,6 @@ function renderDashboard(){
     greetEl.textContent = first ? `${t('dashboard_title')}, ${first}` : t('dashboard_title');
   }
 
-  const acctEmailEl = $('#dashboard-account-email');
-  if(acctEmailEl) acctEmailEl.textContent = _currentUser?.email || (currentLang==='de' ? 'Nicht verbunden' : 'Non connecté');
-  $('#dash-lang-fr')?.classList.toggle('active', currentLang === 'fr');
-  $('#dash-lang-de')?.classList.toggle('active', currentLang === 'de');
   renderConnexionsStats();
 
   /* Strip de statut index */

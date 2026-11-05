@@ -58,11 +58,13 @@
   }
 
   function updateBadge(list){
-    var badge = $('#pubs-badge');
-    if(!badge) return;
     var n = unseenCount(list);
-    badge.textContent = n > 99 ? '99+' : String(n);
-    badge.hidden = n === 0;
+    ['#pubs-badge', '#pubs-tile-badge'].forEach(function(sel){
+      var badge = $(sel);
+      if(!badge) return;
+      badge.textContent = n > 99 ? '99+' : String(n);
+      badge.hidden = n === 0;
+    });
   }
 
   function injectStyles(){
@@ -179,8 +181,10 @@
   function markSeen(){
     var all = dated();
     if(all.length) writeSeen(latestArrival(all));
-    var badge = $('#pubs-badge');
-    if(badge) badge.hidden = true;
+    ['#pubs-badge', '#pubs-tile-badge'].forEach(function(sel){
+      var badge = $(sel);
+      if(badge) badge.hidden = true;
+    });
   }
 
   document.addEventListener('click', function(e){
